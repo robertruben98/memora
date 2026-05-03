@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../core/models/memora_card.dart';
 import '../../../core/theme/deck_visuals.dart';
@@ -25,16 +26,42 @@ class FeedPostCard extends ConsumerStatefulWidget {
   ConsumerState<FeedPostCard> createState() => _FeedPostCardState();
 }
 
-class _FeedPostCardState extends ConsumerState<FeedPostCard> {
+class _FeedPostCardState extends ConsumerState<FeedPostCard>
+    with TickerProviderStateMixin {
   bool _revealed = false;
   bool _answered = false;
   bool? _wasCorrect;
   bool _saving = false;
+  bool _bookmarked = false;
+  late final AnimationController _heartBounce = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 320),
+  );
+
+  @override
+  void dispose() {
+    _heartBounce.dispose();
+    super.dispose();
+  }
 
   void _reveal() {
     if (_revealed) return;
     HapticFeedback.lightImpact();
     setState(() => _revealed = true);
+  }
+
+  void _toggleBookmark() {
+    HapticFeedback.lightImpact();
+    setState(() => _bookmarked = !_bookmarked);
+  }
+
+  Future<void> _share() async {
+    final c = widget.card;
+    final text = '${c.deck}\n\n'
+        'Pregunta: ${c.front}\n\n'
+        'Respuesta: ${c.back}\n\n'
+        '— Memora';
+    await Share.share(text, subject: c.deck);
   }
 
   void _showMoreMenu(BuildContext context) {
@@ -123,6 +150,9 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard> {
   Future<void> _answer(bool correct) async {
     if (_answered || _saving) return;
     HapticFeedback.mediumImpact();
+    if (correct) {
+      _heartBounce.forward(from: 0);
+    }
     setState(() {
       _saving = true;
       _wasCorrect = correct;
@@ -176,15 +206,34 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard> {
               frontImagePath: frontImg,
               storage: storage,
             ),
-          _Footer(
-            revealed: _revealed,
+          _ActionRow(
             answered: _answered,
             wasCorrect: _wasCorrect,
+            bookmarked: _bookmarked,
             saving: _saving,
-            onReveal: _reveal,
+            heartAnim: _heartBounce,
             onCorrect: () => _answer(true),
             onIncorrect: () => _answer(false),
+            onBookmark: _toggleBookmark,
+            onShare: _share,
           ),
+          if (!_revealed && !_answered)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+              child: GestureDetector(
+                onTap: _reveal,
+                child: Text(
+                  'Ver respuesta',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withValues(alpha: 0.55),
+                  ),
+                ),
+              ),
+            )
+          else
+            const SizedBox(height: 6),
         ],
       ),
     );
@@ -417,119 +466,80 @@ class _AnswerBlock extends StatelessWidget {
   }
 }
 
-class _Footer extends StatelessWidget {
-  final bool revealed;
+/// Fila de acciones estilo Instagram: heart (acerté), X (fallé),
+/// bookmark, share, y a la derecha el estado SRS pill cuando ya fue contestada.
+class _ActionRow extends StatelessWidget {
   final bool answered;
   final bool? wasCorrect;
+  final bool bookmarked;
   final bool saving;
-  final VoidCallback onReveal;
+  final AnimationController heartAnim;
   final VoidCallback onCorrect;
   final VoidCallback onIncorrect;
+  final VoidCallback onBookmark;
+  final VoidCallback onShare;
 
-  const _Footer({
-    required this.revealed,
+  const _ActionRow({
     required this.answered,
     required this.wasCorrect,
+    required this.bookmarked,
     required this.saving,
-    required this.onReveal,
+    required this.heartAnim,
     required this.onCorrect,
     required this.onIncorrect,
+    required this.onBookmark,
+    required this.onShare,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (answered) {
-      final ok = wasCorrect == true;
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(14, 4, 14, 12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-          decoration: BoxDecoration(
-            color: (ok ? const Color(0xFF4FFFB0) : const Color(0xFFFF4F6B))
-                .withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                ok ? Icons.check_circle_rounded : Icons.cancel_rounded,
-                color: ok
-                    ? const Color(0xFF4FFFB0)
-                    : const Color(0xFFFF4F6B),
-                size: 18,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                ok ? 'Marcada como acertada' : 'Marcada como fallada',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: ok
-                      ? const Color(0xFF4FFFB0)
-                      : const Color(0xFFFF4F6B),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    if (!revealed) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(14, 4, 14, 12),
-        child: Material(
-          color: Colors.white.withValues(alpha: 0.06),
-          borderRadius: BorderRadius.circular(12),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: onReveal,
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              alignment: Alignment.center,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.visibility_rounded,
-                    size: 17,
-                    color: Colors.white.withValues(alpha: 0.7),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Ver respuesta',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white.withValues(alpha: 0.85),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    }
+    final liked = answered && wasCorrect == true;
+    final disliked = answered && wasCorrect == false;
+    final disabled = saving;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 4, 14, 12),
+      padding: const EdgeInsets.fromLTRB(8, 6, 8, 4),
       child: Row(
         children: [
-          Expanded(
-            child: _SmallButton(
-              label: 'No acerté',
-              icon: Icons.close_rounded,
-              color: const Color(0xFFFF4F6B),
-              onPressed: saving ? null : onIncorrect,
+          // Heart (Acerté)
+          ScaleTransition(
+            scale: Tween<double>(begin: 1.0, end: 1.35).animate(
+              CurvedAnimation(
+                parent: heartAnim,
+                curve: Curves.elasticOut,
+              ),
+            ),
+            child: _IconAction(
+              icon: liked ? Icons.favorite_rounded : Icons.favorite_outline,
+              color: liked ? const Color(0xFFFF4F6B) : Colors.white,
+              onTap: disabled || answered ? null : onCorrect,
+              tooltip: 'Acerté',
             ),
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _SmallButton(
-              label: 'Acerté',
-              icon: Icons.check_rounded,
-              color: const Color(0xFF4FFFB0),
-              onPressed: saving ? null : onCorrect,
-            ),
+          // X (No acerté) — estilo "broken heart" como Instagram
+          _IconAction(
+            icon: disliked
+                ? Icons.heart_broken_rounded
+                : Icons.close_rounded,
+            color: disliked ? const Color(0xFFFF4F6B) : Colors.white,
+            onTap: disabled || answered ? null : onIncorrect,
+            tooltip: 'No acerté',
+          ),
+          // Share
+          _IconAction(
+            icon: Icons.send_rounded,
+            color: Colors.white,
+            onTap: onShare,
+            tooltip: 'Compartir',
+          ),
+          const Spacer(),
+          // Bookmark a la derecha (como en IG)
+          _IconAction(
+            icon: bookmarked
+                ? Icons.bookmark_rounded
+                : Icons.bookmark_border_rounded,
+            color: bookmarked ? const Color(0xFFFFD24F) : Colors.white,
+            onTap: onBookmark,
+            tooltip: bookmarked ? 'Quitar marcador' : 'Guardar',
           ),
         ],
       ),
@@ -537,48 +547,34 @@ class _Footer extends StatelessWidget {
   }
 }
 
-class _SmallButton extends StatelessWidget {
-  final String label;
+class _IconAction extends StatelessWidget {
   final IconData icon;
   final Color color;
-  final VoidCallback? onPressed;
+  final VoidCallback? onTap;
+  final String tooltip;
 
-  const _SmallButton({
-    required this.label,
+  const _IconAction({
     required this.icon,
     required this.color,
-    this.onPressed,
+    required this.onTap,
+    required this.tooltip,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: color.withValues(alpha: 0.15),
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onPressed,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            border:
-                Border.all(color: color.withValues(alpha: 0.4), width: 1.2),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: color, size: 18),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                ),
-              ),
-            ],
+    return Tooltip(
+      message: tooltip,
+      child: InkResponse(
+        radius: 24,
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Icon(
+            icon,
+            size: 26,
+            color: onTap == null
+                ? color.withValues(alpha: 0.3)
+                : color.withValues(alpha: 0.92),
           ),
         ),
       ),
