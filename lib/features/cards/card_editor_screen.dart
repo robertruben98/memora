@@ -1,10 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../core/models/memora_card.dart';
 import '../../data/repositories/card_repository.dart';
 import '../../data/repositories/deck_repository.dart';
 import '../../data/repositories/review_repository.dart';
+import '../../data/storage/image_storage.dart';
 import '../review/study_queue.dart';
 
 class CardEditorScreen extends ConsumerStatefulWidget {
@@ -24,6 +28,8 @@ class CardEditorScreen extends ConsumerStatefulWidget {
 class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
   late final TextEditingController _frontController;
   late final TextEditingController _backController;
+  String? _frontImagePath;
+  String? _backImagePath;
   bool _saving = false;
 
   bool get _isEditing => widget.cardToEdit != null;
@@ -37,6 +43,8 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     _backController = TextEditingController(
       text: widget.cardToEdit?.back ?? '',
     );
+    _frontImagePath = widget.cardToEdit?.frontImagePath;
+    _backImagePath = widget.cardToEdit?.backImagePath;
   }
 
   @override
@@ -44,6 +52,85 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     _frontController.dispose();
     _backController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage(bool isFront) async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: const Color(0xFF1A1A22),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library_rounded),
+              title: const Text('Galería'),
+              onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt_rounded),
+              title: const Text('Cámara'),
+              onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null) return;
+
+    final picker = ImagePicker();
+    final XFile? picked;
+    try {
+      picked = await picker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No se pudo seleccionar imagen: $e')),
+      );
+      return;
+    }
+    if (picked == null) return;
+
+    final storage = ref.read(imageStorageProvider);
+    final cardId = widget.cardToEdit?.id ??
+        'tmp-${DateTime.now().microsecondsSinceEpoch}';
+    final relPath = await storage.saveFromXFile(
+      picked,
+      cardId: cardId,
+      slot: isFront ? 'front' : 'back',
+    );
+
+    // Borrar la anterior si existía (solo cuando reemplazas)
+    final previous = isFront ? _frontImagePath : _backImagePath;
+    if (previous != null && previous != relPath) {
+      await storage.delete(previous);
+    }
+
+    setState(() {
+      if (isFront) {
+        _frontImagePath = relPath;
+      } else {
+        _backImagePath = relPath;
+      }
+    });
+  }
+
+  Future<void> _removeImage(bool isFront) async {
+    final storage = ref.read(imageStorageProvider);
+    final path = isFront ? _frontImagePath : _backImagePath;
+    if (path != null) await storage.delete(path);
+    setState(() {
+      if (isFront) {
+        _frontImagePath = null;
+      } else {
+        _backImagePath = null;
+      }
+    });
   }
 
   Future<void> _save({required bool createAnother}) async {
@@ -62,6 +149,8 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
         id: widget.cardToEdit!.id,
         frontText: front,
         backText: back,
+        frontImagePath: _frontImagePath,
+        backImagePath: _backImagePath,
       );
     } else {
       final newId = 'card-${DateTime.now().microsecondsSinceEpoch}';
@@ -70,8 +159,9 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
         deckId: widget.deckId,
         frontText: front,
         backText: back,
+        frontImagePath: _frontImagePath,
+        backImagePath: _backImagePath,
       );
-      // Crea schedule 'new' inmediatamente para que entre en la cola.
       await ref
           .read(reviewRepositoryProvider)
           .getOrCreateSchedule(newId, now: DateTime.now());
@@ -86,7 +176,11 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     if (createAnother && !_isEditing) {
       _frontController.clear();
       _backController.clear();
-      setState(() => _saving = false);
+      setState(() {
+        _frontImagePath = null;
+        _backImagePath = null;
+        _saving = false;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Tarjeta creada. Crea la siguiente.'),
@@ -112,7 +206,9 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: const Color(0xFFFF4F6B)),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFFFF4F6B),
+            ),
             child: const Text('Eliminar'),
           ),
         ],
@@ -121,6 +217,9 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     if (confirmed != true) return;
 
     setState(() => _saving = true);
+    final storage = ref.read(imageStorageProvider);
+    if (_frontImagePath != null) await storage.delete(_frontImagePath);
+    if (_backImagePath != null) await storage.delete(_backImagePath);
     await ref.read(cardRepositoryProvider).deleteCard(widget.cardToEdit!.id);
     ref.invalidate(allCardsProvider);
     ref.invalidate(deckSummariesProvider);
@@ -134,6 +233,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final storage = ref.watch(imageStorageProvider);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -160,6 +260,13 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
               hint: 'p. ej. ¿Qué significa "to thrive"?',
               minLines: 3,
             ),
+            const SizedBox(height: 8),
+            _ImagePickerRow(
+              path: _frontImagePath,
+              storage: storage,
+              onPick: () => _pickImage(true),
+              onRemove: () => _removeImage(true),
+            ),
             const SizedBox(height: 24),
             const _Label('Respuesta (back)'),
             const SizedBox(height: 8),
@@ -167,6 +274,13 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
               controller: _backController,
               hint: 'p. ej. Prosperar, florecer.',
               minLines: 3,
+            ),
+            const SizedBox(height: 8),
+            _ImagePickerRow(
+              path: _backImagePath,
+              storage: storage,
+              onPick: () => _pickImage(false),
+              onRemove: () => _removeImage(false),
             ),
             const SizedBox(height: 32),
             FilledButton(
@@ -187,6 +301,104 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
               ),
             ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ImagePickerRow extends StatelessWidget {
+  final String? path;
+  final ImageStorage storage;
+  final VoidCallback onPick;
+  final VoidCallback onRemove;
+
+  const _ImagePickerRow({
+    required this.path,
+    required this.storage,
+    required this.onPick,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (path == null) {
+      return TextButton.icon(
+        onPressed: onPick,
+        icon: const Icon(Icons.add_photo_alternate_rounded),
+        label: const Text('Añadir imagen'),
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+          alignment: Alignment.centerLeft,
+        ),
+      );
+    }
+    final abs = storage.absolutePathFor(path!);
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.file(
+            File(abs),
+            height: 160,
+            width: double.infinity,
+            fit: BoxFit.cover,
+            errorBuilder: (ctx, _, _) => Container(
+              height: 160,
+              color: const Color(0xFF1A1A22),
+              alignment: Alignment.center,
+              child: Text(
+                'Imagen no disponible',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.5),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 8,
+          right: 8,
+          child: Row(
+            children: [
+              _IconButton(icon: Icons.swap_horiz_rounded, onTap: onPick),
+              const SizedBox(width: 6),
+              _IconButton(
+                icon: Icons.close_rounded,
+                onTap: onRemove,
+                danger: true,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _IconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool danger;
+
+  const _IconButton({
+    required this.icon,
+    required this.onTap,
+    this.danger = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = danger ? const Color(0xFFFF4F6B) : Colors.white;
+    return Material(
+      color: Colors.black.withValues(alpha: 0.55),
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Icon(icon, size: 18, color: color),
         ),
       ),
     );

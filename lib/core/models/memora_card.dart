@@ -4,6 +4,8 @@ class MemoraCard {
   final String id;
   final String front;
   final String back;
+  final String? frontImagePath; // relativa: "card_images/xxx.jpg"
+  final String? backImagePath;
   final String deck;
   final Color deckColor;
 
@@ -11,6 +13,8 @@ class MemoraCard {
     required this.id,
     required this.front,
     required this.back,
+    this.frontImagePath,
+    this.backImagePath,
     required this.deck,
     required this.deckColor,
   });

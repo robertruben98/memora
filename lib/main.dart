@@ -5,13 +5,20 @@ import 'core/srs/study_settings.dart';
 import 'core/theme/theme_provider.dart';
 import 'data/database/database.dart';
 import 'data/seeder.dart';
+import 'data/storage/image_storage.dart';
 import 'features/home/home_screen.dart';
 import 'features/settings/settings_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final container = ProviderContainer();
+  final imageStorage = await ImageStorage.create();
+
+  final container = ProviderContainer(
+    overrides: [
+      imageStorageProvider.overrideWithValue(imageStorage),
+    ],
+  );
   final db = container.read(databaseProvider);
   await seedIfEmpty(db);
 

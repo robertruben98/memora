@@ -23,6 +23,8 @@ class CardRepository {
         id: c.id,
         front: c.frontText,
         back: c.backText,
+        frontImagePath: c.frontImagePath,
+        backImagePath: c.backImagePath,
         deck: d?.name ?? 'Sin mazo',
         deckColor: _parseColor(d?.colorHex ?? '#7C5CFF'),
       );
@@ -38,6 +40,8 @@ class CardRepository {
               id: c.id,
               front: c.frontText,
               back: c.backText,
+              frontImagePath: c.frontImagePath,
+              backImagePath: c.backImagePath,
               deck: deck.name,
               deckColor: _parseColor(deck.colorHex),
             ))

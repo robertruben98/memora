@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/memora_card.dart';
+import '../../../data/storage/image_storage.dart';
 
-class CardPage extends StatefulWidget {
+class CardPage extends ConsumerStatefulWidget {
   final MemoraCard card;
   final VoidCallback onCorrect;
   final VoidCallback onIncorrect;
@@ -16,10 +20,10 @@ class CardPage extends StatefulWidget {
   });
 
   @override
-  State<CardPage> createState() => _CardPageState();
+  ConsumerState<CardPage> createState() => _CardPageState();
 }
 
-class _CardPageState extends State<CardPage> {
+class _CardPageState extends ConsumerState<CardPage> {
   bool _revealed = false;
 
   void _reveal() {
@@ -30,6 +34,9 @@ class _CardPageState extends State<CardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final storage = ref.watch(imageStorageProvider);
+    final frontImg = widget.card.frontImagePath;
+    final backImg = widget.card.backImagePath;
     return GestureDetector(
       onTap: _reveal,
       onHorizontalDragEnd: (details) {
@@ -56,10 +63,19 @@ class _CardPageState extends State<CardPage> {
                         key: const ValueKey('answered'),
                         front: widget.card.front,
                         back: widget.card.back,
+                        frontImageAbsPath: frontImg == null
+                            ? null
+                            : storage.absolutePathFor(frontImg),
+                        backImageAbsPath: backImg == null
+                            ? null
+                            : storage.absolutePathFor(backImg),
                       )
                     : _QuestionView(
                         key: const ValueKey('question'),
                         front: widget.card.front,
+                        imageAbsPath: frontImg == null
+                            ? null
+                            : storage.absolutePathFor(frontImg),
                       ),
               ),
             ),
@@ -113,19 +129,31 @@ class _DeckBadge extends StatelessWidget {
 
 class _QuestionView extends StatelessWidget {
   final String front;
-  const _QuestionView({super.key, required this.front});
+  final String? imageAbsPath;
+  const _QuestionView({super.key, required this.front, this.imageAbsPath});
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text(
-        front,
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          fontSize: 30,
-          fontWeight: FontWeight.w700,
-          height: 1.3,
-          letterSpacing: -0.5,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (imageAbsPath != null) ...[
+              _CardImage(absPath: imageAbsPath!),
+              const SizedBox(height: 24),
+            ],
+            Text(
+              front,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.w700,
+                height: 1.3,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -135,10 +163,14 @@ class _QuestionView extends StatelessWidget {
 class _AnsweredView extends StatelessWidget {
   final String front;
   final String back;
+  final String? frontImageAbsPath;
+  final String? backImageAbsPath;
   const _AnsweredView({
     super.key,
     required this.front,
     required this.back,
+    this.frontImageAbsPath,
+    this.backImageAbsPath,
   });
 
   @override
@@ -164,19 +196,45 @@ class _AnsweredView extends StatelessWidget {
         Expanded(
           child: Center(
             child: SingleChildScrollView(
-              child: Text(
-                back,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  height: 1.4,
-                ),
+              child: Column(
+                children: [
+                  if (backImageAbsPath != null) ...[
+                    _CardImage(absPath: backImageAbsPath!),
+                    const SizedBox(height: 16),
+                  ],
+                  Text(
+                    back,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _CardImage extends StatelessWidget {
+  final String absPath;
+  const _CardImage({required this.absPath});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Image.file(
+        File(absPath),
+        height: 220,
+        fit: BoxFit.contain,
+        errorBuilder: (ctx, _, _) => const SizedBox.shrink(),
+      ),
     );
   }
 }
