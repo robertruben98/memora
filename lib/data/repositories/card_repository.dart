@@ -21,11 +21,13 @@ class CardRepository {
       final d = byId[c.deckId];
       return MemoraCard(
         id: c.id,
+        deckId: c.deckId,
         front: c.frontText,
         back: c.backText,
         frontImagePath: c.frontImagePath,
         backImagePath: c.backImagePath,
         deck: d?.name ?? 'Sin mazo',
+        deckIconName: d?.iconName ?? 'style_rounded',
         deckColor: _parseColor(d?.colorHex ?? '#7C5CFF'),
       );
     }).toList();
@@ -38,11 +40,13 @@ class CardRepository {
     return cards
         .map((c) => MemoraCard(
               id: c.id,
+              deckId: c.deckId,
               front: c.frontText,
               back: c.backText,
               frontImagePath: c.frontImagePath,
               backImagePath: c.backImagePath,
               deck: deck.name,
+              deckIconName: deck.iconName,
               deckColor: _parseColor(deck.colorHex),
             ))
         .toList();

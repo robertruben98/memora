@@ -98,3 +98,13 @@ final reviewRepositoryProvider = Provider<ReviewRepository>((ref) {
   final db = ref.watch(databaseProvider);
   return ReviewRepository(db.scheduleDao, db.reviewLogDao);
 });
+
+/// Map cardId -> schedule, para vistas que necesitan estado SRS por tarjeta
+/// (evita N+1 queries).
+final allCardSchedulesProvider =
+    FutureProvider<Map<String, CardScheduleRow>>((ref) async {
+  final db = ref.watch(databaseProvider);
+  final cards = await db.cardDao.getAllCards();
+  final ids = cards.map((c) => c.id).toList();
+  return ref.read(reviewRepositoryProvider).getSchedulesByCardIds(ids);
+});

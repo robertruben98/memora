@@ -6,10 +6,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/memora_card.dart';
 import '../../../core/theme/deck_visuals.dart';
+import '../../../data/database/database.dart';
 import '../../../data/repositories/card_repository.dart';
 import '../../../data/repositories/deck_repository.dart';
 import '../../../data/repositories/review_repository.dart';
 import '../../../data/storage/image_storage.dart';
+import '../../cards/card_editor_screen.dart';
 import '../../review/study_queue.dart';
 import '../../stats/stats_repository.dart';
 
@@ -35,6 +37,89 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard> {
     setState(() => _revealed = true);
   }
 
+  void _showMoreMenu(BuildContext context) {
+    final c = widget.card;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1A1A22),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetCtx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(top: 8, bottom: 4),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.edit_rounded),
+              title: const Text('Editar tarjeta'),
+              onTap: () {
+                Navigator.of(sheetCtx).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => CardEditorScreen(
+                      deckId: c.deckId,
+                      cardToEdit: c,
+                    ),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.delete_outline_rounded,
+                color: Color(0xFFFF4F6B),
+              ),
+              title: const Text(
+                'Eliminar tarjeta',
+                style: TextStyle(color: Color(0xFFFF4F6B)),
+              ),
+              onTap: () async {
+                Navigator.of(sheetCtx).pop();
+                final ok = await showDialog<bool>(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    backgroundColor: const Color(0xFF1A1A22),
+                    title: const Text('Eliminar tarjeta'),
+                    content: const Text('Esta acción no se puede deshacer.'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: const Text('Cancelar'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        style: TextButton.styleFrom(
+                          foregroundColor: const Color(0xFFFF4F6B),
+                        ),
+                        child: const Text('Eliminar'),
+                      ),
+                    ],
+                  ),
+                );
+                if (ok == true) {
+                  await ref.read(cardRepositoryProvider).deleteCard(c.id);
+                  ref.invalidate(allCardsProvider);
+                  ref.invalidate(deckSummariesProvider);
+                  ref.invalidate(allCardSchedulesProvider);
+                }
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _answer(bool correct) async {
     if (_answered || _saving) return;
     HapticFeedback.mediumImpact();
@@ -52,6 +137,7 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard> {
     ref.invalidate(allCardsProvider);
     ref.invalidate(studyQueueProvider(null));
     ref.invalidate(statsSnapshotProvider);
+    ref.invalidate(allCardSchedulesProvider);
     setState(() {
       _answered = true;
       _saving = false;
@@ -77,7 +163,10 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _Header(card: c),
+          _Header(
+            card: c,
+            onMore: () => _showMoreMenu(context),
+          ),
           if (!_revealed)
             _QuestionBlock(card: c, frontImagePath: frontImg, storage: storage)
           else
@@ -102,31 +191,52 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard> {
   }
 }
 
-class _Header extends StatelessWidget {
+class _Header extends ConsumerWidget {
   final MemoraCard card;
-  const _Header({required this.card});
+  final VoidCallback onMore;
+
+  const _Header({required this.card, required this.onMore});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final schedulesAsync = ref.watch(allCardSchedulesProvider);
+    final schedule = schedulesAsync.maybeWhen(
+      data: (m) => m[card.id],
+      orElse: () => null,
+    );
+    final stateLabel = _stateLabelFor(schedule);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 12, 12, 10),
+      padding: const EdgeInsets.fromLTRB(12, 10, 6, 10),
       child: Row(
         children: [
+          // Avatar circular con anillo gradient + icono del mazo
           Container(
-            width: 36,
-            height: 36,
+            width: 40,
+            height: 40,
+            padding: const EdgeInsets.all(2),
             decoration: BoxDecoration(
-              color: card.deckColor.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: card.deckColor.withValues(alpha: 0.45),
-                width: 1,
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [
+                  card.deckColor,
+                  card.deckColor.withValues(alpha: 0.5),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
-            child: Icon(
-              DeckVisuals.iconFor(_iconForDeckName(card.deck)),
-              color: card.deckColor,
-              size: 18,
+            child: Container(
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Color(0xFF1A1A22),
+              ),
+              child: Center(
+                child: Icon(
+                  DeckVisuals.iconFor(card.deckIconName),
+                  color: card.deckColor,
+                  size: 20,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 10),
@@ -136,32 +246,49 @@ class _Header extends StatelessWidget {
               children: [
                 Text(
                   card.deck,
-                  style: TextStyle(
-                    fontSize: 13,
+                  style: const TextStyle(
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: card.deckColor,
+                    color: Colors.white,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  'Tarjeta',
+                  stateLabel,
                   style: TextStyle(
                     fontSize: 11,
-                    color: Colors.white.withValues(alpha: 0.45),
+                    color: Colors.white.withValues(alpha: 0.5),
                   ),
                 ),
               ],
             ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.more_vert_rounded, size: 22),
+            color: Colors.white.withValues(alpha: 0.7),
+            onPressed: onMore,
+            tooltip: 'Más',
           ),
         ],
       ),
     );
   }
 
-  // Heurística: el icono real está en la BD pero MemoraCard no lo expone aún.
-  // Usamos el icon por defecto del DeckVisuals fallback.
-  String _iconForDeckName(String _) => 'style_rounded';
+  String _stateLabelFor(CardScheduleRow? s) {
+    if (s == null || s.state == 'new') return 'Nueva';
+    if (s.state == 'learning') return 'Aprendiendo';
+    final now = DateTime.now();
+    final next = DateTime.fromMillisecondsSinceEpoch(s.nextReviewDate);
+    final today = DateTime(now.year, now.month, now.day);
+    final nextDay = DateTime(next.year, next.month, next.day);
+    final diffDays = nextDay.difference(today).inDays;
+    if (diffDays <= 0) return 'Due ahora';
+    if (diffDays == 1) return 'Due mañana';
+    if (diffDays < 7) return 'En $diffDays días';
+    final weeks = (diffDays / 7).round();
+    return weeks == 1 ? 'En 1 semana' : 'En $weeks semanas';
+  }
 }
 
 class _QuestionBlock extends StatelessWidget {

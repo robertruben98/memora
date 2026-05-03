@@ -70,9 +70,13 @@ class DeckRepository {
       final cards = cardRows
           .map((c) => MemoraCard(
                 id: c.id,
+                deckId: c.deckId,
                 front: c.frontText,
                 back: c.backText,
+                frontImagePath: c.frontImagePath,
+                backImagePath: c.backImagePath,
                 deck: d.name,
+                deckIconName: d.iconName,
                 deckColor: _parseColor(d.colorHex),
               ))
           .toList();
