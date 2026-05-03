@@ -27,6 +27,8 @@ class ScheduleDao extends DatabaseAccessor<MemoraDatabase>
   Future<int> deleteScheduleByCardId(String cardId) =>
       (delete(cardSchedules)..where((s) => s.cardId.equals(cardId))).go();
 
+  Future<int> deleteAll() => delete(cardSchedules).go();
+
   Future<Map<String, CardScheduleRow>> getSchedulesByCardIds(
     List<String> ids,
   ) async {

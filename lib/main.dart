@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/srs/study_settings.dart';
+import 'core/theme/theme_provider.dart';
 import 'data/database/database.dart';
 import 'data/seeder.dart';
 import 'features/home/home_screen.dart';
+import 'features/settings/settings_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,6 +14,13 @@ Future<void> main() async {
   final container = ProviderContainer();
   final db = container.read(databaseProvider);
   await seedIfEmpty(db);
+
+  // Cargar settings persistidos en estado.
+  final settingsRepo = container.read(settingsRepositoryProvider);
+  final loadedStudy = await settingsRepo.loadStudySettings();
+  final loadedTheme = await settingsRepo.loadThemeMode();
+  container.read(studySettingsProvider.notifier).state = loadedStudy;
+  container.read(themeModeProvider.notifier).state = loadedTheme;
 
   runApp(
     UncontrolledProviderScope(
@@ -20,26 +30,36 @@ Future<void> main() async {
   );
 }
 
-class MemoraApp extends StatelessWidget {
+class MemoraApp extends ConsumerWidget {
   const MemoraApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final colorScheme = ColorScheme.fromSeed(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    final darkScheme = ColorScheme.fromSeed(
       seedColor: const Color(0xFF7C5CFF),
       brightness: Brightness.dark,
+    );
+    final lightScheme = ColorScheme.fromSeed(
+      seedColor: const Color(0xFF7C5CFF),
+      brightness: Brightness.light,
     );
     return MaterialApp(
       title: 'Memora',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
+      themeMode: themeMode,
+      darkTheme: ThemeData(
         useMaterial3: true,
-        colorScheme: colorScheme,
+        colorScheme: darkScheme,
         scaffoldBackgroundColor: const Color(0xFF0E0E12),
         textTheme: Typography.whiteMountainView.apply(
           bodyColor: Colors.white,
           displayColor: Colors.white,
         ),
+      ),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: lightScheme,
       ),
       home: const HomeScreen(),
     );

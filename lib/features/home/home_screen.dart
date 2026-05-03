@@ -8,6 +8,7 @@ import '../decks/deck_editor_screen.dart';
 import '../decks/deck_screen.dart';
 import '../review/feed_screen.dart';
 import '../review/study_queue.dart';
+import '../settings/settings_screen.dart';
 import '../stats/stats_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -39,7 +40,10 @@ class HomeScreen extends ConsumerWidget {
           ),
           IconButton(
             icon: const Icon(Icons.settings_rounded),
-            onPressed: () {},
+            tooltip: 'Ajustes',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+            ),
           ),
         ],
       ),

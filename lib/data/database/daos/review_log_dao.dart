@@ -25,4 +25,6 @@ class ReviewLogDao extends DatabaseAccessor<MemoraDatabase>
           ..where((l) => l.reviewedAt.isBiggerOrEqualValue(sinceEpochMs)))
         .get();
   }
+
+  Future<int> deleteAll() => delete(reviewLogs).go();
 }

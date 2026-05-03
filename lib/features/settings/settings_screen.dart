@@ -1,0 +1,483 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../core/srs/study_settings.dart';
+import '../../core/theme/theme_provider.dart';
+import '../../data/repositories/card_repository.dart';
+import '../../data/repositories/deck_repository.dart';
+import '../review/study_queue.dart';
+import '../stats/stats_repository.dart';
+import 'settings_repository.dart';
+
+class SettingsScreen extends ConsumerWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final study = ref.watch(studySettingsProvider);
+    final theme = ref.watch(themeModeProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text(
+          'Ajustes',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+        children: [
+          const _SectionTitle('Estudio'),
+          const SizedBox(height: 8),
+          _SliderSetting(
+            label: 'Tarjetas nuevas por día',
+            value: study.newCardsPerDay.toDouble(),
+            min: 1,
+            max: 30,
+            divisions: 29,
+            valueLabel: '${study.newCardsPerDay}',
+            onChanged: (v) async {
+              final newSettings =
+                  study.copyWith(newCardsPerDay: v.round());
+              ref.read(studySettingsProvider.notifier).state = newSettings;
+              await ref
+                  .read(settingsRepositoryProvider)
+                  .saveStudySettings(newSettings);
+              ref.invalidate(studyQueueProvider(null));
+            },
+          ),
+          const SizedBox(height: 12),
+          _SliderSetting(
+            label: 'Revisiones máximas por día',
+            value: study.maxReviewsPerDay.toDouble(),
+            min: 10,
+            max: 200,
+            divisions: 19,
+            valueLabel: '${study.maxReviewsPerDay}',
+            onChanged: (v) async {
+              final newSettings = study.copyWith(maxReviewsPerDay: v.round());
+              ref.read(studySettingsProvider.notifier).state = newSettings;
+              await ref
+                  .read(settingsRepositoryProvider)
+                  .saveStudySettings(newSettings);
+              ref.invalidate(studyQueueProvider(null));
+            },
+          ),
+          const SizedBox(height: 24),
+          const _SectionTitle('Apariencia'),
+          const SizedBox(height: 8),
+          _ThemeSelector(
+            selected: theme,
+            onChanged: (m) async {
+              ref.read(themeModeProvider.notifier).state = m;
+              await ref.read(settingsRepositoryProvider).saveThemeMode(m);
+            },
+          ),
+          const SizedBox(height: 24),
+          const _SectionTitle('Datos'),
+          const SizedBox(height: 8),
+          _DangerCard(
+            icon: Icons.refresh_rounded,
+            title: 'Resetear progreso SRS',
+            description:
+                'Borra todas las programaciones y el historial de '
+                'revisiones. Las tarjetas y mazos quedan intactos.',
+            onTap: () => _confirmReset(context, ref),
+          ),
+          const SizedBox(height: 24),
+          const _SectionTitle('Acerca de'),
+          const SizedBox(height: 8),
+          const _AboutCard(),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {
+    final ok1 = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A22),
+        title: const Text('¿Resetear progreso?'),
+        content: const Text(
+          'Vas a borrar tu historial de estudio: todas las '
+          'programaciones SRS y los logs de revisiones. '
+          'Esta acción no se puede deshacer.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFFFF4F6B),
+            ),
+            child: const Text('Continuar'),
+          ),
+        ],
+      ),
+    );
+    if (ok1 != true || !context.mounted) return;
+
+    final ok2 = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A22),
+        title: const Text('¿Estás seguro?'),
+        content: const Text(
+          'Última confirmación. Toca "Sí, resetear" para borrar '
+          'definitivamente.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('No'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFFF4F6B),
+            ),
+            child: const Text('Sí, resetear'),
+          ),
+        ],
+      ),
+    );
+    if (ok2 != true || !context.mounted) return;
+
+    await ref.read(settingsRepositoryProvider).resetSrsProgress();
+
+    ref.invalidate(deckSummariesProvider);
+    ref.invalidate(allCardsProvider);
+    ref.invalidate(studyQueueProvider(null));
+    ref.invalidate(statsSnapshotProvider);
+
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Progreso reseteado'),
+        backgroundColor: Color(0xFF4FFFB0),
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String text;
+  const _SectionTitle(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Text(
+        text.toUpperCase(),
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.0,
+          color: Colors.white.withValues(alpha: 0.5),
+        ),
+      ),
+    );
+  }
+}
+
+class _SliderSetting extends StatelessWidget {
+  final String label;
+  final double value;
+  final double min;
+  final double max;
+  final int divisions;
+  final String valueLabel;
+  final ValueChanged<double> onChanged;
+
+  const _SliderSetting({
+    required this.label,
+    required this.value,
+    required this.min,
+    required this.max,
+    required this.divisions,
+    required this.valueLabel,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A22),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7C5CFF).withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  valueLabel,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF7C5CFF),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Slider(
+            value: value,
+            min: min,
+            max: max,
+            divisions: divisions,
+            onChanged: onChanged,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ThemeSelector extends StatelessWidget {
+  final ThemeMode selected;
+  final ValueChanged<ThemeMode> onChanged;
+
+  const _ThemeSelector({required this.selected, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A22),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+      ),
+      child: Row(
+        children: [
+          _option(ThemeMode.light, Icons.light_mode_rounded, 'Claro'),
+          _option(ThemeMode.dark, Icons.dark_mode_rounded, 'Oscuro'),
+          _option(ThemeMode.system, Icons.smartphone_rounded, 'Sistema'),
+        ],
+      ),
+    );
+  }
+
+  Widget _option(ThemeMode mode, IconData icon, String label) {
+    final active = selected == mode;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => onChanged(mode),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: active
+                ? const Color(0xFF7C5CFF).withValues(alpha: 0.2)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            border: active
+                ? Border.all(
+                    color: const Color(0xFF7C5CFF).withValues(alpha: 0.5),
+                    width: 1.5,
+                  )
+                : null,
+          ),
+          child: Column(
+            children: [
+              Icon(
+                icon,
+                size: 22,
+                color: active
+                    ? const Color(0xFF7C5CFF)
+                    : Colors.white.withValues(alpha: 0.6),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                  color: active
+                      ? const Color(0xFF7C5CFF)
+                      : Colors.white.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DangerCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String description;
+  final VoidCallback onTap;
+
+  const _DangerCard({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0xFF1A1A22),
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: const Color(0xFFFF4F6B).withValues(alpha: 0.4),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF4F6B).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.refresh_rounded,
+                  color: Color(0xFFFF4F6B),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFFFF4F6B),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.6),
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AboutCard extends StatelessWidget {
+  const _AboutCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A22),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF7C5CFF), Color(0xFF4F8AFF)],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: const Text(
+                  'M',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Memora',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    'v0.10.0',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white.withValues(alpha: 0.5),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'Aprende cualquier cosa con repetición espaciada en formato '
+            'feed. Algoritmo SM-2, almacenamiento local, sin tracking.',
+            style: TextStyle(
+              fontSize: 13,
+              height: 1.5,
+              color: Colors.white.withValues(alpha: 0.7),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
