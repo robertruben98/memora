@@ -14,6 +14,7 @@ import '../../../data/repositories/review_repository.dart';
 import '../../../data/storage/image_storage.dart';
 import '../../cards/card_editor_screen.dart';
 import '../../review/study_queue.dart';
+import '../../stats/card_stats_provider.dart';
 import '../../stats/stats_repository.dart';
 
 /// Tarjeta tipo "post de Instagram" para el feed scrollable.
@@ -180,6 +181,7 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
     ref.invalidate(studyQueueProvider(null));
     ref.invalidate(statsSnapshotProvider);
     ref.invalidate(allCardSchedulesProvider);
+    ref.invalidate(cardStatsProvider);
     setState(() {
       _answered = true;
       _saving = false;
@@ -284,7 +286,7 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
           ),
           if (!_revealed && !_answered)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
               child: GestureDetector(
                 onTap: _reveal,
                 child: Text(
@@ -292,13 +294,86 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white.withValues(alpha: 0.55),
+                    color: Colors.white.withValues(alpha: 0.5),
                   ),
                 ),
               ),
+            ),
+          _StatsLine(cardId: widget.card.id),
+          if (_answered)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+              child: _AnsweredPill(correct: _wasCorrect == true),
             )
           else
-            const SizedBox(height: 6),
+            const SizedBox(height: 10),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatsLine extends ConsumerWidget {
+  final String cardId;
+
+  const _StatsLine({required this.cardId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final statsAsync = ref.watch(cardStatsProvider);
+    final stats = statsAsync.maybeWhen(
+      data: (m) => m[cardId],
+      orElse: () => null,
+    );
+    if (stats == null || !stats.hasReviews) {
+      return const SizedBox(height: 4);
+    }
+    final relTime = formatRelativeTime(stats.lastReviewMs);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 4),
+      child: Text(
+        '${stats.correct} aciertos · ${stats.total} intentos · última $relTime',
+        style: TextStyle(
+          fontSize: 12,
+          color: Colors.white.withValues(alpha: 0.45),
+        ),
+      ),
+    );
+  }
+}
+
+class _AnsweredPill extends StatelessWidget {
+  final bool correct;
+
+  const _AnsweredPill({required this.correct});
+
+  @override
+  Widget build(BuildContext context) {
+    final color =
+        correct ? const Color(0xFF4FFFB0) : const Color(0xFFFF4F6B);
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.13),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            correct ? Icons.check_circle_rounded : Icons.cancel_rounded,
+            color: color,
+            size: 16,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            correct ? 'Marcada como acertada' : 'Marcada como fallada',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
         ],
       ),
     );
@@ -428,21 +503,29 @@ class _QuestionBlock extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               child: Image.file(
                 File(storage.absolutePathFor(frontImagePath!)),
-                height: 200,
+                height: 220,
                 fit: BoxFit.cover,
                 errorBuilder: (_, _, _) => const SizedBox.shrink(),
               ),
             ),
           ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(18, 14, 18, 8),
-          child: Text(
-            card.front,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              height: 1.35,
-              letterSpacing: -0.2,
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+          child: Text.rich(
+            TextSpan(
+              style: const TextStyle(
+                fontSize: 15,
+                height: 1.45,
+                color: Colors.white,
+              ),
+              children: [
+                TextSpan(
+                  text: card.deck,
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+                const TextSpan(text: '  '),
+                TextSpan(text: card.front),
+              ],
             ),
           ),
         ),
@@ -476,35 +559,40 @@ class _AnswerBlock extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               child: Image.file(
                 File(storage.absolutePathFor(frontImagePath!)),
-                height: 140,
+                height: 220,
                 fit: BoxFit.cover,
                 errorBuilder: (_, _, _) => const SizedBox.shrink(),
               ),
             ),
           ),
+        // Caption: deck (bold) + pregunta (color tenue)
         Padding(
-          padding: const EdgeInsets.fromLTRB(18, 14, 18, 4),
-          child: Text(
-            card.front,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              height: 1.35,
-              color: Colors.white.withValues(alpha: 0.55),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+          child: Text.rich(
+            TextSpan(
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.45,
+                color: Colors.white.withValues(alpha: 0.65),
+              ),
+              children: [
+                TextSpan(
+                  text: card.deck,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
+                const TextSpan(text: '  '),
+                TextSpan(text: card.front),
+              ],
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18),
-          child: Container(
-            height: 1,
-            margin: const EdgeInsets.symmetric(vertical: 10),
-            color: Colors.white.withValues(alpha: 0.08),
-          ),
-        ),
+        // Imagen de respuesta si existe
         if (backImagePath != null)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
+            padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.file(
@@ -515,14 +603,16 @@ class _AnswerBlock extends StatelessWidget {
               ),
             ),
           ),
+        // Respuesta como párrafo destacado
         Padding(
-          padding: const EdgeInsets.fromLTRB(18, 8, 18, 8),
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 2),
           child: Text(
             card.back,
             style: const TextStyle(
-              fontSize: 17,
+              fontSize: 16,
               fontWeight: FontWeight.w600,
               height: 1.45,
+              color: Colors.white,
             ),
           ),
         ),
