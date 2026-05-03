@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/memora_card.dart';
 import '../../core/theme/deck_visuals.dart';
 import '../../data/repositories/deck_repository.dart';
+import '../browse/browse_feed_screen.dart';
 import '../decks/deck_editor_screen.dart';
 import '../decks/deck_screen.dart';
 import '../review/feed_screen.dart';
@@ -31,6 +32,13 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.dynamic_feed_rounded),
+            tooltip: 'Feed',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const BrowseFeedScreen()),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.bar_chart_rounded),
             tooltip: 'Estadísticas',
@@ -75,6 +83,14 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   );
                 },
+              ),
+              const SizedBox(height: 10),
+              _BrowseFeedTile(
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const BrowseFeedScreen(),
+                  ),
+                ),
               ),
               const SizedBox(height: 24),
               const Padding(
@@ -345,6 +361,80 @@ class _HomeEmptyState extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _BrowseFeedTile extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _BrowseFeedTile({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0xFF1A1A22),
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFE04FFF), Color(0xFF7C5CFF)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.dynamic_feed_rounded,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Explorar feed',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Scroll relajado por todas tus tarjetas',
+                      style: TextStyle(
+                        color: Colors.white60,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_rounded,
+                color: Colors.white.withValues(alpha: 0.55),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
