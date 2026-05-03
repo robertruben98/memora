@@ -78,6 +78,7 @@ class DeckRepository {
           .toList();
       result.add(
         DeckSummary(
+          id: d.id,
           name: d.name,
           color: _parseColor(d.colorHex),
           dueCount: cards.length,

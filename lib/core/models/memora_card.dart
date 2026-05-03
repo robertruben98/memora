@@ -17,6 +17,7 @@ class MemoraCard {
 }
 
 class DeckSummary {
+  final String id;
   final String name;
   final Color color;
   final int dueCount;
@@ -24,6 +25,7 @@ class DeckSummary {
   final List<MemoraCard> cards;
 
   const DeckSummary({
+    required this.id,
     required this.name,
     required this.color,
     required this.dueCount,

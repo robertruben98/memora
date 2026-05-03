@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/memora_card.dart';
 import '../../data/repositories/card_repository.dart';
 import '../../data/repositories/deck_repository.dart';
+import '../decks/deck_screen.dart';
 import '../review/feed_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -77,7 +78,7 @@ class HomeScreen extends ConsumerWidget {
                     deck: deck,
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => FeedScreen(cards: deck.cards),
+                        builder: (_) => DeckScreen(deck: deck),
                       ),
                     ),
                   ),
