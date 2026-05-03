@@ -74,6 +74,12 @@ class ReviewRepository {
     return result;
   }
 
+  Future<Map<String, CardScheduleRow>> getSchedulesByCardIds(
+    List<String> ids,
+  ) {
+    return _scheduleDao.getSchedulesByCardIds(ids);
+  }
+
   Future<List<String>> getDueCardIds(DateTime now) async {
     final rows = await _scheduleDao.getDueSchedules(now.millisecondsSinceEpoch);
     return rows.map((s) => s.cardId).toList();

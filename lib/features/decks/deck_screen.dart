@@ -7,6 +7,7 @@ import '../../data/repositories/card_repository.dart';
 import '../../data/repositories/deck_repository.dart';
 import '../cards/card_editor_screen.dart';
 import '../review/feed_screen.dart';
+import '../review/study_queue.dart';
 import 'deck_editor_screen.dart';
 
 class DeckScreen extends ConsumerWidget {
@@ -119,10 +120,11 @@ class _DeckBody extends StatelessWidget {
                   enabled: cards.isNotEmpty,
                   cardCount: cards.length,
                   color: deck.color,
+                  deckId: deck.id,
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => FeedScreen(cards: cards),
+                        builder: (_) => FeedScreen(deckId: deck.id),
                       ),
                     );
                   },
@@ -168,35 +170,65 @@ class _DeckBody extends StatelessWidget {
   }
 }
 
-class _StudyButton extends StatelessWidget {
+class _StudyButton extends ConsumerWidget {
   final bool enabled;
   final int cardCount;
   final Color color;
+  final String deckId;
   final VoidCallback onTap;
 
   const _StudyButton({
     required this.enabled,
     required this.cardCount,
     required this.color,
+    required this.deckId,
     required this.onTap,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final queueAsync = ref.watch(studyQueueProvider(deckId));
+    final pending = queueAsync.maybeWhen(
+      data: (q) => q.totalAvailable,
+      orElse: () => null,
+    );
+    final allCaughtUp = enabled && pending == 0;
+
+    final title = !enabled
+        ? 'Sin tarjetas'
+        : allCaughtUp
+            ? '¡Todo al día!'
+            : 'Estudiar este mazo';
+    final subtitle = !enabled
+        ? 'Añade tarjetas para estudiar'
+        : allCaughtUp
+            ? 'Vuelve cuando se acerque la próxima revisión'
+            : pending == null
+                ? '$cardCount tarjetas'
+                : '$pending pendientes · $cardCount totales';
+    final icon = !enabled
+        ? Icons.add_circle_outline_rounded
+        : allCaughtUp
+            ? Icons.check_circle_outline_rounded
+            : Icons.play_arrow_rounded;
+    final accent = allCaughtUp ? const Color(0xFF4FFFB0) : color;
+
+    final clickable = enabled && !allCaughtUp;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: enabled ? onTap : null,
+        onTap: clickable ? onTap : null,
         borderRadius: BorderRadius.circular(20),
         child: Ink(
           decoration: BoxDecoration(
             color: enabled
-                ? color.withValues(alpha: 0.18)
+                ? accent.withValues(alpha: 0.18)
                 : Colors.white.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: enabled
-                  ? color.withValues(alpha: 0.5)
+                  ? accent.withValues(alpha: 0.5)
                   : Colors.white.withValues(alpha: 0.1),
               width: 1.5,
             ),
@@ -204,26 +236,24 @@ class _StudyButton extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           child: Row(
             children: [
-              Icon(Icons.play_arrow_rounded,
-                  color: enabled ? color : Colors.white38, size: 32),
+              Icon(icon,
+                  color: enabled ? accent : Colors.white38, size: 32),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      enabled ? 'Estudiar este mazo' : 'Sin tarjetas',
+                      title,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: enabled ? color : Colors.white38,
+                        color: enabled ? accent : Colors.white38,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      enabled
-                          ? '$cardCount tarjetas'
-                          : 'Añade tarjetas para estudiar',
+                      subtitle,
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.white.withValues(alpha: 0.6),

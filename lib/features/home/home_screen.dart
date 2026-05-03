@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/memora_card.dart';
 import '../../core/theme/deck_visuals.dart';
-import '../../data/repositories/card_repository.dart';
 import '../../data/repositories/deck_repository.dart';
 import '../decks/deck_editor_screen.dart';
 import '../decks/deck_screen.dart';
 import '../review/feed_screen.dart';
+import '../review/study_queue.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -15,7 +15,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final decksAsync = ref.watch(deckSummariesProvider);
-    final allCardsAsync = ref.watch(allCardsProvider);
+    final globalQueueAsync = ref.watch(studyQueueProvider(null));
 
     return Scaffold(
       appBar: AppBar(
@@ -47,16 +47,14 @@ class HomeScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             children: [
               _StudyAllCard(
-                cardCount: allCardsAsync.maybeWhen(
-                  data: (c) => c.length,
-                  orElse: () => 0,
+                pendingCount: globalQueueAsync.maybeWhen(
+                  data: (q) => q.totalAvailable,
+                  orElse: () => null,
                 ),
-                onTap: () async {
-                  final cards = await ref.read(allCardsProvider.future);
-                  if (!context.mounted) return;
+                onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => FeedScreen(cards: cards),
+                      builder: (_) => const FeedScreen(),
                     ),
                   );
                 },
@@ -105,26 +103,48 @@ class HomeScreen extends ConsumerWidget {
 }
 
 class _StudyAllCard extends StatelessWidget {
-  final int cardCount;
+  /// null = aún cargando; 0 = todo al día; >0 = hay tarjetas listas.
+  final int? pendingCount;
   final VoidCallback onTap;
 
-  const _StudyAllCard({required this.cardCount, required this.onTap});
+  const _StudyAllCard({required this.pendingCount, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    final allCaughtUp = pendingCount == 0;
+    final subtitle = pendingCount == null
+        ? 'Calculando…'
+        : allCaughtUp
+            ? '¡Todo al día!'
+            : '$pendingCount tarjetas pendientes';
+    final icon = allCaughtUp
+        ? Icons.check_circle_outline_rounded
+        : Icons.public_rounded;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
+        onTap: allCaughtUp ? null : onTap,
         borderRadius: BorderRadius.circular(20),
         child: Ink(
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF7C5CFF), Color(0xFF4F8AFF)],
+            gradient: LinearGradient(
+              colors: allCaughtUp
+                  ? [
+                      const Color(0xFF1A1A22),
+                      const Color(0xFF1A1A22),
+                    ]
+                  : const [Color(0xFF7C5CFF), Color(0xFF4F8AFF)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(20),
+            border: allCaughtUp
+                ? Border.all(
+                    color: const Color(0xFF4FFFB0).withValues(alpha: 0.4),
+                    width: 1.5,
+                  )
+                : null,
           ),
           padding: const EdgeInsets.all(20),
           child: Row(
@@ -133,37 +153,48 @@ class _StudyAllCard extends StatelessWidget {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: allCaughtUp
+                      ? const Color(0xFF4FFFB0).withValues(alpha: 0.18)
+                      : Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(Icons.public_rounded,
-                    color: Colors.white, size: 28),
+                child: Icon(
+                  icon,
+                  color:
+                      allCaughtUp ? const Color(0xFF4FFFB0) : Colors.white,
+                  size: 28,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Estudiar todo',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: allCaughtUp ? Colors.white70 : Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '$cardCount tarjetas pendientes',
+                      subtitle,
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.85),
+                        color: allCaughtUp
+                            ? const Color(0xFF4FFFB0)
+                            : Colors.white.withValues(alpha: 0.85),
                         fontSize: 14,
+                        fontWeight:
+                            allCaughtUp ? FontWeight.w600 : FontWeight.w400,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+              if (!allCaughtUp)
+                const Icon(Icons.arrow_forward_rounded, color: Colors.white),
             ],
           ),
         ),

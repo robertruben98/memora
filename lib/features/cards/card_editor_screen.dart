@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/memora_card.dart';
 import '../../data/repositories/card_repository.dart';
 import '../../data/repositories/deck_repository.dart';
+import '../../data/repositories/review_repository.dart';
+import '../review/study_queue.dart';
 
 class CardEditorScreen extends ConsumerStatefulWidget {
   final String deckId;
@@ -62,16 +64,23 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
         backText: back,
       );
     } else {
+      final newId = 'card-${DateTime.now().microsecondsSinceEpoch}';
       await repo.createCard(
-        id: 'card-${DateTime.now().microsecondsSinceEpoch}',
+        id: newId,
         deckId: widget.deckId,
         frontText: front,
         backText: back,
       );
+      // Crea schedule 'new' inmediatamente para que entre en la cola.
+      await ref
+          .read(reviewRepositoryProvider)
+          .getOrCreateSchedule(newId, now: DateTime.now());
     }
     ref.invalidate(allCardsProvider);
     ref.invalidate(deckSummariesProvider);
     ref.invalidate(cardsByDeckProvider(widget.deckId));
+    ref.invalidate(studyQueueProvider(widget.deckId));
+    ref.invalidate(studyQueueProvider(null));
 
     if (!mounted) return;
     if (createAnother && !_isEditing) {
@@ -116,6 +125,8 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     ref.invalidate(allCardsProvider);
     ref.invalidate(deckSummariesProvider);
     ref.invalidate(cardsByDeckProvider(widget.deckId));
+    ref.invalidate(studyQueueProvider(widget.deckId));
+    ref.invalidate(studyQueueProvider(null));
 
     if (!mounted) return;
     Navigator.of(context).pop();
