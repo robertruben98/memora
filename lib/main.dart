@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/srs/study_settings.dart';
 import 'core/theme/theme_provider.dart';
 import 'data/database/database.dart';
-import 'data/seeder.dart';
 import 'data/storage/image_storage.dart';
+import 'data/sync/sync_service.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'features/settings/settings_repository.dart';
 import 'features/shell/root_shell.dart';
@@ -21,7 +21,15 @@ Future<void> main() async {
     ],
   );
   final db = container.read(databaseProvider);
-  await seedIfEmpty(db);
+
+  // Bootstrap: bajamos del servidor (Postgres) al cache local.
+  // Si falla la red, seguimos con lo que haya en local.
+  try {
+    await container.read(syncServiceProvider).bootstrapFromServer();
+  } catch (e) {
+    // ignore: avoid_print
+    print('Sync bootstrap failed (offline?): $e');
+  }
 
   // Cargar settings persistidos en estado.
   final settingsRepo = container.read(settingsRepositoryProvider);

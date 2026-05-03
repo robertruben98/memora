@@ -6,12 +6,14 @@ import '../../core/models/memora_card.dart';
 import '../database/daos/card_dao.dart';
 import '../database/daos/deck_dao.dart';
 import '../database/database.dart';
+import '../sync/sync_service.dart';
 
 class CardRepository {
   final CardDao _cardDao;
   final DeckDao _deckDao;
+  final SyncService _sync;
 
-  CardRepository(this._cardDao, this._deckDao);
+  CardRepository(this._cardDao, this._deckDao, this._sync);
 
   Future<List<MemoraCard>> getAllCards() async {
     final cards = await _cardDao.getAllCards();
@@ -60,6 +62,14 @@ class CardRepository {
     String? frontImagePath,
     String? backImagePath,
   }) async {
+    await _sync.upsertCard(
+      id: id,
+      deckId: deckId,
+      frontText: frontText,
+      backText: backText,
+      frontImagePath: frontImagePath,
+      backImagePath: backImagePath,
+    );
     final now = DateTime.now().millisecondsSinceEpoch;
     await _cardDao.insertCard(
       CardsCompanion.insert(
@@ -84,6 +94,14 @@ class CardRepository {
   }) async {
     final existing = await _cardDao.getCardById(id);
     if (existing == null) return;
+    await _sync.upsertCard(
+      id: id,
+      deckId: existing.deckId,
+      frontText: frontText,
+      backText: backText,
+      frontImagePath: frontImagePath,
+      backImagePath: backImagePath,
+    );
     await _cardDao.updateCard(
       CardsCompanion(
         id: Value(id),
@@ -98,7 +116,10 @@ class CardRepository {
     );
   }
 
-  Future<void> deleteCard(String id) => _cardDao.deleteCard(id);
+  Future<void> deleteCard(String id) async {
+    await _sync.deleteCard(id);
+    await _cardDao.deleteCard(id);
+  }
 }
 
 Color _parseColor(String hex) {
@@ -112,7 +133,7 @@ Color _parseColor(String hex) {
 
 final cardRepositoryProvider = Provider<CardRepository>((ref) {
   final db = ref.watch(databaseProvider);
-  return CardRepository(db.cardDao, db.deckDao);
+  return CardRepository(db.cardDao, db.deckDao, ref.watch(syncServiceProvider));
 });
 
 final allCardsProvider = FutureProvider<List<MemoraCard>>((ref) async {

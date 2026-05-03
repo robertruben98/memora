@@ -6,12 +6,14 @@ import '../../core/models/memora_card.dart';
 import '../database/daos/card_dao.dart';
 import '../database/daos/deck_dao.dart';
 import '../database/database.dart';
+import '../sync/sync_service.dart';
 
 class DeckRepository {
   final DeckDao _deckDao;
   final CardDao _cardDao;
+  final SyncService _sync;
 
-  DeckRepository(this._deckDao, this._cardDao);
+  DeckRepository(this._deckDao, this._cardDao, this._sync);
 
   Future<List<DeckRow>> getAllDecks() => _deckDao.getAllDecks();
 
@@ -24,6 +26,13 @@ class DeckRepository {
     String colorHex = '#7C5CFF',
     String iconName = 'style_rounded',
   }) async {
+    await _sync.upsertDeck(
+      id: id,
+      name: name,
+      description: description,
+      colorHex: colorHex,
+      iconName: iconName,
+    );
     final now = DateTime.now().millisecondsSinceEpoch;
     await _deckDao.insertDeck(
       DecksCompanion.insert(
@@ -47,6 +56,13 @@ class DeckRepository {
   }) async {
     final existing = await _deckDao.getDeckById(id);
     if (existing == null) return;
+    await _sync.upsertDeck(
+      id: id,
+      name: name,
+      description: description,
+      colorHex: colorHex,
+      iconName: iconName,
+    );
     await _deckDao.updateDeck(
       DecksCompanion(
         id: Value(id),
@@ -60,7 +76,10 @@ class DeckRepository {
     );
   }
 
-  Future<void> deleteDeck(String id) => _deckDao.deleteDeck(id);
+  Future<void> deleteDeck(String id) async {
+    await _sync.deleteDeck(id);
+    await _deckDao.deleteDeck(id);
+  }
 
   Future<List<DeckSummary>> getDeckSummaries() async {
     final decks = await _deckDao.getAllDecks();
@@ -107,7 +126,7 @@ Color _parseColor(String hex) {
 
 final deckRepositoryProvider = Provider<DeckRepository>((ref) {
   final db = ref.watch(databaseProvider);
-  return DeckRepository(db.deckDao, db.cardDao);
+  return DeckRepository(db.deckDao, db.cardDao, ref.watch(syncServiceProvider));
 });
 
 final deckSummariesProvider = FutureProvider<List<DeckSummary>>((ref) async {
