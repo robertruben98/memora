@@ -4,13 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/memora_card.dart';
 import '../../core/theme/deck_visuals.dart';
 import '../../data/repositories/deck_repository.dart';
-import '../browse/browse_feed_screen.dart';
 import '../decks/deck_editor_screen.dart';
 import '../decks/deck_screen.dart';
 import '../review/feed_screen.dart';
 import '../review/study_queue.dart';
-import '../settings/settings_screen.dart';
-import '../stats/stats_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -25,35 +22,12 @@ class HomeScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
-          'Memora',
+          'Mazos',
           style: TextStyle(
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.5,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.4,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.dynamic_feed_rounded),
-            tooltip: 'Feed',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const BrowseFeedScreen()),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.bar_chart_rounded),
-            tooltip: 'Estadísticas',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const StatsScreen()),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings_rounded),
-            tooltip: 'Ajustes',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const SettingsScreen()),
-            ),
-          ),
-        ],
       ),
       body: decksAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -69,41 +43,28 @@ class HomeScreen extends ConsumerWidget {
             );
           }
           return ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
             children: [
-              _StudyAllCard(
-                pendingCount: globalQueueAsync.maybeWhen(
-                  data: (q) => q.totalAvailable,
-                  orElse: () => null,
-                ),
-                onTap: () {
-                  Navigator.of(context).push(
+              if (globalQueueAsync.maybeWhen(
+                    data: (q) => q.totalAvailable > 0,
+                    orElse: () => false,
+                  ))
+                _DueBanner(
+                  pending: globalQueueAsync.maybeWhen(
+                    data: (q) => q.totalAvailable,
+                    orElse: () => 0,
+                  ),
+                  onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => const FeedScreen(),
                     ),
-                  );
-                },
-              ),
-              const SizedBox(height: 10),
-              _BrowseFeedTile(
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const BrowseFeedScreen(),
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4),
-                child: Text(
-                  'Mis Mazos',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
+              if (globalQueueAsync.maybeWhen(
+                    data: (q) => q.totalAvailable > 0,
+                    orElse: () => false,
+                  ))
+                const SizedBox(height: 16),
               ...decks.map(
                 (deck) => Padding(
                   padding: const EdgeInsets.only(bottom: 10),
@@ -117,7 +78,6 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 80),
             ],
           );
         },
@@ -135,106 +95,6 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-class _StudyAllCard extends StatelessWidget {
-  /// null = aún cargando; 0 = todo al día; >0 = hay tarjetas listas.
-  final int? pendingCount;
-  final VoidCallback onTap;
-
-  const _StudyAllCard({required this.pendingCount, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final allCaughtUp = pendingCount == 0;
-    final subtitle = pendingCount == null
-        ? 'Calculando…'
-        : allCaughtUp
-            ? '¡Todo al día!'
-            : '$pendingCount tarjetas pendientes';
-    final icon = allCaughtUp
-        ? Icons.check_circle_outline_rounded
-        : Icons.public_rounded;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: allCaughtUp ? null : onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Ink(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: allCaughtUp
-                  ? [
-                      const Color(0xFF1A1A22),
-                      const Color(0xFF1A1A22),
-                    ]
-                  : const [Color(0xFF7C5CFF), Color(0xFF4F8AFF)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(20),
-            border: allCaughtUp
-                ? Border.all(
-                    color: const Color(0xFF4FFFB0).withValues(alpha: 0.4),
-                    width: 1.5,
-                  )
-                : null,
-          ),
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: allCaughtUp
-                      ? const Color(0xFF4FFFB0).withValues(alpha: 0.18)
-                      : Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(
-                  icon,
-                  color:
-                      allCaughtUp ? const Color(0xFF4FFFB0) : Colors.white,
-                  size: 28,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Estudiar todo',
-                      style: TextStyle(
-                        color: allCaughtUp ? Colors.white70 : Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        color: allCaughtUp
-                            ? const Color(0xFF4FFFB0)
-                            : Colors.white.withValues(alpha: 0.85),
-                        fontSize: 14,
-                        fontWeight:
-                            allCaughtUp ? FontWeight.w600 : FontWeight.w400,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (!allCaughtUp)
-                const Icon(Icons.arrow_forward_rounded, color: Colors.white),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class _DeckTile extends StatelessWidget {
   final DeckSummary deck;
@@ -366,71 +226,52 @@ class _HomeEmptyState extends StatelessWidget {
   }
 }
 
-class _BrowseFeedTile extends StatelessWidget {
+
+class _DueBanner extends StatelessWidget {
+  final int pending;
   final VoidCallback onTap;
 
-  const _BrowseFeedTile({required this.onTap});
+  const _DueBanner({required this.pending, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFF1A1A22),
-      borderRadius: BorderRadius.circular(20),
+      color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: const EdgeInsets.all(20),
+        borderRadius: BorderRadius.circular(14),
+        child: Ink(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF7C5CFF), Color(0xFF4F8AFF)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(14),
           ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Row(
             children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFE04FFF), Color(0xFF7C5CFF)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+              const Icon(
+                Icons.bolt_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  '$pending tarjetas listas para repasar',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
                   ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Icon(
-                  Icons.dynamic_feed_rounded,
-                  color: Colors.white,
-                  size: 28,
                 ),
               ),
-              const SizedBox(width: 16),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Explorar feed',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Scroll relajado por todas tus tarjetas',
-                      style: TextStyle(
-                        color: Colors.white60,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
+              const Icon(
                 Icons.arrow_forward_rounded,
-                color: Colors.white.withValues(alpha: 0.55),
+                color: Colors.white,
+                size: 18,
               ),
             ],
           ),
