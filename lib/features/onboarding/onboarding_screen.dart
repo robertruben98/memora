@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/database/database.dart';
+import '../auth/auth_state.dart';
+import '../auth/login_screen.dart';
 import '../shell/root_shell.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -25,8 +27,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final db = ref.read(databaseProvider);
     await db.settingsDao.setValue('onboarding_seen', '1');
     if (!mounted) return;
+    final auth = ref.read(authProvider);
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const RootShell()),
+      MaterialPageRoute(
+        builder: (_) => auth.isLoggedIn
+            ? const RootShell()
+            : LoginScreen(
+                onAuthenticated: () {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (_) => const RootShell()),
+                  );
+                },
+              ),
+      ),
     );
   }
 

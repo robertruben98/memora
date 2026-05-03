@@ -108,15 +108,26 @@ class ApiClient {
   }
 }
 
-const _kBaseUrl = String.fromEnvironment(
+const memoraApiBase = String.fromEnvironment(
   'MEMORA_API_BASE',
   defaultValue: 'https://memora-api.a-robertdev.com',
 );
-const _kToken = String.fromEnvironment(
+const fallbackApiToken = String.fromEnvironment(
   'MEMORA_API_TOKEN',
   defaultValue: 'memora-jiku-9834-api',
 );
 
+/// Token efectivo. Override en main.dart después de bootstrap del auth.
+/// Por defecto usa el token legacy → user 'default-user' en el server.
+final effectiveTokenProvider = Provider<String>((ref) => fallbackApiToken);
+
+/// Cliente sin auth (para login/register).
+final unauthApiClientProvider = Provider<ApiClient>((ref) {
+  return ApiClient(baseUrl: memoraApiBase, token: '');
+});
+
+/// Cliente con auth. El token viene de effectiveTokenProvider.
 final apiClientProvider = Provider<ApiClient>((ref) {
-  return ApiClient(baseUrl: _kBaseUrl, token: _kToken);
+  final token = ref.watch(effectiveTokenProvider);
+  return ApiClient(baseUrl: memoraApiBase, token: token);
 });

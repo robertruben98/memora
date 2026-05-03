@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/srs/study_settings.dart';
 import 'core/theme/theme_provider.dart';
+import 'data/api/api_client.dart';
 import 'data/database/database.dart';
 import 'data/storage/image_storage.dart';
 import 'data/sync/sync_service.dart';
+import 'features/auth/auth_state.dart';
+import 'features/auth/login_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'features/settings/settings_repository.dart';
 import 'features/shell/root_shell.dart';
@@ -18,8 +21,20 @@ Future<void> main() async {
   final container = ProviderContainer(
     overrides: [
       imageStorageProvider.overrideWithValue(imageStorage),
+      // El token efectivo se deriva del authProvider (JWT) si hay sesión,
+      // si no usa el legacy API_TOKEN.
+      effectiveTokenProvider.overrideWith((ref) {
+        final auth = ref.watch(authProvider);
+        return auth.token != null && auth.token!.isNotEmpty
+            ? auth.token!
+            : fallbackApiToken;
+      }),
     ],
   );
+
+  // Carga el token persistido (si lo hay) ANTES del primer sync.
+  await container.read(authProvider.notifier).bootstrap();
+
   final db = container.read(databaseProvider);
 
   // Bootstrap: bajamos del servidor (Postgres) al cache local.
@@ -49,14 +64,24 @@ Future<void> main() async {
   );
 }
 
-class MemoraApp extends ConsumerWidget {
+class MemoraApp extends ConsumerStatefulWidget {
   final bool showOnboarding;
 
   const MemoraApp({super.key, this.showOnboarding = false});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MemoraApp> createState() => _MemoraAppState();
+}
+
+class _MemoraAppState extends ConsumerState<MemoraApp> {
+  /// Si el usuario eligió "continuar sin login" usamos el legacy token.
+  /// El flag se conserva en memoria solo en esta sesión.
+  bool _legacyAccepted = false;
+
+  @override
+  Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
+    final auth = ref.watch(authProvider);
     final darkScheme = ColorScheme.fromSeed(
       seedColor: const Color(0xFF7C5CFF),
       brightness: Brightness.dark,
@@ -82,7 +107,17 @@ class MemoraApp extends ConsumerWidget {
         useMaterial3: true,
         colorScheme: lightScheme,
       ),
-      home: showOnboarding ? const OnboardingScreen() : const RootShell(),
+      home: _resolveHome(auth),
     );
+  }
+
+  Widget _resolveHome(AuthState auth) {
+    if (widget.showOnboarding) return const OnboardingScreen();
+    if (!auth.isLoggedIn && !_legacyAccepted) {
+      return LoginScreen(
+        onAuthenticated: () => setState(() => _legacyAccepted = true),
+      );
+    }
+    return const RootShell();
   }
 }
