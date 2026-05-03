@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/srs/study_settings.dart';
 import '../../core/theme/theme_provider.dart';
+import '../../data/backup/backup_service.dart';
 import '../../data/repositories/card_repository.dart';
 import '../../data/repositories/deck_repository.dart';
 import '../review/study_queue.dart';
@@ -76,6 +77,28 @@ class SettingsScreen extends ConsumerWidget {
             },
           ),
           const SizedBox(height: 24),
+          const _SectionTitle('Backup'),
+          const SizedBox(height: 8),
+          _ActionCard(
+            icon: Icons.upload_rounded,
+            color: const Color(0xFF4F8AFF),
+            title: 'Exportar copia (JSON)',
+            description:
+                'Descarga todos tus mazos, tarjetas y progreso. '
+                'Las imágenes no se incluyen.',
+            onTap: () => _exportBackup(context, ref),
+          ),
+          const SizedBox(height: 8),
+          _ActionCard(
+            icon: Icons.download_rounded,
+            color: const Color(0xFF4FFFB0),
+            title: 'Importar copia (JSON)',
+            description:
+                'Reemplaza el contenido actual con un backup. '
+                'Confirmación requerida.',
+            onTap: () => _importBackup(context, ref),
+          ),
+          const SizedBox(height: 24),
           const _SectionTitle('Datos'),
           const SizedBox(height: 8),
           _DangerCard(
@@ -93,6 +116,74 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _exportBackup(BuildContext context, WidgetRef ref) async {
+    try {
+      await ref.read(backupServiceProvider).exportAndShare();
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error exportando: $e')),
+      );
+    }
+  }
+
+  Future<void> _importBackup(BuildContext context, WidgetRef ref) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A22),
+        title: const Text('¿Reemplazar contenido?'),
+        content: const Text(
+          'Importar un backup borra TODOS tus mazos, tarjetas y '
+          'progreso actuales antes de cargar los del archivo. '
+          'Esta acción no se puede deshacer.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFFF4F6B),
+            ),
+            child: const Text('Continuar'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+
+    try {
+      final result = await ref
+          .read(backupServiceProvider)
+          .importFromFilePicker(replace: true);
+      if (result == null) return;
+
+      ref.invalidate(deckSummariesProvider);
+      ref.invalidate(allCardsProvider);
+      ref.invalidate(studyQueueProvider(null));
+      ref.invalidate(statsSnapshotProvider);
+
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Importado: ${result.decks} mazos, '
+            '${result.cards} tarjetas, ${result.logs} reviews',
+          ),
+          backgroundColor: const Color(0xFF4FFFB0),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error importando: $e')),
+      );
+    }
   }
 
   Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {
@@ -323,6 +414,82 @@ class _ThemeSelector extends StatelessWidget {
                       ? const Color(0xFF7C5CFF)
                       : Colors.white.withValues(alpha: 0.6),
                 ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionCard extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String description;
+  final VoidCallback onTap;
+
+  const _ActionCard({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.description,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0xFF1A1A22),
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: color),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.6),
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: Colors.white.withValues(alpha: 0.4),
               ),
             ],
           ),
