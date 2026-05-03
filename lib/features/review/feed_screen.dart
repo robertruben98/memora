@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/card_repository.dart';
 import '../../data/repositories/deck_repository.dart';
 import '../../data/repositories/review_repository.dart';
+import '../profile/character_progress.dart';
 import 'feed_session_notifier.dart';
 import 'study_queue.dart';
 import 'widgets/card_page.dart';
@@ -75,6 +76,7 @@ class _ActiveFeedState extends ConsumerState<_ActiveFeed> {
     ref.invalidate(deckSummariesProvider);
     ref.invalidate(allCardsProvider);
     ref.invalidate(studyQueueProvider(null));
+    ref.invalidate(characterProgressProvider);
     if (widget.deckId != null) {
       ref.invalidate(studyQueueProvider(widget.deckId));
     }

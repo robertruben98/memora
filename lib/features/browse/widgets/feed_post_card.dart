@@ -13,6 +13,7 @@ import '../../../data/repositories/deck_repository.dart';
 import '../../../data/repositories/review_repository.dart';
 import '../../../data/storage/image_storage.dart';
 import '../../cards/card_editor_screen.dart';
+import '../../profile/character_progress.dart';
 import '../../review/study_queue.dart';
 import '../../stats/card_stats_provider.dart';
 import '../../stats/stats_repository.dart';
@@ -188,6 +189,7 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
     ref.invalidate(statsSnapshotProvider);
     ref.invalidate(allCardSchedulesProvider);
     ref.invalidate(cardStatsProvider);
+    ref.invalidate(characterProgressProvider);
     setState(() {
       _answered = true;
       _saving = false;

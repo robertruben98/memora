@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../browse/browse_feed_screen.dart';
 import '../home/home_screen.dart';
-import '../settings/settings_screen.dart';
+import '../profile/profile_screen.dart';
 import '../stats/stats_screen.dart';
 import '../study/study_hub_screen.dart';
 
@@ -23,7 +23,7 @@ class _RootShellState extends ConsumerState<RootShell> {
     HomeScreen(),
     StudyHubScreen(),
     StatsScreen(),
-    SettingsScreen(),
+    ProfileScreen(),
   ];
 
   void _select(int i) {
