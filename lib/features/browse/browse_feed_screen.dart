@@ -45,13 +45,15 @@ class _BrowseFeedScreenState extends ConsumerState<BrowseFeedScreen> {
         ],
       ),
       body: cardsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const _SkeletonFeed(),
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (cards) {
           final filtered = _selectedDeckId == null
               ? cards
               : cards.where((c) => c.deckId == _selectedDeckId).toList();
           return RefreshIndicator(
+            color: const Color(0xFF7C5CFF),
+            backgroundColor: const Color(0xFF1A1A22),
             onRefresh: () async {
               ref.invalidate(allCardsProvider);
               ref.invalidate(deckSummariesProvider);
@@ -197,51 +199,68 @@ class _StoryCircle extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 6),
         child: Column(
           children: [
-            Container(
-              width: 64,
-              height: 64,
-              padding: const EdgeInsets.all(2.5),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: selected
-                    ? LinearGradient(
-                        colors: isAllAccent
-                            ? const [
-                                Color(0xFFE04FFF),
-                                Color(0xFF7C5CFF),
-                                Color(0xFF4F8AFF),
-                              ]
-                            : [
-                                color,
-                                color.withValues(alpha: 0.4),
-                                color,
-                              ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      )
-                    : null,
-                color: selected ? null : Colors.transparent,
-                border: selected
-                    ? null
-                    : Border.all(
-                        color: Colors.white.withValues(alpha: 0.18),
-                        width: 1.5,
-                      ),
-              ),
+            AnimatedScale(
+              scale: selected ? 1.06 : 1.0,
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutBack,
               child: Container(
+                width: 64,
+                height: 64,
+                padding: const EdgeInsets.all(2.5),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFF1A1A22),
-                  border: Border.all(
-                    color: const Color(0xFF0E0E12),
-                    width: 2,
-                  ),
+                  gradient: selected
+                      ? LinearGradient(
+                          colors: isAllAccent
+                              ? const [
+                                  Color(0xFFE04FFF),
+                                  Color(0xFF7C5CFF),
+                                  Color(0xFF4F8AFF),
+                                ]
+                              : [
+                                  color,
+                                  color.withValues(alpha: 0.4),
+                                  color,
+                                ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                      : null,
+                  color: selected ? null : Colors.transparent,
+                  border: selected
+                      ? null
+                      : Border.all(
+                          color: Colors.white.withValues(alpha: 0.18),
+                          width: 1.5,
+                        ),
+                  boxShadow: selected
+                      ? [
+                          BoxShadow(
+                            color: (isAllAccent
+                                    ? const Color(0xFF7C5CFF)
+                                    : color)
+                                .withValues(alpha: 0.4),
+                            blurRadius: 12,
+                            spreadRadius: 1,
+                          ),
+                        ]
+                      : null,
                 ),
-                child: Center(
-                  child: Icon(
-                    DeckVisuals.iconFor(iconName),
-                    color: color,
-                    size: 26,
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFF1A1A22),
+                    border: Border.all(
+                      color: const Color(0xFF0E0E12),
+                      width: 2,
+                    ),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      DeckVisuals.iconFor(iconName),
+                      color: color,
+                      size: 26,
+                    ),
                   ),
                 ),
               ),
@@ -266,6 +285,160 @@ class _StoryCircle extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Skeleton loader: 3 cards placeholder con shimmer ligero (AnimatedOpacity).
+class _SkeletonFeed extends StatefulWidget {
+  const _SkeletonFeed();
+
+  @override
+  State<_SkeletonFeed> createState() => _SkeletonFeedState();
+}
+
+class _SkeletonFeedState extends State<_SkeletonFeed>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _shimmer = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1100),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _shimmer.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.only(top: 16, bottom: 32),
+      children: [
+        const _SkeletonRibbon(),
+        for (var i = 0; i < 3; i++) _SkeletonCard(shimmer: _shimmer),
+      ],
+    );
+  }
+}
+
+class _SkeletonRibbon extends StatelessWidget {
+  const _SkeletonRibbon();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 100,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Colors.white.withValues(alpha: 0.06),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          for (var i = 0; i < 5; i++)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: Column(
+                children: [
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.06),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    width: 50,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SkeletonCard extends StatelessWidget {
+  final AnimationController shimmer;
+  const _SkeletonCard({required this.shimmer});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: shimmer,
+      builder: (context, _) {
+        final opacity = 0.04 + 0.06 * shimmer.value;
+        Widget bar({double w = double.infinity, double h = 12}) => Container(
+              width: w,
+              height: h,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: opacity),
+                borderRadius: BorderRadius.circular(6),
+              ),
+            );
+        return Container(
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 14),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A22),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: opacity),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        bar(w: 120, h: 12),
+                        const SizedBox(height: 6),
+                        bar(w: 70, h: 9),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: opacity),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              const SizedBox(height: 12),
+              bar(h: 14),
+              const SizedBox(height: 8),
+              bar(w: 220, h: 14),
+            ],
+          ),
+        );
+      },
     );
   }
 }

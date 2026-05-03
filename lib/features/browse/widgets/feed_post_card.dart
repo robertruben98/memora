@@ -42,11 +42,16 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
     vsync: this,
     duration: const Duration(milliseconds: 700),
   );
+  late final AnimationController _bookmarkBounce = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 220),
+  );
 
   @override
   void dispose() {
     _heartBounce.dispose();
     _heartOverlay.dispose();
+    _bookmarkBounce.dispose();
     super.dispose();
   }
 
@@ -65,6 +70,7 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
 
   void _toggleBookmark() {
     HapticFeedback.lightImpact();
+    _bookmarkBounce.forward(from: 0);
     setState(() => _bookmarked = !_bookmarked);
   }
 
@@ -195,7 +201,7 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
     final frontImg = c.frontImagePath;
     final backImg = c.backImagePath;
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       decoration: BoxDecoration(
         color: const Color(0xFF1A1A22),
         borderRadius: BorderRadius.circular(20),
@@ -203,6 +209,18 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
           color: c.deckColor.withValues(alpha: 0.18),
           width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.25),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: c.deckColor.withValues(alpha: 0.08),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,21 +230,40 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
             onMore: () => _showMoreMenu(context),
           ),
           GestureDetector(
+            onTap: (_revealed || _answered) ? null : _reveal,
             onDoubleTap: _onDoubleTapHeart,
             behavior: HitTestBehavior.opaque,
             child: Stack(
               alignment: Alignment.center,
               children: [
-                if (!_revealed)
-                  _QuestionBlock(
-                      card: c, frontImagePath: frontImg, storage: storage)
-                else
-                  _AnswerBlock(
-                    card: c,
-                    backImagePath: backImg,
-                    frontImagePath: frontImg,
-                    storage: storage,
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOutCubic,
+                  alignment: Alignment.topCenter,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    transitionBuilder: (child, anim) => FadeTransition(
+                      opacity: anim,
+                      child: child,
+                    ),
+                    child: !_revealed
+                        ? _QuestionBlock(
+                            key: const ValueKey('question'),
+                            card: c,
+                            frontImagePath: frontImg,
+                            storage: storage,
+                          )
+                        : _AnswerBlock(
+                            key: const ValueKey('answer'),
+                            card: c,
+                            backImagePath: backImg,
+                            frontImagePath: frontImg,
+                            storage: storage,
+                          ),
                   ),
+                ),
                 IgnorePointer(
                   child: AnimatedBuilder(
                     animation: _heartOverlay,
@@ -279,6 +316,7 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
             bookmarked: _bookmarked,
             saving: _saving,
             heartAnim: _heartBounce,
+            bookmarkAnim: _bookmarkBounce,
             onCorrect: () => _answer(true),
             onIncorrect: () => _answer(false),
             onBookmark: _toggleBookmark,
@@ -486,6 +524,7 @@ class _QuestionBlock extends StatelessWidget {
   final ImageStorage storage;
 
   const _QuestionBlock({
+    super.key,
     required this.card,
     required this.frontImagePath,
     required this.storage,
@@ -541,6 +580,7 @@ class _AnswerBlock extends StatelessWidget {
   final ImageStorage storage;
 
   const _AnswerBlock({
+    super.key,
     required this.card,
     required this.frontImagePath,
     required this.backImagePath,
@@ -629,6 +669,7 @@ class _ActionRow extends StatelessWidget {
   final bool bookmarked;
   final bool saving;
   final AnimationController heartAnim;
+  final AnimationController bookmarkAnim;
   final VoidCallback onCorrect;
   final VoidCallback onIncorrect;
   final VoidCallback onBookmark;
@@ -640,6 +681,7 @@ class _ActionRow extends StatelessWidget {
     required this.bookmarked,
     required this.saving,
     required this.heartAnim,
+    required this.bookmarkAnim,
     required this.onCorrect,
     required this.onIncorrect,
     required this.onBookmark,
@@ -687,14 +729,22 @@ class _ActionRow extends StatelessWidget {
             tooltip: 'Compartir',
           ),
           const Spacer(),
-          // Bookmark a la derecha (como en IG)
-          _IconAction(
-            icon: bookmarked
-                ? Icons.bookmark_rounded
-                : Icons.bookmark_border_rounded,
-            color: bookmarked ? const Color(0xFFFFD24F) : Colors.white,
-            onTap: onBookmark,
-            tooltip: bookmarked ? 'Quitar marcador' : 'Guardar',
+          // Bookmark a la derecha (como en IG) con bounce
+          ScaleTransition(
+            scale: Tween<double>(begin: 1.0, end: 1.35).animate(
+              CurvedAnimation(
+                parent: bookmarkAnim,
+                curve: Curves.elasticOut,
+              ),
+            ),
+            child: _IconAction(
+              icon: bookmarked
+                  ? Icons.bookmark_rounded
+                  : Icons.bookmark_border_rounded,
+              color: bookmarked ? const Color(0xFFFFD24F) : Colors.white,
+              onTap: onBookmark,
+              tooltip: bookmarked ? 'Quitar marcador' : 'Guardar',
+            ),
           ),
         ],
       ),
