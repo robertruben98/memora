@@ -37,11 +37,23 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
     vsync: this,
     duration: const Duration(milliseconds: 320),
   );
+  late final AnimationController _heartOverlay = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 700),
+  );
 
   @override
   void dispose() {
     _heartBounce.dispose();
+    _heartOverlay.dispose();
     super.dispose();
+  }
+
+  void _onDoubleTapHeart() {
+    if (_answered || _saving) return;
+    HapticFeedback.lightImpact();
+    _heartOverlay.forward(from: 0);
+    _answer(true);
   }
 
   void _reveal() {
@@ -197,15 +209,68 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
             card: c,
             onMore: () => _showMoreMenu(context),
           ),
-          if (!_revealed)
-            _QuestionBlock(card: c, frontImagePath: frontImg, storage: storage)
-          else
-            _AnswerBlock(
-              card: c,
-              backImagePath: backImg,
-              frontImagePath: frontImg,
-              storage: storage,
+          GestureDetector(
+            onDoubleTap: _onDoubleTapHeart,
+            behavior: HitTestBehavior.opaque,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                if (!_revealed)
+                  _QuestionBlock(
+                      card: c, frontImagePath: frontImg, storage: storage)
+                else
+                  _AnswerBlock(
+                    card: c,
+                    backImagePath: backImg,
+                    frontImagePath: frontImg,
+                    storage: storage,
+                  ),
+                IgnorePointer(
+                  child: AnimatedBuilder(
+                    animation: _heartOverlay,
+                    builder: (ctx, _) {
+                      final t = _heartOverlay.value;
+                      if (t == 0) return const SizedBox.shrink();
+                      // Fase 1 (0..0.35): scale 0 -> 1.2, opacidad 0 -> 1
+                      // Fase 2 (0.35..0.6): scale 1.2 -> 1.0, opacidad 1
+                      // Fase 3 (0.6..1): scale 1.0 -> 0.95, opacidad 1 -> 0
+                      final double scale;
+                      final double opacity;
+                      if (t < 0.35) {
+                        final p = t / 0.35;
+                        scale = Curves.easeOutBack.transform(p) * 1.2;
+                        opacity = (p * 1.2).clamp(0.0, 1.0);
+                      } else if (t < 0.6) {
+                        scale = 1.2 - (t - 0.35) / 0.25 * 0.2;
+                        opacity = 1.0;
+                      } else {
+                        scale = 1.0 - (t - 0.6) / 0.4 * 0.05;
+                        opacity = 1.0 - (t - 0.6) / 0.4;
+                      }
+                      return Opacity(
+                        opacity: opacity.clamp(0.0, 1.0),
+                        child: Transform.scale(
+                          scale: scale.clamp(0.0, 2.0),
+                          child: Icon(
+                            Icons.favorite_rounded,
+                            size: 110,
+                            color: Colors.white.withValues(alpha: 0.92),
+                            shadows: [
+                              Shadow(
+                                color: Colors.black.withValues(alpha: 0.5),
+                                blurRadius: 18,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
+          ),
           _ActionRow(
             answered: _answered,
             wasCorrect: _wasCorrect,
