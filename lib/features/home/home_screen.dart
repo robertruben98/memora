@@ -51,6 +51,15 @@ class HomeScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (decks) {
+          if (decks.isEmpty) {
+            return _HomeEmptyState(
+              onCreateDeck: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const DeckEditorScreen(),
+                ),
+              ),
+            );
+          }
           return ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             children: [
@@ -271,6 +280,71 @@ class _DeckTile extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _HomeEmptyState extends StatelessWidget {
+  final VoidCallback onCreateDeck;
+
+  const _HomeEmptyState({required this.onCreateDeck});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 96,
+            height: 96,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF7C5CFF), Color(0xFF4F8AFF)],
+              ),
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: const Icon(
+              Icons.style_rounded,
+              color: Colors.white,
+              size: 48,
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Aún no tienes mazos',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.4,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Crea tu primer mazo para empezar a estudiar.\n'
+            'Puedes organizar tarjetas por idioma, tema o lo que '
+            'quieras aprender.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              height: 1.5,
+              color: Colors.white.withValues(alpha: 0.65),
+            ),
+          ),
+          const SizedBox(height: 32),
+          FilledButton.icon(
+            onPressed: onCreateDeck,
+            icon: const Icon(Icons.add_rounded),
+            label: const Text('Crear primer mazo'),
+            style: FilledButton.styleFrom(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+            ),
+          ),
+        ],
       ),
     );
   }
