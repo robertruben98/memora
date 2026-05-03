@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/memora_card.dart';
 import '../../core/theme/deck_visuals.dart';
 import '../../data/repositories/deck_repository.dart';
+import '../ai_gen/ai_generate_screen.dart';
 import '../decks/deck_editor_screen.dart';
 import '../decks/deck_screen.dart';
 import '../quest/quest_provider.dart';
@@ -93,15 +94,7 @@ class HomeScreen extends ConsumerWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => const DeckEditorScreen(),
-          ),
-        ),
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Nuevo mazo'),
-      ),
+      floatingActionButton: _HomeFab(),
     );
   }
 }
@@ -372,6 +365,41 @@ class _QuestBanner extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _HomeFab extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        FloatingActionButton(
+          heroTag: 'fab-ai',
+          backgroundColor: const Color(0xFFE04FFF),
+          mini: true,
+          tooltip: 'Generar con IA',
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const AiGenerateScreen(),
+            ),
+          ),
+          child: const Icon(Icons.auto_awesome_rounded, color: Colors.white),
+        ),
+        const SizedBox(height: 10),
+        FloatingActionButton.extended(
+          heroTag: 'fab-deck',
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const DeckEditorScreen(),
+            ),
+          ),
+          icon: const Icon(Icons.add_rounded),
+          label: const Text('Nuevo mazo'),
+        ),
+      ],
     );
   }
 }
