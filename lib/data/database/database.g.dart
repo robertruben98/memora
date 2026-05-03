@@ -3,7 +3,7 @@
 part of 'database.dart';
 
 // ignore_for_file: type=lint
-class $DecksTable extends Decks with TableInfo<$DecksTable, Deck> {
+class $DecksTable extends Decks with TableInfo<$DecksTable, DeckRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -64,7 +64,7 @@ class $DecksTable extends Decks with TableInfo<$DecksTable, Deck> {
   String get actualTableName => $name;
   static const String $name = 'decks';
   @override
-  VerificationContext validateIntegrity(Insertable<Deck> instance,
+  VerificationContext validateIntegrity(Insertable<DeckRow> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -111,9 +111,9 @@ class $DecksTable extends Decks with TableInfo<$DecksTable, Deck> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Deck map(Map<String, dynamic> data, {String? tablePrefix}) {
+  DeckRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Deck(
+    return DeckRow(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
@@ -137,7 +137,7 @@ class $DecksTable extends Decks with TableInfo<$DecksTable, Deck> {
   }
 }
 
-class Deck extends DataClass implements Insertable<Deck> {
+class DeckRow extends DataClass implements Insertable<DeckRow> {
   final String id;
   final String name;
   final String? description;
@@ -145,7 +145,7 @@ class Deck extends DataClass implements Insertable<Deck> {
   final String iconName;
   final int createdAt;
   final int updatedAt;
-  const Deck(
+  const DeckRow(
       {required this.id,
       required this.name,
       this.description,
@@ -182,10 +182,10 @@ class Deck extends DataClass implements Insertable<Deck> {
     );
   }
 
-  factory Deck.fromJson(Map<String, dynamic> json,
+  factory DeckRow.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Deck(
+    return DeckRow(
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String?>(json['description']),
@@ -209,7 +209,7 @@ class Deck extends DataClass implements Insertable<Deck> {
     };
   }
 
-  Deck copyWith(
+  DeckRow copyWith(
           {String? id,
           String? name,
           Value<String?> description = const Value.absent(),
@@ -217,7 +217,7 @@ class Deck extends DataClass implements Insertable<Deck> {
           String? iconName,
           int? createdAt,
           int? updatedAt}) =>
-      Deck(
+      DeckRow(
         id: id ?? this.id,
         name: name ?? this.name,
         description: description.present ? description.value : this.description,
@@ -226,8 +226,8 @@ class Deck extends DataClass implements Insertable<Deck> {
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
       );
-  Deck copyWithCompanion(DecksCompanion data) {
-    return Deck(
+  DeckRow copyWithCompanion(DecksCompanion data) {
+    return DeckRow(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       description:
@@ -241,7 +241,7 @@ class Deck extends DataClass implements Insertable<Deck> {
 
   @override
   String toString() {
-    return (StringBuffer('Deck(')
+    return (StringBuffer('DeckRow(')
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
@@ -259,7 +259,7 @@ class Deck extends DataClass implements Insertable<Deck> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Deck &&
+      (other is DeckRow &&
           other.id == this.id &&
           other.name == this.name &&
           other.description == this.description &&
@@ -269,7 +269,7 @@ class Deck extends DataClass implements Insertable<Deck> {
           other.updatedAt == this.updatedAt);
 }
 
-class DecksCompanion extends UpdateCompanion<Deck> {
+class DecksCompanion extends UpdateCompanion<DeckRow> {
   final Value<String> id;
   final Value<String> name;
   final Value<String?> description;
@@ -301,7 +301,7 @@ class DecksCompanion extends UpdateCompanion<Deck> {
         name = Value(name),
         createdAt = Value(createdAt),
         updatedAt = Value(updatedAt);
-  static Insertable<Deck> custom({
+  static Insertable<DeckRow> custom({
     Expression<String>? id,
     Expression<String>? name,
     Expression<String>? description,
@@ -390,7 +390,7 @@ class DecksCompanion extends UpdateCompanion<Deck> {
   }
 }
 
-class $CardsTable extends Cards with TableInfo<$CardsTable, Card> {
+class $CardsTable extends Cards with TableInfo<$CardsTable, CardRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -461,7 +461,7 @@ class $CardsTable extends Cards with TableInfo<$CardsTable, Card> {
   String get actualTableName => $name;
   static const String $name = 'cards';
   @override
-  VerificationContext validateIntegrity(Insertable<Card> instance,
+  VerificationContext validateIntegrity(Insertable<CardRow> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -518,9 +518,9 @@ class $CardsTable extends Cards with TableInfo<$CardsTable, Card> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Card map(Map<String, dynamic> data, {String? tablePrefix}) {
+  CardRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Card(
+    return CardRow(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       deckId: attachedDatabase.typeMapping
@@ -546,7 +546,7 @@ class $CardsTable extends Cards with TableInfo<$CardsTable, Card> {
   }
 }
 
-class Card extends DataClass implements Insertable<Card> {
+class CardRow extends DataClass implements Insertable<CardRow> {
   final String id;
   final String deckId;
   final String frontText;
@@ -555,7 +555,7 @@ class Card extends DataClass implements Insertable<Card> {
   final String? backImagePath;
   final int createdAt;
   final int updatedAt;
-  const Card(
+  const CardRow(
       {required this.id,
       required this.deckId,
       required this.frontText,
@@ -599,10 +599,10 @@ class Card extends DataClass implements Insertable<Card> {
     );
   }
 
-  factory Card.fromJson(Map<String, dynamic> json,
+  factory CardRow.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Card(
+    return CardRow(
       id: serializer.fromJson<String>(json['id']),
       deckId: serializer.fromJson<String>(json['deckId']),
       frontText: serializer.fromJson<String>(json['frontText']),
@@ -628,7 +628,7 @@ class Card extends DataClass implements Insertable<Card> {
     };
   }
 
-  Card copyWith(
+  CardRow copyWith(
           {String? id,
           String? deckId,
           String? frontText,
@@ -637,7 +637,7 @@ class Card extends DataClass implements Insertable<Card> {
           Value<String?> backImagePath = const Value.absent(),
           int? createdAt,
           int? updatedAt}) =>
-      Card(
+      CardRow(
         id: id ?? this.id,
         deckId: deckId ?? this.deckId,
         frontText: frontText ?? this.frontText,
@@ -649,8 +649,8 @@ class Card extends DataClass implements Insertable<Card> {
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
       );
-  Card copyWithCompanion(CardsCompanion data) {
-    return Card(
+  CardRow copyWithCompanion(CardsCompanion data) {
+    return CardRow(
       id: data.id.present ? data.id.value : this.id,
       deckId: data.deckId.present ? data.deckId.value : this.deckId,
       frontText: data.frontText.present ? data.frontText.value : this.frontText,
@@ -668,7 +668,7 @@ class Card extends DataClass implements Insertable<Card> {
 
   @override
   String toString() {
-    return (StringBuffer('Card(')
+    return (StringBuffer('CardRow(')
           ..write('id: $id, ')
           ..write('deckId: $deckId, ')
           ..write('frontText: $frontText, ')
@@ -687,7 +687,7 @@ class Card extends DataClass implements Insertable<Card> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Card &&
+      (other is CardRow &&
           other.id == this.id &&
           other.deckId == this.deckId &&
           other.frontText == this.frontText &&
@@ -698,7 +698,7 @@ class Card extends DataClass implements Insertable<Card> {
           other.updatedAt == this.updatedAt);
 }
 
-class CardsCompanion extends UpdateCompanion<Card> {
+class CardsCompanion extends UpdateCompanion<CardRow> {
   final Value<String> id;
   final Value<String> deckId;
   final Value<String> frontText;
@@ -735,7 +735,7 @@ class CardsCompanion extends UpdateCompanion<Card> {
         backText = Value(backText),
         createdAt = Value(createdAt),
         updatedAt = Value(updatedAt);
-  static Insertable<Card> custom({
+  static Insertable<CardRow> custom({
     Expression<String>? id,
     Expression<String>? deckId,
     Expression<String>? frontText,
@@ -833,7 +833,7 @@ class CardsCompanion extends UpdateCompanion<Card> {
 }
 
 class $CardSchedulesTable extends CardSchedules
-    with TableInfo<$CardSchedulesTable, CardSchedule> {
+    with TableInfo<$CardSchedulesTable, CardScheduleRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -905,7 +905,7 @@ class $CardSchedulesTable extends CardSchedules
   String get actualTableName => $name;
   static const String $name = 'card_schedules';
   @override
-  VerificationContext validateIntegrity(Insertable<CardSchedule> instance,
+  VerificationContext validateIntegrity(Insertable<CardScheduleRow> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -957,9 +957,9 @@ class $CardSchedulesTable extends CardSchedules
   @override
   Set<GeneratedColumn> get $primaryKey => {cardId};
   @override
-  CardSchedule map(Map<String, dynamic> data, {String? tablePrefix}) {
+  CardScheduleRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return CardSchedule(
+    return CardScheduleRow(
       cardId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}card_id'])!,
       easeFactor: attachedDatabase.typeMapping
@@ -983,7 +983,7 @@ class $CardSchedulesTable extends CardSchedules
   }
 }
 
-class CardSchedule extends DataClass implements Insertable<CardSchedule> {
+class CardScheduleRow extends DataClass implements Insertable<CardScheduleRow> {
   final String cardId;
   final double easeFactor;
   final int intervalDays;
@@ -991,7 +991,7 @@ class CardSchedule extends DataClass implements Insertable<CardSchedule> {
   final String state;
   final int nextReviewDate;
   final int? lastReviewDate;
-  const CardSchedule(
+  const CardScheduleRow(
       {required this.cardId,
       required this.easeFactor,
       required this.intervalDays,
@@ -1028,10 +1028,10 @@ class CardSchedule extends DataClass implements Insertable<CardSchedule> {
     );
   }
 
-  factory CardSchedule.fromJson(Map<String, dynamic> json,
+  factory CardScheduleRow.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return CardSchedule(
+    return CardScheduleRow(
       cardId: serializer.fromJson<String>(json['cardId']),
       easeFactor: serializer.fromJson<double>(json['easeFactor']),
       intervalDays: serializer.fromJson<int>(json['intervalDays']),
@@ -1055,7 +1055,7 @@ class CardSchedule extends DataClass implements Insertable<CardSchedule> {
     };
   }
 
-  CardSchedule copyWith(
+  CardScheduleRow copyWith(
           {String? cardId,
           double? easeFactor,
           int? intervalDays,
@@ -1063,7 +1063,7 @@ class CardSchedule extends DataClass implements Insertable<CardSchedule> {
           String? state,
           int? nextReviewDate,
           Value<int?> lastReviewDate = const Value.absent()}) =>
-      CardSchedule(
+      CardScheduleRow(
         cardId: cardId ?? this.cardId,
         easeFactor: easeFactor ?? this.easeFactor,
         intervalDays: intervalDays ?? this.intervalDays,
@@ -1073,8 +1073,8 @@ class CardSchedule extends DataClass implements Insertable<CardSchedule> {
         lastReviewDate:
             lastReviewDate.present ? lastReviewDate.value : this.lastReviewDate,
       );
-  CardSchedule copyWithCompanion(CardSchedulesCompanion data) {
-    return CardSchedule(
+  CardScheduleRow copyWithCompanion(CardSchedulesCompanion data) {
+    return CardScheduleRow(
       cardId: data.cardId.present ? data.cardId.value : this.cardId,
       easeFactor:
           data.easeFactor.present ? data.easeFactor.value : this.easeFactor,
@@ -1095,7 +1095,7 @@ class CardSchedule extends DataClass implements Insertable<CardSchedule> {
 
   @override
   String toString() {
-    return (StringBuffer('CardSchedule(')
+    return (StringBuffer('CardScheduleRow(')
           ..write('cardId: $cardId, ')
           ..write('easeFactor: $easeFactor, ')
           ..write('intervalDays: $intervalDays, ')
@@ -1113,7 +1113,7 @@ class CardSchedule extends DataClass implements Insertable<CardSchedule> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is CardSchedule &&
+      (other is CardScheduleRow &&
           other.cardId == this.cardId &&
           other.easeFactor == this.easeFactor &&
           other.intervalDays == this.intervalDays &&
@@ -1123,7 +1123,7 @@ class CardSchedule extends DataClass implements Insertable<CardSchedule> {
           other.lastReviewDate == this.lastReviewDate);
 }
 
-class CardSchedulesCompanion extends UpdateCompanion<CardSchedule> {
+class CardSchedulesCompanion extends UpdateCompanion<CardScheduleRow> {
   final Value<String> cardId;
   final Value<double> easeFactor;
   final Value<int> intervalDays;
@@ -1153,7 +1153,7 @@ class CardSchedulesCompanion extends UpdateCompanion<CardSchedule> {
     this.rowid = const Value.absent(),
   })  : cardId = Value(cardId),
         nextReviewDate = Value(nextReviewDate);
-  static Insertable<CardSchedule> custom({
+  static Insertable<CardScheduleRow> custom({
     Expression<String>? cardId,
     Expression<double>? easeFactor,
     Expression<int>? intervalDays,
@@ -1243,7 +1243,7 @@ class CardSchedulesCompanion extends UpdateCompanion<CardSchedule> {
 }
 
 class $ReviewLogsTable extends ReviewLogs
-    with TableInfo<$ReviewLogsTable, ReviewLog> {
+    with TableInfo<$ReviewLogsTable, ReviewLogRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -1297,7 +1297,7 @@ class $ReviewLogsTable extends ReviewLogs
   String get actualTableName => $name;
   static const String $name = 'review_logs';
   @override
-  VerificationContext validateIntegrity(Insertable<ReviewLog> instance,
+  VerificationContext validateIntegrity(Insertable<ReviewLogRow> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -1346,9 +1346,9 @@ class $ReviewLogsTable extends ReviewLogs
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  ReviewLog map(Map<String, dynamic> data, {String? tablePrefix}) {
+  ReviewLogRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return ReviewLog(
+    return ReviewLogRow(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       cardId: attachedDatabase.typeMapping
@@ -1370,14 +1370,14 @@ class $ReviewLogsTable extends ReviewLogs
   }
 }
 
-class ReviewLog extends DataClass implements Insertable<ReviewLog> {
+class ReviewLogRow extends DataClass implements Insertable<ReviewLogRow> {
   final int id;
   final String cardId;
   final int reviewedAt;
   final String result;
   final int previousIntervalDays;
   final int newIntervalDays;
-  const ReviewLog(
+  const ReviewLogRow(
       {required this.id,
       required this.cardId,
       required this.reviewedAt,
@@ -1407,10 +1407,10 @@ class ReviewLog extends DataClass implements Insertable<ReviewLog> {
     );
   }
 
-  factory ReviewLog.fromJson(Map<String, dynamic> json,
+  factory ReviewLogRow.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return ReviewLog(
+    return ReviewLogRow(
       id: serializer.fromJson<int>(json['id']),
       cardId: serializer.fromJson<String>(json['cardId']),
       reviewedAt: serializer.fromJson<int>(json['reviewedAt']),
@@ -1433,14 +1433,14 @@ class ReviewLog extends DataClass implements Insertable<ReviewLog> {
     };
   }
 
-  ReviewLog copyWith(
+  ReviewLogRow copyWith(
           {int? id,
           String? cardId,
           int? reviewedAt,
           String? result,
           int? previousIntervalDays,
           int? newIntervalDays}) =>
-      ReviewLog(
+      ReviewLogRow(
         id: id ?? this.id,
         cardId: cardId ?? this.cardId,
         reviewedAt: reviewedAt ?? this.reviewedAt,
@@ -1448,8 +1448,8 @@ class ReviewLog extends DataClass implements Insertable<ReviewLog> {
         previousIntervalDays: previousIntervalDays ?? this.previousIntervalDays,
         newIntervalDays: newIntervalDays ?? this.newIntervalDays,
       );
-  ReviewLog copyWithCompanion(ReviewLogsCompanion data) {
-    return ReviewLog(
+  ReviewLogRow copyWithCompanion(ReviewLogsCompanion data) {
+    return ReviewLogRow(
       id: data.id.present ? data.id.value : this.id,
       cardId: data.cardId.present ? data.cardId.value : this.cardId,
       reviewedAt:
@@ -1466,7 +1466,7 @@ class ReviewLog extends DataClass implements Insertable<ReviewLog> {
 
   @override
   String toString() {
-    return (StringBuffer('ReviewLog(')
+    return (StringBuffer('ReviewLogRow(')
           ..write('id: $id, ')
           ..write('cardId: $cardId, ')
           ..write('reviewedAt: $reviewedAt, ')
@@ -1483,7 +1483,7 @@ class ReviewLog extends DataClass implements Insertable<ReviewLog> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is ReviewLog &&
+      (other is ReviewLogRow &&
           other.id == this.id &&
           other.cardId == this.cardId &&
           other.reviewedAt == this.reviewedAt &&
@@ -1492,7 +1492,7 @@ class ReviewLog extends DataClass implements Insertable<ReviewLog> {
           other.newIntervalDays == this.newIntervalDays);
 }
 
-class ReviewLogsCompanion extends UpdateCompanion<ReviewLog> {
+class ReviewLogsCompanion extends UpdateCompanion<ReviewLogRow> {
   final Value<int> id;
   final Value<String> cardId;
   final Value<int> reviewedAt;
@@ -1519,7 +1519,7 @@ class ReviewLogsCompanion extends UpdateCompanion<ReviewLog> {
         result = Value(result),
         previousIntervalDays = Value(previousIntervalDays),
         newIntervalDays = Value(newIntervalDays);
-  static Insertable<ReviewLog> custom({
+  static Insertable<ReviewLogRow> custom({
     Expression<int>? id,
     Expression<String>? cardId,
     Expression<int>? reviewedAt,
@@ -1594,7 +1594,7 @@ class ReviewLogsCompanion extends UpdateCompanion<ReviewLog> {
 }
 
 class $AppSettingsTable extends AppSettings
-    with TableInfo<$AppSettingsTable, AppSetting> {
+    with TableInfo<$AppSettingsTable, AppSettingRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -1617,7 +1617,7 @@ class $AppSettingsTable extends AppSettings
   String get actualTableName => $name;
   static const String $name = 'app_settings';
   @override
-  VerificationContext validateIntegrity(Insertable<AppSetting> instance,
+  VerificationContext validateIntegrity(Insertable<AppSettingRow> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -1639,9 +1639,9 @@ class $AppSettingsTable extends AppSettings
   @override
   Set<GeneratedColumn> get $primaryKey => {key};
   @override
-  AppSetting map(Map<String, dynamic> data, {String? tablePrefix}) {
+  AppSettingRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return AppSetting(
+    return AppSettingRow(
       key: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
       value: attachedDatabase.typeMapping
@@ -1655,10 +1655,10 @@ class $AppSettingsTable extends AppSettings
   }
 }
 
-class AppSetting extends DataClass implements Insertable<AppSetting> {
+class AppSettingRow extends DataClass implements Insertable<AppSettingRow> {
   final String key;
   final String value;
-  const AppSetting({required this.key, required this.value});
+  const AppSettingRow({required this.key, required this.value});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1674,10 +1674,10 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     );
   }
 
-  factory AppSetting.fromJson(Map<String, dynamic> json,
+  factory AppSettingRow.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return AppSetting(
+    return AppSettingRow(
       key: serializer.fromJson<String>(json['key']),
       value: serializer.fromJson<String>(json['value']),
     );
@@ -1691,12 +1691,12 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     };
   }
 
-  AppSetting copyWith({String? key, String? value}) => AppSetting(
+  AppSettingRow copyWith({String? key, String? value}) => AppSettingRow(
         key: key ?? this.key,
         value: value ?? this.value,
       );
-  AppSetting copyWithCompanion(AppSettingsCompanion data) {
-    return AppSetting(
+  AppSettingRow copyWithCompanion(AppSettingsCompanion data) {
+    return AppSettingRow(
       key: data.key.present ? data.key.value : this.key,
       value: data.value.present ? data.value.value : this.value,
     );
@@ -1704,7 +1704,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
 
   @override
   String toString() {
-    return (StringBuffer('AppSetting(')
+    return (StringBuffer('AppSettingRow(')
           ..write('key: $key, ')
           ..write('value: $value')
           ..write(')'))
@@ -1716,12 +1716,12 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is AppSetting &&
+      (other is AppSettingRow &&
           other.key == this.key &&
           other.value == this.value);
 }
 
-class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
+class AppSettingsCompanion extends UpdateCompanion<AppSettingRow> {
   final Value<String> key;
   final Value<String> value;
   final Value<int> rowid;
@@ -1736,7 +1736,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.rowid = const Value.absent(),
   })  : key = Value(key),
         value = Value(value);
-  static Insertable<AppSetting> custom({
+  static Insertable<AppSettingRow> custom({
     Expression<String>? key,
     Expression<String>? value,
     Expression<int>? rowid,
@@ -1852,10 +1852,10 @@ typedef $$DecksTableUpdateCompanionBuilder = DecksCompanion Function({
 });
 
 final class $$DecksTableReferences
-    extends BaseReferences<_$MemoraDatabase, $DecksTable, Deck> {
+    extends BaseReferences<_$MemoraDatabase, $DecksTable, DeckRow> {
   $$DecksTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static MultiTypedResultKey<$CardsTable, List<Card>> _cardsRefsTable(
+  static MultiTypedResultKey<$CardsTable, List<CardRow>> _cardsRefsTable(
           _$MemoraDatabase db) =>
       MultiTypedResultKey.fromTable(db.cards,
           aliasName: $_aliasNameGenerator(db.decks.id, db.cards.deckId));
@@ -2008,14 +2008,14 @@ class $$DecksTableAnnotationComposer
 class $$DecksTableTableManager extends RootTableManager<
     _$MemoraDatabase,
     $DecksTable,
-    Deck,
+    DeckRow,
     $$DecksTableFilterComposer,
     $$DecksTableOrderingComposer,
     $$DecksTableAnnotationComposer,
     $$DecksTableCreateCompanionBuilder,
     $$DecksTableUpdateCompanionBuilder,
-    (Deck, $$DecksTableReferences),
-    Deck,
+    (DeckRow, $$DecksTableReferences),
+    DeckRow,
     PrefetchHooks Function({bool cardsRefs})> {
   $$DecksTableTableManager(_$MemoraDatabase db, $DecksTable table)
       : super(TableManagerState(
@@ -2099,14 +2099,14 @@ class $$DecksTableTableManager extends RootTableManager<
 typedef $$DecksTableProcessedTableManager = ProcessedTableManager<
     _$MemoraDatabase,
     $DecksTable,
-    Deck,
+    DeckRow,
     $$DecksTableFilterComposer,
     $$DecksTableOrderingComposer,
     $$DecksTableAnnotationComposer,
     $$DecksTableCreateCompanionBuilder,
     $$DecksTableUpdateCompanionBuilder,
-    (Deck, $$DecksTableReferences),
-    Deck,
+    (DeckRow, $$DecksTableReferences),
+    DeckRow,
     PrefetchHooks Function({bool cardsRefs})>;
 typedef $$CardsTableCreateCompanionBuilder = CardsCompanion Function({
   required String id,
@@ -2132,7 +2132,7 @@ typedef $$CardsTableUpdateCompanionBuilder = CardsCompanion Function({
 });
 
 final class $$CardsTableReferences
-    extends BaseReferences<_$MemoraDatabase, $CardsTable, Card> {
+    extends BaseReferences<_$MemoraDatabase, $CardsTable, CardRow> {
   $$CardsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $DecksTable _deckIdTable(_$MemoraDatabase db) =>
@@ -2148,7 +2148,7 @@ final class $$CardsTableReferences
         manager.$state.copyWith(prefetchedData: [item]));
   }
 
-  static MultiTypedResultKey<$CardSchedulesTable, List<CardSchedule>>
+  static MultiTypedResultKey<$CardSchedulesTable, List<CardScheduleRow>>
       _cardSchedulesRefsTable(_$MemoraDatabase db) =>
           MultiTypedResultKey.fromTable(db.cardSchedules,
               aliasName:
@@ -2163,7 +2163,7 @@ final class $$CardsTableReferences
         manager.$state.copyWith(prefetchedData: cache));
   }
 
-  static MultiTypedResultKey<$ReviewLogsTable, List<ReviewLog>>
+  static MultiTypedResultKey<$ReviewLogsTable, List<ReviewLogRow>>
       _reviewLogsRefsTable(_$MemoraDatabase db) =>
           MultiTypedResultKey.fromTable(db.reviewLogs,
               aliasName:
@@ -2422,14 +2422,14 @@ class $$CardsTableAnnotationComposer
 class $$CardsTableTableManager extends RootTableManager<
     _$MemoraDatabase,
     $CardsTable,
-    Card,
+    CardRow,
     $$CardsTableFilterComposer,
     $$CardsTableOrderingComposer,
     $$CardsTableAnnotationComposer,
     $$CardsTableCreateCompanionBuilder,
     $$CardsTableUpdateCompanionBuilder,
-    (Card, $$CardsTableReferences),
-    Card,
+    (CardRow, $$CardsTableReferences),
+    CardRow,
     PrefetchHooks Function(
         {bool deckId, bool cardSchedulesRefs, bool reviewLogsRefs})> {
   $$CardsTableTableManager(_$MemoraDatabase db, $CardsTable table)
@@ -2561,14 +2561,14 @@ class $$CardsTableTableManager extends RootTableManager<
 typedef $$CardsTableProcessedTableManager = ProcessedTableManager<
     _$MemoraDatabase,
     $CardsTable,
-    Card,
+    CardRow,
     $$CardsTableFilterComposer,
     $$CardsTableOrderingComposer,
     $$CardsTableAnnotationComposer,
     $$CardsTableCreateCompanionBuilder,
     $$CardsTableUpdateCompanionBuilder,
-    (Card, $$CardsTableReferences),
-    Card,
+    (CardRow, $$CardsTableReferences),
+    CardRow,
     PrefetchHooks Function(
         {bool deckId, bool cardSchedulesRefs, bool reviewLogsRefs})>;
 typedef $$CardSchedulesTableCreateCompanionBuilder = CardSchedulesCompanion
@@ -2595,7 +2595,7 @@ typedef $$CardSchedulesTableUpdateCompanionBuilder = CardSchedulesCompanion
 });
 
 final class $$CardSchedulesTableReferences extends BaseReferences<
-    _$MemoraDatabase, $CardSchedulesTable, CardSchedule> {
+    _$MemoraDatabase, $CardSchedulesTable, CardScheduleRow> {
   $$CardSchedulesTableReferences(
       super.$_db, super.$_table, super.$_typedResult);
 
@@ -2765,14 +2765,14 @@ class $$CardSchedulesTableAnnotationComposer
 class $$CardSchedulesTableTableManager extends RootTableManager<
     _$MemoraDatabase,
     $CardSchedulesTable,
-    CardSchedule,
+    CardScheduleRow,
     $$CardSchedulesTableFilterComposer,
     $$CardSchedulesTableOrderingComposer,
     $$CardSchedulesTableAnnotationComposer,
     $$CardSchedulesTableCreateCompanionBuilder,
     $$CardSchedulesTableUpdateCompanionBuilder,
-    (CardSchedule, $$CardSchedulesTableReferences),
-    CardSchedule,
+    (CardScheduleRow, $$CardSchedulesTableReferences),
+    CardScheduleRow,
     PrefetchHooks Function({bool cardId})> {
   $$CardSchedulesTableTableManager(
       _$MemoraDatabase db, $CardSchedulesTable table)
@@ -2872,14 +2872,14 @@ class $$CardSchedulesTableTableManager extends RootTableManager<
 typedef $$CardSchedulesTableProcessedTableManager = ProcessedTableManager<
     _$MemoraDatabase,
     $CardSchedulesTable,
-    CardSchedule,
+    CardScheduleRow,
     $$CardSchedulesTableFilterComposer,
     $$CardSchedulesTableOrderingComposer,
     $$CardSchedulesTableAnnotationComposer,
     $$CardSchedulesTableCreateCompanionBuilder,
     $$CardSchedulesTableUpdateCompanionBuilder,
-    (CardSchedule, $$CardSchedulesTableReferences),
-    CardSchedule,
+    (CardScheduleRow, $$CardSchedulesTableReferences),
+    CardScheduleRow,
     PrefetchHooks Function({bool cardId})>;
 typedef $$ReviewLogsTableCreateCompanionBuilder = ReviewLogsCompanion Function({
   Value<int> id,
@@ -2899,7 +2899,7 @@ typedef $$ReviewLogsTableUpdateCompanionBuilder = ReviewLogsCompanion Function({
 });
 
 final class $$ReviewLogsTableReferences
-    extends BaseReferences<_$MemoraDatabase, $ReviewLogsTable, ReviewLog> {
+    extends BaseReferences<_$MemoraDatabase, $ReviewLogsTable, ReviewLogRow> {
   $$ReviewLogsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $CardsTable _cardIdTable(_$MemoraDatabase db) => db.cards
@@ -3058,14 +3058,14 @@ class $$ReviewLogsTableAnnotationComposer
 class $$ReviewLogsTableTableManager extends RootTableManager<
     _$MemoraDatabase,
     $ReviewLogsTable,
-    ReviewLog,
+    ReviewLogRow,
     $$ReviewLogsTableFilterComposer,
     $$ReviewLogsTableOrderingComposer,
     $$ReviewLogsTableAnnotationComposer,
     $$ReviewLogsTableCreateCompanionBuilder,
     $$ReviewLogsTableUpdateCompanionBuilder,
-    (ReviewLog, $$ReviewLogsTableReferences),
-    ReviewLog,
+    (ReviewLogRow, $$ReviewLogsTableReferences),
+    ReviewLogRow,
     PrefetchHooks Function({bool cardId})> {
   $$ReviewLogsTableTableManager(_$MemoraDatabase db, $ReviewLogsTable table)
       : super(TableManagerState(
@@ -3156,14 +3156,14 @@ class $$ReviewLogsTableTableManager extends RootTableManager<
 typedef $$ReviewLogsTableProcessedTableManager = ProcessedTableManager<
     _$MemoraDatabase,
     $ReviewLogsTable,
-    ReviewLog,
+    ReviewLogRow,
     $$ReviewLogsTableFilterComposer,
     $$ReviewLogsTableOrderingComposer,
     $$ReviewLogsTableAnnotationComposer,
     $$ReviewLogsTableCreateCompanionBuilder,
     $$ReviewLogsTableUpdateCompanionBuilder,
-    (ReviewLog, $$ReviewLogsTableReferences),
-    ReviewLog,
+    (ReviewLogRow, $$ReviewLogsTableReferences),
+    ReviewLogRow,
     PrefetchHooks Function({bool cardId})>;
 typedef $$AppSettingsTableCreateCompanionBuilder = AppSettingsCompanion
     Function({
@@ -3229,17 +3229,17 @@ class $$AppSettingsTableAnnotationComposer
 class $$AppSettingsTableTableManager extends RootTableManager<
     _$MemoraDatabase,
     $AppSettingsTable,
-    AppSetting,
+    AppSettingRow,
     $$AppSettingsTableFilterComposer,
     $$AppSettingsTableOrderingComposer,
     $$AppSettingsTableAnnotationComposer,
     $$AppSettingsTableCreateCompanionBuilder,
     $$AppSettingsTableUpdateCompanionBuilder,
     (
-      AppSetting,
-      BaseReferences<_$MemoraDatabase, $AppSettingsTable, AppSetting>
+      AppSettingRow,
+      BaseReferences<_$MemoraDatabase, $AppSettingsTable, AppSettingRow>
     ),
-    AppSetting,
+    AppSettingRow,
     PrefetchHooks Function()> {
   $$AppSettingsTableTableManager(_$MemoraDatabase db, $AppSettingsTable table)
       : super(TableManagerState(
@@ -3281,17 +3281,17 @@ class $$AppSettingsTableTableManager extends RootTableManager<
 typedef $$AppSettingsTableProcessedTableManager = ProcessedTableManager<
     _$MemoraDatabase,
     $AppSettingsTable,
-    AppSetting,
+    AppSettingRow,
     $$AppSettingsTableFilterComposer,
     $$AppSettingsTableOrderingComposer,
     $$AppSettingsTableAnnotationComposer,
     $$AppSettingsTableCreateCompanionBuilder,
     $$AppSettingsTableUpdateCompanionBuilder,
     (
-      AppSetting,
-      BaseReferences<_$MemoraDatabase, $AppSettingsTable, AppSetting>
+      AppSettingRow,
+      BaseReferences<_$MemoraDatabase, $AppSettingsTable, AppSettingRow>
     ),
-    AppSetting,
+    AppSettingRow,
     PrefetchHooks Function()>;
 
 class $MemoraDatabaseManager {

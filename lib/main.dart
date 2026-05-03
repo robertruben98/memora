@@ -1,10 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'data/database/database.dart';
+import 'data/seeder.dart';
 import 'features/home/home_screen.dart';
 
-void main() {
-  runApp(const ProviderScope(child: MemoraApp()));
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final container = ProviderContainer();
+  final db = container.read(databaseProvider);
+  await seedIfEmpty(db);
+
+  runApp(
+    UncontrolledProviderScope(
+      container: container,
+      child: const MemoraApp(),
+    ),
+  );
 }
 
 class MemoraApp extends StatelessWidget {

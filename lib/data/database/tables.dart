@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+@DataClassName('DeckRow')
 class Decks extends Table {
   TextColumn get id => text()();
   TextColumn get name => text().withLength(min: 1, max: 100)();
@@ -14,6 +15,7 @@ class Decks extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@DataClassName('CardRow')
 class Cards extends Table {
   TextColumn get id => text()();
   TextColumn get deckId =>
@@ -29,6 +31,7 @@ class Cards extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@DataClassName('CardScheduleRow')
 class CardSchedules extends Table {
   TextColumn get cardId =>
       text().references(Cards, #id, onDelete: KeyAction.cascade)();
@@ -43,6 +46,7 @@ class CardSchedules extends Table {
   Set<Column> get primaryKey => {cardId};
 }
 
+@DataClassName('ReviewLogRow')
 class ReviewLogs extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get cardId =>
@@ -53,6 +57,7 @@ class ReviewLogs extends Table {
   IntColumn get newIntervalDays => integer()();
 }
 
+@DataClassName('AppSettingRow')
 class AppSettings extends Table {
   TextColumn get key => text()();
   TextColumn get value => text()();

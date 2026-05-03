@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/memora_card.dart';
-import '../../data/card_repository.dart';
+import '../../data/repositories/card_repository.dart';
+import '../../data/repositories/deck_repository.dart';
 import '../review/feed_screen.dart';
 
 class HomeScreen extends ConsumerWidget {

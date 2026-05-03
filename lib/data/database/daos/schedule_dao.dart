@@ -10,11 +10,11 @@ class ScheduleDao extends DatabaseAccessor<MemoraDatabase>
     with _$ScheduleDaoMixin {
   ScheduleDao(super.db);
 
-  Future<CardSchedule?> getScheduleByCardId(String cardId) =>
+  Future<CardScheduleRow?> getScheduleByCardId(String cardId) =>
       (select(cardSchedules)..where((s) => s.cardId.equals(cardId)))
           .getSingleOrNull();
 
-  Future<List<CardSchedule>> getDueSchedules(int nowEpochMs) {
+  Future<List<CardScheduleRow>> getDueSchedules(int nowEpochMs) {
     return (select(cardSchedules)
           ..where((s) => s.nextReviewDate.isSmallerOrEqualValue(nowEpochMs)))
         .get();

@@ -9,11 +9,11 @@ part 'deck_dao.g.dart';
 class DeckDao extends DatabaseAccessor<MemoraDatabase> with _$DeckDaoMixin {
   DeckDao(super.db);
 
-  Future<List<Deck>> getAllDecks() => select(decks).get();
+  Future<List<DeckRow>> getAllDecks() => select(decks).get();
 
-  Stream<List<Deck>> watchAllDecks() => select(decks).watch();
+  Stream<List<DeckRow>> watchAllDecks() => select(decks).watch();
 
-  Future<Deck?> getDeckById(String id) =>
+  Future<DeckRow?> getDeckById(String id) =>
       (select(decks)..where((d) => d.id.equals(id))).getSingleOrNull();
 
   Future<int> insertDeck(DecksCompanion deck) => into(decks).insert(deck);

@@ -13,14 +13,14 @@ class ReviewLogDao extends DatabaseAccessor<MemoraDatabase>
   Future<int> insertLog(ReviewLogsCompanion log) =>
       into(reviewLogs).insert(log);
 
-  Future<List<ReviewLog>> getRecentLogs({int limit = 100}) {
+  Future<List<ReviewLogRow>> getRecentLogs({int limit = 100}) {
     return (select(reviewLogs)
           ..orderBy([(t) => OrderingTerm.desc(t.reviewedAt)])
           ..limit(limit))
         .get();
   }
 
-  Future<List<ReviewLog>> getLogsSince(int sinceEpochMs) {
+  Future<List<ReviewLogRow>> getLogsSince(int sinceEpochMs) {
     return (select(reviewLogs)
           ..where((l) => l.reviewedAt.isBiggerOrEqualValue(sinceEpochMs)))
         .get();

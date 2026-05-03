@@ -9,15 +9,15 @@ part 'card_dao.g.dart';
 class CardDao extends DatabaseAccessor<MemoraDatabase> with _$CardDaoMixin {
   CardDao(super.db);
 
-  Future<List<Card>> getAllCards() => select(cards).get();
+  Future<List<CardRow>> getAllCards() => select(cards).get();
 
-  Future<List<Card>> getCardsByDeck(String deckId) =>
+  Future<List<CardRow>> getCardsByDeck(String deckId) =>
       (select(cards)..where((c) => c.deckId.equals(deckId))).get();
 
-  Stream<List<Card>> watchCardsByDeck(String deckId) =>
+  Stream<List<CardRow>> watchCardsByDeck(String deckId) =>
       (select(cards)..where((c) => c.deckId.equals(deckId))).watch();
 
-  Future<Card?> getCardById(String id) =>
+  Future<CardRow?> getCardById(String id) =>
       (select(cards)..where((c) => c.id.equals(id))).getSingleOrNull();
 
   Future<int> insertCard(CardsCompanion card) => into(cards).insert(card);
