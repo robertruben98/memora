@@ -6,6 +6,7 @@ import '../../core/theme/deck_visuals.dart';
 import '../../data/repositories/deck_repository.dart';
 import '../decks/deck_editor_screen.dart';
 import '../decks/deck_screen.dart';
+import '../quest/quest_provider.dart';
 import '../review/feed_screen.dart';
 import '../review/study_queue.dart';
 
@@ -16,6 +17,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final decksAsync = ref.watch(deckSummariesProvider);
     final globalQueueAsync = ref.watch(studyQueueProvider(null));
+    final questAsync = ref.watch(dailyQuestProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -45,6 +47,15 @@ class HomeScreen extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
             children: [
+              questAsync.maybeWhen(
+                data: (q) => _QuestBanner(quest: q),
+                orElse: () => const SizedBox.shrink(),
+              ),
+              if (questAsync.maybeWhen(
+                    data: (_) => true,
+                    orElse: () => false,
+                  ))
+                const SizedBox(height: 12),
               if (globalQueueAsync.maybeWhen(
                     data: (q) => q.totalAvailable > 0,
                     orElse: () => false,
@@ -276,6 +287,90 @@ class _DueBanner extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _QuestBanner extends StatelessWidget {
+  final DailyQuest quest;
+  const _QuestBanner({required this.quest});
+
+  @override
+  Widget build(BuildContext context) {
+    final complete = quest.isComplete;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A22),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: complete
+              ? const Color(0xFF4FFFB0).withValues(alpha: 0.45)
+              : const Color(0xFFFFD24F).withValues(alpha: 0.45),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                complete ? '🏆' : '🎯',
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'QUEST DIARIA',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.4,
+                  color: Color(0xFFFFD24F),
+                ),
+              ),
+              const Spacer(),
+              if (quest.streakDays > 0)
+                Text(
+                  '🔥 ${quest.streakDays}d',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFFFF8A4F),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            complete
+                ? 'Quest completada — ¡a por mañana!'
+                : 'Estudia ${quest.target} tarjetas hoy '
+                    '(${quest.completed}/${quest.target})',
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: Container(
+              height: 6,
+              color: Colors.black.withValues(alpha: 0.4),
+              child: FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: quest.progress,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: complete
+                          ? const [Color(0xFF4FFFB0), Color(0xFF4FFFE9)]
+                          : const [Color(0xFFFFD24F), Color(0xFFFF8A4F)],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

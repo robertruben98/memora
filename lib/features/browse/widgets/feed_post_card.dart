@@ -14,6 +14,8 @@ import '../../../data/repositories/review_repository.dart';
 import '../../../data/storage/image_storage.dart';
 import '../../cards/card_editor_screen.dart';
 import '../../profile/character_progress.dart';
+import '../../profile/level_up_overlay.dart';
+import '../../quest/quest_provider.dart';
 import '../../review/study_queue.dart';
 import '../../stats/card_stats_provider.dart';
 import '../../stats/stats_repository.dart';
@@ -177,6 +179,10 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
       _saving = true;
       _wasCorrect = correct;
     });
+    // Snapshot del nivel antes para detectar level-up
+    final beforeProgress = ref
+        .read(characterProgressProvider)
+        .maybeWhen(data: (p) => p, orElse: () => null);
     await ref.read(reviewRepositoryProvider).recordReview(
           cardId: widget.card.id,
           correct: correct,
@@ -190,10 +196,27 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
     ref.invalidate(allCardSchedulesProvider);
     ref.invalidate(cardStatsProvider);
     ref.invalidate(characterProgressProvider);
+    ref.invalidate(dailyQuestProvider);
     setState(() {
       _answered = true;
       _saving = false;
     });
+
+    // Detectar level-up: re-leer characterProgress y comparar
+    if (beforeProgress != null) {
+      try {
+        final after = await ref.read(characterProgressProvider.future);
+        if (!mounted) return;
+        if (after.level > beforeProgress.level) {
+          LevelUpOverlay.show(
+            // ignore: use_build_context_synchronously
+            context,
+            newLevel: after.level,
+            title: after.title != beforeProgress.title ? after.title : null,
+          );
+        }
+      } catch (_) {}
+    }
   }
 
   @override

@@ -6,6 +6,8 @@ import '../../data/repositories/card_repository.dart';
 import '../../data/repositories/deck_repository.dart';
 import '../../data/repositories/review_repository.dart';
 import '../profile/character_progress.dart';
+import '../profile/level_up_overlay.dart';
+import '../quest/quest_provider.dart';
 import 'feed_session_notifier.dart';
 import 'study_queue.dart';
 import 'widgets/card_page.dart';
@@ -66,6 +68,9 @@ class _ActiveFeedState extends ConsumerState<_ActiveFeed> {
     final state = ref.read(feedSessionProvider(widget.queue.cards));
     final currentCard = widget.queue.cards[state.currentIndex];
 
+    final beforeProgress = ref
+        .read(characterProgressProvider)
+        .maybeWhen(data: (p) => p, orElse: () => null);
     // Persist SRS update + review log (await to keep order tight).
     await ref.read(reviewRepositoryProvider).recordReview(
           cardId: currentCard.id,
@@ -77,6 +82,7 @@ class _ActiveFeedState extends ConsumerState<_ActiveFeed> {
     ref.invalidate(allCardsProvider);
     ref.invalidate(studyQueueProvider(null));
     ref.invalidate(characterProgressProvider);
+    ref.invalidate(dailyQuestProvider);
     if (widget.deckId != null) {
       ref.invalidate(studyQueueProvider(widget.deckId));
     }
@@ -88,6 +94,19 @@ class _ActiveFeedState extends ConsumerState<_ActiveFeed> {
         duration: const Duration(milliseconds: 350),
         curve: Curves.easeOutCubic,
       );
+    }
+
+    if (beforeProgress != null) {
+      try {
+        final after = await ref.read(characterProgressProvider.future);
+        if (after.level > beforeProgress.level && context.mounted) {
+          LevelUpOverlay.show(
+            context,
+            newLevel: after.level,
+            title: after.title != beforeProgress.title ? after.title : null,
+          );
+        }
+      } catch (_) {}
     }
   }
 
