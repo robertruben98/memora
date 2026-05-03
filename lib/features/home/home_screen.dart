@@ -8,6 +8,7 @@ import '../decks/deck_editor_screen.dart';
 import '../decks/deck_screen.dart';
 import '../review/feed_screen.dart';
 import '../review/study_queue.dart';
+import '../stats/stats_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -31,7 +32,10 @@ class HomeScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.bar_chart_rounded),
-            onPressed: () {},
+            tooltip: 'Estadísticas',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const StatsScreen()),
+            ),
           ),
           IconButton(
             icon: const Icon(Icons.settings_rounded),
