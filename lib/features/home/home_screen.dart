@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/memora_card.dart';
+import '../../core/theme/deck_visuals.dart';
 import '../../data/repositories/card_repository.dart';
 import '../../data/repositories/deck_repository.dart';
+import '../decks/deck_editor_screen.dart';
 import '../decks/deck_screen.dart';
 import '../review/feed_screen.dart';
 
@@ -90,7 +92,11 @@ class HomeScreen extends ConsumerWidget {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const DeckEditorScreen(),
+          ),
+        ),
         icon: const Icon(Icons.add_rounded),
         label: const Text('Nuevo mazo'),
       ),
@@ -191,7 +197,10 @@ class _DeckTile extends StatelessWidget {
                   color: deck.color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.style_rounded, color: deck.color),
+                child: Icon(
+                  DeckVisuals.iconFor(deck.iconName),
+                  color: deck.color,
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(

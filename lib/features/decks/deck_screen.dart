@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/memora_card.dart';
+import '../../core/theme/deck_visuals.dart';
 import '../../data/repositories/card_repository.dart';
+import '../../data/repositories/deck_repository.dart';
 import '../cards/card_editor_screen.dart';
 import '../review/feed_screen.dart';
+import 'deck_editor_screen.dart';
 
 class DeckScreen extends ConsumerWidget {
   final DeckSummary deck;
@@ -15,11 +18,29 @@ class DeckScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cardsAsync = ref.watch(cardsByDeckProvider(deck.id));
 
+    Future<void> openEditor() async {
+      final deckRow =
+          await ref.read(deckByIdProvider(deck.id).future);
+      if (deckRow == null || !context.mounted) return;
+      final result = await Navigator.of(context).push<dynamic>(
+        MaterialPageRoute(
+          builder: (_) => DeckEditorScreen(deckToEdit: deckRow),
+        ),
+      );
+      if (result == 'deleted' && context.mounted) {
+        Navigator.of(context).pop();
+      }
+    }
+
     return Scaffold(
       body: cardsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
-        data: (cards) => _DeckBody(deck: deck, cards: cards),
+        data: (cards) => _DeckBody(
+          deck: deck,
+          cards: cards,
+          onEditDeck: openEditor,
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -39,8 +60,13 @@ class DeckScreen extends ConsumerWidget {
 class _DeckBody extends StatelessWidget {
   final DeckSummary deck;
   final List<MemoraCard> cards;
+  final VoidCallback onEditDeck;
 
-  const _DeckBody({required this.deck, required this.cards});
+  const _DeckBody({
+    required this.deck,
+    required this.cards,
+    required this.onEditDeck,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +77,13 @@ class _DeckBody extends StatelessWidget {
           elevation: 0,
           expandedHeight: 200,
           pinned: true,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.edit_rounded),
+              onPressed: onEditDeck,
+              tooltip: 'Editar mazo',
+            ),
+          ],
           flexibleSpace: FlexibleSpaceBar(
             title: Text(
               deck.name,
@@ -69,7 +102,7 @@ class _DeckBody extends StatelessWidget {
               ),
               child: Center(
                 child: Icon(
-                  Icons.style_rounded,
+                  DeckVisuals.iconFor(deck.iconName),
                   size: 80,
                   color: deck.color.withValues(alpha: 0.6),
                 ),

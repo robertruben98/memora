@@ -20,6 +20,7 @@ class DeckSummary {
   final String id;
   final String name;
   final Color color;
+  final String iconName;
   final int dueCount;
   final int totalCount;
   final List<MemoraCard> cards;
@@ -28,6 +29,7 @@ class DeckSummary {
     required this.id,
     required this.name,
     required this.color,
+    required this.iconName,
     required this.dueCount,
     required this.totalCount,
     required this.cards,

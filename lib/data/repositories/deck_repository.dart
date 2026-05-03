@@ -81,6 +81,7 @@ class DeckRepository {
           id: d.id,
           name: d.name,
           color: _parseColor(d.colorHex),
+          iconName: d.iconName,
           dueCount: cards.length,
           totalCount: cards.length,
           cards: cards,
@@ -107,4 +108,9 @@ final deckRepositoryProvider = Provider<DeckRepository>((ref) {
 
 final deckSummariesProvider = FutureProvider<List<DeckSummary>>((ref) async {
   return ref.read(deckRepositoryProvider).getDeckSummaries();
+});
+
+final deckByIdProvider =
+    FutureProvider.family<DeckRow?, String>((ref, id) async {
+  return ref.read(deckRepositoryProvider).getDeckById(id);
 });
