@@ -38,6 +38,13 @@ SIZE=$(du -h "$APK_RELEASES_DIR/$APK_NAME" | cut -f1)
 APK_URL="$BASE_URL/$APK_NAME"
 LATEST_URL="$BASE_URL/$LATEST_NAME"
 
+# Regenerar index.html con la lista actualizada
+PYTHON312="/home/robertdev/.pyenv/versions/3.12.11/bin/python3"
+if [ -x "$PYTHON312" ] && [ -f "$APK_RELEASES_DIR/_generate_index.py" ]; then
+    "$PYTHON312" "$APK_RELEASES_DIR/_generate_index.py" >/dev/null && \
+        echo "    Index page regenerated"
+fi
+
 echo ""
 echo "==> Build done."
 echo "    File: $APK_RELEASES_DIR/$APK_NAME ($SIZE)"
