@@ -13,6 +13,7 @@ import '../../../data/repositories/review_repository.dart';
 import '../../cards/card_editor_screen.dart';
 import '../../profile/character_progress.dart';
 import '../../profile/level_up_overlay.dart';
+import '../../profile/title_unlock_overlay.dart';
 import '../../quest/quest_provider.dart';
 import '../../review/study_queue.dart';
 import '../../stats/card_stats_provider.dart';
@@ -200,11 +201,41 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
       _saving = false;
     });
 
-    // Detectar level-up: re-leer characterProgress y comparar
+    // Detectar level-up + title-up por mazo
     if (beforeProgress != null) {
       try {
         final after = await ref.read(characterProgressProvider.future);
         if (!mounted) return;
+        // Title-up: rango del mazo de esta card
+        final beforeDeck = beforeProgress.decks.firstWhere(
+          (d) => d.deckId == widget.card.deckId,
+          orElse: () => DeckProgress(
+            deckId: widget.card.deckId,
+            name: widget.card.deck,
+            iconName: widget.card.deckIconName,
+            colorHex: '',
+            reviews: 0,
+            correct: 0,
+            level: 1,
+            rank: DeckRank.none,
+          ),
+        );
+        final afterDeck = after.decks.firstWhere(
+          (d) => d.deckId == widget.card.deckId,
+          orElse: () => beforeDeck,
+        );
+        if (afterDeck.rank.index > beforeDeck.rank.index) {
+          // ignore: use_build_context_synchronously
+          TitleUnlockOverlay.show(
+            context,
+            deckName: afterDeck.name,
+            newRank: afterDeck.rank,
+            accent: widget.card.deckColor,
+          );
+          // Pequeño delay para no superponer con level-up
+          await Future.delayed(const Duration(milliseconds: 2900));
+          if (!mounted) return;
+        }
         if (after.level > beforeProgress.level) {
           LevelUpOverlay.show(
             // ignore: use_build_context_synchronously

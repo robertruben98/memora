@@ -7,6 +7,7 @@ import '../../data/repositories/deck_repository.dart';
 import '../../data/repositories/review_repository.dart';
 import '../profile/character_progress.dart';
 import '../profile/level_up_overlay.dart';
+import '../profile/title_unlock_overlay.dart';
 import '../quest/quest_provider.dart';
 import 'feed_session_notifier.dart';
 import 'study_queue.dart';
@@ -99,6 +100,34 @@ class _ActiveFeedState extends ConsumerState<_ActiveFeed> {
     if (beforeProgress != null) {
       try {
         final after = await ref.read(characterProgressProvider.future);
+        if (!context.mounted) return;
+        // Title-up del mazo de la card actual
+        final beforeDeck = beforeProgress.decks.firstWhere(
+          (d) => d.deckId == currentCard.deckId,
+          orElse: () => DeckProgress(
+            deckId: currentCard.deckId,
+            name: currentCard.deck,
+            iconName: currentCard.deckIconName,
+            colorHex: '',
+            reviews: 0,
+            correct: 0,
+            level: 1,
+            rank: DeckRank.none,
+          ),
+        );
+        final afterDeck = after.decks.firstWhere(
+          (d) => d.deckId == currentCard.deckId,
+          orElse: () => beforeDeck,
+        );
+        if (afterDeck.rank.index > beforeDeck.rank.index && context.mounted) {
+          TitleUnlockOverlay.show(
+            context,
+            deckName: afterDeck.name,
+            newRank: afterDeck.rank,
+            accent: currentCard.deckColor,
+          );
+          await Future.delayed(const Duration(milliseconds: 2900));
+        }
         if (after.level > beforeProgress.level && context.mounted) {
           LevelUpOverlay.show(
             context,

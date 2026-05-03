@@ -57,6 +57,7 @@ class DeckProgress {
   final int reviews;
   final int correct;
   final int level;
+  final DeckRank rank;
 
   const DeckProgress({
     required this.deckId,
@@ -66,9 +67,39 @@ class DeckProgress {
     required this.reviews,
     required this.correct,
     required this.level,
+    required this.rank,
   });
 
   double get hitRate => reviews == 0 ? 0 : correct / reviews;
+
+  /// Tipo "Maestro de Inglés - Verbos" / "Adepto de Programación".
+  String? get titleLabel {
+    if (rank == DeckRank.none) return null;
+    return '${rank.label} de $name';
+  }
+}
+
+/// Rangos por mazo. Se calculan a partir de aciertos absolutos.
+enum DeckRank {
+  none(0, '—', '⚪'),
+  aprendiz(5, 'Aprendiz', '🌱'),
+  adepto(20, 'Adepto', '⚔️'),
+  experto(60, 'Experto', '🎯'),
+  maestro(150, 'Maestro', '👑'),
+  leyenda(400, 'Leyenda', '🌟');
+
+  final int threshold;
+  final String label;
+  final String emoji;
+  const DeckRank(this.threshold, this.label, this.emoji);
+
+  static DeckRank fromCorrect(int correct) {
+    DeckRank current = DeckRank.none;
+    for (final r in DeckRank.values) {
+      if (correct >= r.threshold) current = r;
+    }
+    return current;
+  }
 }
 
 /// XP curve: cada nivel requiere `100 * N` XP, acumulada `100 * N*(N+1)/2`.
@@ -218,6 +249,7 @@ final characterProgressProvider =
         reviews: entry.value.reviews,
         correct: entry.value.correct,
         level: _levelFromXp(deckXp),
+        rank: DeckRank.fromCorrect(entry.value.correct),
       ),
     );
   }
@@ -233,6 +265,7 @@ final characterProgressProvider =
         reviews: 0,
         correct: 0,
         level: 1,
+        rank: DeckRank.none,
       ),
     );
   }
