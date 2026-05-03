@@ -7,6 +7,7 @@ import 'data/database/database.dart';
 import 'data/seeder.dart';
 import 'data/storage/image_storage.dart';
 import 'features/home/home_screen.dart';
+import 'features/onboarding/onboarding_screen.dart';
 import 'features/settings/settings_repository.dart';
 
 Future<void> main() async {
@@ -29,16 +30,21 @@ Future<void> main() async {
   container.read(studySettingsProvider.notifier).state = loadedStudy;
   container.read(themeModeProvider.notifier).state = loadedTheme;
 
+  final onboardingSeen =
+      await db.settingsDao.getValue('onboarding_seen') == '1';
+
   runApp(
     UncontrolledProviderScope(
       container: container,
-      child: const MemoraApp(),
+      child: MemoraApp(showOnboarding: !onboardingSeen),
     ),
   );
 }
 
 class MemoraApp extends ConsumerWidget {
-  const MemoraApp({super.key});
+  final bool showOnboarding;
+
+  const MemoraApp({super.key, this.showOnboarding = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -68,7 +74,7 @@ class MemoraApp extends ConsumerWidget {
         useMaterial3: true,
         colorScheme: lightScheme,
       ),
-      home: const HomeScreen(),
+      home: showOnboarding ? const OnboardingScreen() : const HomeScreen(),
     );
   }
 }
