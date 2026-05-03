@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'dart:io';
+
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+
 import '../../core/models/memora_card.dart';
 import '../../core/theme/deck_visuals.dart';
+import '../../data/api/api_client.dart';
 import '../../data/repositories/card_repository.dart';
 import '../../data/repositories/deck_repository.dart';
 import '../cards/card_editor_screen.dart';
@@ -79,6 +86,7 @@ class _DeckBody extends StatelessWidget {
           expandedHeight: 200,
           pinned: true,
           actions: [
+            _ExportAnkiButton(deckId: deck.id, deckName: deck.name),
             IconButton(
               icon: const Icon(Icons.edit_rounded),
               onPressed: onEditDeck,
@@ -415,6 +423,62 @@ class _EmptyState extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ExportAnkiButton extends ConsumerStatefulWidget {
+  final String deckId;
+  final String deckName;
+
+  const _ExportAnkiButton({required this.deckId, required this.deckName});
+
+  @override
+  ConsumerState<_ExportAnkiButton> createState() => _ExportAnkiButtonState();
+}
+
+class _ExportAnkiButtonState extends ConsumerState<_ExportAnkiButton> {
+  bool _busy = false;
+
+  Future<void> _export() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final api = ref.read(apiClientProvider);
+      final bytes = await api.downloadBytes(
+        '/decks/${widget.deckId}/export.apkg',
+      );
+      final tmp = await getTemporaryDirectory();
+      final safe = widget.deckName.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
+      final file = File(p.join(tmp.path, '$safe.apkg'));
+      await file.writeAsBytes(bytes);
+      if (!mounted) return;
+      await Share.shareXFiles(
+        [XFile(file.path, mimeType: 'application/octet-stream')],
+        subject: 'Mazo Anki: ${widget.deckName}',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al exportar: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: _busy
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.ios_share_rounded),
+      tooltip: 'Exportar a Anki (.apkg)',
+      onPressed: _busy ? null : _export,
     );
   }
 }

@@ -1,11 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/memora_card.dart';
-import '../../../data/storage/image_storage.dart';
+import '../../../core/widgets/memora_image.dart';
 
 class CardPage extends ConsumerStatefulWidget {
   final MemoraCard card;
@@ -34,7 +32,6 @@ class _CardPageState extends ConsumerState<CardPage> {
 
   @override
   Widget build(BuildContext context) {
-    final storage = ref.watch(imageStorageProvider);
     final frontImg = widget.card.frontImagePath;
     final backImg = widget.card.backImagePath;
     return GestureDetector(
@@ -63,19 +60,13 @@ class _CardPageState extends ConsumerState<CardPage> {
                         key: const ValueKey('answered'),
                         front: widget.card.front,
                         back: widget.card.back,
-                        frontImageAbsPath: frontImg == null
-                            ? null
-                            : storage.absolutePathFor(frontImg),
-                        backImageAbsPath: backImg == null
-                            ? null
-                            : storage.absolutePathFor(backImg),
+                        frontImagePath: frontImg,
+                        backImagePath: backImg,
                       )
                     : _QuestionView(
                         key: const ValueKey('question'),
                         front: widget.card.front,
-                        imageAbsPath: frontImg == null
-                            ? null
-                            : storage.absolutePathFor(frontImg),
+                        imagePath: frontImg,
                       ),
               ),
             ),
@@ -129,8 +120,8 @@ class _DeckBadge extends StatelessWidget {
 
 class _QuestionView extends StatelessWidget {
   final String front;
-  final String? imageAbsPath;
-  const _QuestionView({super.key, required this.front, this.imageAbsPath});
+  final String? imagePath;
+  const _QuestionView({super.key, required this.front, this.imagePath});
 
   @override
   Widget build(BuildContext context) {
@@ -139,8 +130,8 @@ class _QuestionView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (imageAbsPath != null) ...[
-              _CardImage(absPath: imageAbsPath!),
+            if (imagePath != null) ...[
+              MemoraImage(path: imagePath!, height: 220, fit: BoxFit.contain),
               const SizedBox(height: 24),
             ],
             Text(
@@ -163,14 +154,14 @@ class _QuestionView extends StatelessWidget {
 class _AnsweredView extends StatelessWidget {
   final String front;
   final String back;
-  final String? frontImageAbsPath;
-  final String? backImageAbsPath;
+  final String? frontImagePath;
+  final String? backImagePath;
   const _AnsweredView({
     super.key,
     required this.front,
     required this.back,
-    this.frontImageAbsPath,
-    this.backImageAbsPath,
+    this.frontImagePath,
+    this.backImagePath,
   });
 
   @override
@@ -198,8 +189,9 @@ class _AnsweredView extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  if (backImageAbsPath != null) ...[
-                    _CardImage(absPath: backImageAbsPath!),
+                  if (backImagePath != null) ...[
+                    MemoraImage(
+                        path: backImagePath!, height: 220, fit: BoxFit.contain),
                     const SizedBox(height: 16),
                   ],
                   Text(
@@ -217,24 +209,6 @@ class _AnsweredView extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _CardImage extends StatelessWidget {
-  final String absPath;
-  const _CardImage({required this.absPath});
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: Image.file(
-        File(absPath),
-        height: 220,
-        fit: BoxFit.contain,
-        errorBuilder: (ctx, _, _) => const SizedBox.shrink(),
-      ),
     );
   }
 }

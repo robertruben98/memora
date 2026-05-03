@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/models/memora_card.dart';
+import '../../core/widgets/memora_image.dart';
+import '../../data/api/api_client.dart';
 import '../../data/repositories/card_repository.dart';
 import '../../data/repositories/deck_repository.dart';
 import '../../data/repositories/review_repository.dart';
@@ -96,27 +98,41 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     }
     if (picked == null) return;
 
-    final storage = ref.read(imageStorageProvider);
-    final cardId = widget.cardToEdit?.id ??
-        'tmp-${DateTime.now().microsecondsSinceEpoch}';
-    final relPath = await storage.saveFromXFile(
-      picked,
-      cardId: cardId,
-      slot: isFront ? 'front' : 'back',
-    );
-
-    // Borrar la anterior si existía (solo cuando reemplazas)
-    final previous = isFront ? _frontImagePath : _backImagePath;
-    if (previous != null && previous != relPath) {
-      await storage.delete(previous);
+    setState(() => _saving = true);
+    String? remotePath;
+    try {
+      // Sube al servidor; el server devuelve "/images/abc.jpg".
+      final api = ref.read(apiClientProvider);
+      final res = await api.uploadImage(File(picked.path));
+      remotePath = res['path'] as String;
+    } catch (e) {
+      // Fallback offline: guarda en local.
+      if (!mounted) return;
+      final storage = ref.read(imageStorageProvider);
+      final cardId = widget.cardToEdit?.id ??
+          'tmp-${DateTime.now().microsecondsSinceEpoch}';
+      remotePath = await storage.saveFromXFile(
+        picked,
+        cardId: cardId,
+        slot: isFront ? 'front' : 'back',
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sin conexión: imagen guardada solo en local'),
+          ),
+        );
+      }
     }
 
+    if (!mounted) return;
     setState(() {
       if (isFront) {
-        _frontImagePath = relPath;
+        _frontImagePath = remotePath;
       } else {
-        _backImagePath = relPath;
+        _backImagePath = remotePath;
       }
+      _saving = false;
     });
   }
 
@@ -218,8 +234,12 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
 
     setState(() => _saving = true);
     final storage = ref.read(imageStorageProvider);
-    if (_frontImagePath != null) await storage.delete(_frontImagePath);
-    if (_backImagePath != null) await storage.delete(_backImagePath);
+    if (_frontImagePath != null && !_frontImagePath!.startsWith('/')) {
+      await storage.delete(_frontImagePath);
+    }
+    if (_backImagePath != null && !_backImagePath!.startsWith('/')) {
+      await storage.delete(_backImagePath);
+    }
     await ref.read(cardRepositoryProvider).deleteCard(widget.cardToEdit!.id);
     ref.invalidate(allCardsProvider);
     ref.invalidate(deckSummariesProvider);
@@ -333,28 +353,11 @@ class _ImagePickerRow extends StatelessWidget {
         ),
       );
     }
-    final abs = storage.absolutePathFor(path!);
     return Stack(
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.file(
-            File(abs),
-            height: 160,
-            width: double.infinity,
-            fit: BoxFit.cover,
-            errorBuilder: (ctx, _, _) => Container(
-              height: 160,
-              color: const Color(0xFF1A1A22),
-              alignment: Alignment.center,
-              child: Text(
-                'Imagen no disponible',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.5),
-                ),
-              ),
-            ),
-          ),
+        SizedBox(
+          width: double.infinity,
+          child: MemoraImage(path: path!, height: 160),
         ),
         Positioned(
           top: 8,

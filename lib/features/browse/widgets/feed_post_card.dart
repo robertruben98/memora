@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,11 +5,11 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../core/models/memora_card.dart';
 import '../../../core/theme/deck_visuals.dart';
+import '../../../core/widgets/memora_image.dart';
 import '../../../data/database/database.dart';
 import '../../../data/repositories/card_repository.dart';
 import '../../../data/repositories/deck_repository.dart';
 import '../../../data/repositories/review_repository.dart';
-import '../../../data/storage/image_storage.dart';
 import '../../cards/card_editor_screen.dart';
 import '../../profile/character_progress.dart';
 import '../../profile/level_up_overlay.dart';
@@ -222,7 +220,6 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
   @override
   Widget build(BuildContext context) {
     final c = widget.card;
-    final storage = ref.watch(imageStorageProvider);
     final frontImg = c.frontImagePath;
     final backImg = c.backImagePath;
     return Container(
@@ -278,14 +275,12 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
                             key: const ValueKey('question'),
                             card: c,
                             frontImagePath: frontImg,
-                            storage: storage,
                           )
                         : _AnswerBlock(
                             key: const ValueKey('answer'),
                             card: c,
                             backImagePath: backImg,
                             frontImagePath: frontImg,
-                            storage: storage,
                           ),
                   ),
                 ),
@@ -546,13 +541,11 @@ class _Header extends ConsumerWidget {
 class _QuestionBlock extends StatelessWidget {
   final MemoraCard card;
   final String? frontImagePath;
-  final ImageStorage storage;
 
   const _QuestionBlock({
     super.key,
     required this.card,
     required this.frontImagePath,
-    required this.storage,
   });
 
   @override
@@ -563,15 +556,7 @@ class _QuestionBlock extends StatelessWidget {
         if (frontImagePath != null)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.file(
-                File(storage.absolutePathFor(frontImagePath!)),
-                height: 220,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => const SizedBox.shrink(),
-              ),
-            ),
+            child: MemoraImage(path: frontImagePath!, height: 220),
           ),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
@@ -602,14 +587,12 @@ class _AnswerBlock extends StatelessWidget {
   final MemoraCard card;
   final String? frontImagePath;
   final String? backImagePath;
-  final ImageStorage storage;
 
   const _AnswerBlock({
     super.key,
     required this.card,
     required this.frontImagePath,
     required this.backImagePath,
-    required this.storage,
   });
 
   @override
@@ -620,15 +603,7 @@ class _AnswerBlock extends StatelessWidget {
         if (frontImagePath != null)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.file(
-                File(storage.absolutePathFor(frontImagePath!)),
-                height: 220,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => const SizedBox.shrink(),
-              ),
-            ),
+            child: MemoraImage(path: frontImagePath!, height: 220),
           ),
         // Caption: deck (bold) + pregunta (color tenue)
         Padding(
@@ -658,15 +633,7 @@ class _AnswerBlock extends StatelessWidget {
         if (backImagePath != null)
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.file(
-                File(storage.absolutePathFor(backImagePath!)),
-                height: 200,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => const SizedBox.shrink(),
-              ),
-            ),
+            child: MemoraImage(path: backImagePath!, height: 200),
           ),
         // Respuesta como párrafo destacado
         Padding(
