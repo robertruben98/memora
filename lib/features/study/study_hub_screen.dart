@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/memora_card.dart';
 import '../../core/theme/deck_visuals.dart';
 import '../../data/repositories/deck_repository.dart';
+import '../learn/learn_methods_screen.dart';
 import '../review/feed_screen.dart';
 import '../review/study_queue.dart';
 
@@ -23,6 +24,15 @@ class StudyHubScreen extends ConsumerWidget {
           'Estudiar',
           style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: -0.4),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.menu_book_rounded),
+            tooltip: 'Aprende a aprender',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const LearnMethodsScreen()),
+            ),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
@@ -42,6 +52,12 @@ class StudyHubScreen extends ConsumerWidget {
             ),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const FeedScreen()),
+            ),
+          ),
+          const SizedBox(height: 14),
+          _LearnMethodsTile(
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const LearnMethodsScreen()),
             ),
           ),
           const SizedBox(height: 28),
@@ -352,6 +368,74 @@ class _DeckQuickRow extends ConsumerWidget {
                     ? const Color(0xFF4FFFB0)
                     : deck.color,
                 size: 22,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LearnMethodsTile extends StatelessWidget {
+  final VoidCallback onTap;
+  const _LearnMethodsTile({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A22),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: const Color(0xFF4FFFB0).withValues(alpha: 0.35),
+            ),
+          ),
+          padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4FFFB0).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: const Text('📖', style: TextStyle(fontSize: 22)),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Aprende a aprender',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Métodos con evidencia: SRS, recall, Feynman, mnemónicas…',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_rounded,
+                color: const Color(0xFF4FFFB0).withValues(alpha: 0.7),
               ),
             ],
           ),
