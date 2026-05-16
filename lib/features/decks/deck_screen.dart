@@ -447,6 +447,41 @@ class _CardListTile extends ConsumerWidget {
                 },
               ),
               ListTile(
+                leading: const Icon(Icons.copy_rounded),
+                title: const Text('Duplicar'),
+                onTap: () async {
+                  Navigator.of(sheetCtx).pop();
+                  final messenger = ScaffoldMessenger.of(context);
+                  final repo = ref.read(cardRepositoryProvider);
+                  try {
+                    final newId =
+                        'card-${DateTime.now().microsecondsSinceEpoch}';
+                    await repo.createCard(
+                      id: newId,
+                      deckId: card.deckId,
+                      frontText: card.front,
+                      backText: card.back,
+                      frontImagePath: card.frontImagePath,
+                      backImagePath: card.backImagePath,
+                    );
+                    ref.invalidate(allCardsProvider);
+                    ref.invalidate(cardsByDeckProvider(deckId));
+                    messenger.hideCurrentSnackBar();
+                    messenger.showSnackBar(
+                      const SnackBar(content: Text('Tarjeta duplicada')),
+                    );
+                  } catch (_) {
+                    messenger.hideCurrentSnackBar();
+                    messenger.showSnackBar(
+                      const SnackBar(
+                        content: Text('No se pudo duplicar'),
+                        backgroundColor: Color(0xFFFF4F6B),
+                      ),
+                    );
+                  }
+                },
+              ),
+              ListTile(
                 leading: const Icon(
                   Icons.delete_outline_rounded,
                   color: Color(0xFFFF4F6B),
