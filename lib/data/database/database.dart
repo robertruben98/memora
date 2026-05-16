@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -21,6 +22,11 @@ part 'database.g.dart';
 )
 class MemoraDatabase extends _$MemoraDatabase {
   MemoraDatabase() : super(_openConnection());
+
+  /// Constructor para tests: permite inyectar un `QueryExecutor` arbitrario
+  /// (por ejemplo `NativeDatabase.memory()`).
+  @visibleForTesting
+  MemoraDatabase.forTesting(super.executor);
 
   @override
   int get schemaVersion => 1;
