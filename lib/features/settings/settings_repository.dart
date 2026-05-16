@@ -5,6 +5,7 @@ import '../../core/srs/study_settings.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../data/database/database.dart';
 import '../../data/sync/sync_service.dart';
+import '../home/deck_sort_preference.dart';
 
 class SettingsRepository {
   final MemoraDatabase _db;
@@ -15,6 +16,7 @@ class SettingsRepository {
   static const _kNewCardsPerDay = 'new_cards_per_day';
   static const _kMaxReviewsPerDay = 'max_reviews_per_day';
   static const _kThemeMode = 'theme_mode';
+  static const _kDeckSortOption = 'deck_sort_option';
 
   Future<StudySettings> loadStudySettings() async {
     final n = await _db.settingsDao.getValue(_kNewCardsPerDay);
@@ -45,6 +47,16 @@ class SettingsRepository {
     final v = themeModeToString(m);
     await _sync.putSetting(_kThemeMode, v);
     await _db.settingsDao.setValue(_kThemeMode, v);
+  }
+
+  Future<DeckSortOption> loadDeckSortOption() async {
+    final v = await _db.settingsDao.getValue(_kDeckSortOption);
+    return deckSortOptionFromString(v);
+  }
+
+  Future<void> saveDeckSortOption(DeckSortOption o) async {
+    final v = deckSortOptionToString(o);
+    await _db.settingsDao.setValue(_kDeckSortOption, v);
   }
 
   /// Borra todos los `card_schedules` y `review_logs`. Las tarjetas quedan.

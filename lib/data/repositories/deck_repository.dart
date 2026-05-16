@@ -108,6 +108,7 @@ class DeckRepository {
           dueCount: cards.length,
           totalCount: cards.length,
           cards: cards,
+          createdAt: d.createdAt,
         ),
       );
     }
