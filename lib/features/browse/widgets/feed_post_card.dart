@@ -4,19 +4,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/models/memora_card.dart';
-import '../../../core/theme/deck_visuals.dart';
-import '../../../core/widgets/memora_image.dart';
-import '../../../data/database/database.dart';
-import '../../../data/repositories/card_repository.dart';
 import '../../../data/repositories/review_repository.dart';
-import '../../cards/card_editor_screen.dart';
-import '../../profile/character_progress.dart';
-import '../../profile/level_up_overlay.dart';
-import '../../profile/title_unlock_overlay.dart';
+import '../../review/review_completion_handler.dart';
 import '../../review/review_invalidation.dart';
-import '../../stats/card_stats_provider.dart';
+import 'feed_post_actions.dart';
+import 'feed_post_content.dart';
+import 'feed_post_header.dart';
+import 'feed_post_more_menu.dart';
+import 'feed_post_overlays.dart';
 
 /// Tarjeta tipo "post de Instagram" para el feed scrollable.
+///
+/// Composicion de sub-widgets (todos en `lib/features/browse/widgets/`):
+///   - `FeedPostHeader`: avatar + deck + estado SRS + menu "...".
+///   - `FeedPostContent`: pregunta/respuesta con `AnimatedSwitcher`.
+///   - `FeedPostActions`: heart, broken-heart, share, bookmark.
+///   - `FeedDoubleTapHeart`, `FeedPostStatsLine`, `FeedAnsweredPill`:
+///     piezas auxiliares.
+///   - `FeedPostMoreMenu`: bottom sheet de "editar/eliminar".
+///
+/// La logica de level-up + title-up se delega en
+/// `ReviewCompletionHandler` (en `features/review/`).
 class FeedPostCard extends ConsumerStatefulWidget {
   final MemoraCard card;
 
@@ -82,87 +90,6 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
     await Share.share(text, subject: c.deck);
   }
 
-  void _showMoreMenu(BuildContext context) {
-    final c = widget.card;
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: const Color(0xFF1A1A22),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetCtx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(top: 8, bottom: 4),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.edit_rounded),
-              title: const Text('Editar tarjeta'),
-              onTap: () {
-                Navigator.of(sheetCtx).pop();
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => CardEditorScreen(
-                      deckId: c.deckId,
-                      cardToEdit: c,
-                    ),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(
-                Icons.delete_outline_rounded,
-                color: Color(0xFFFF4F6B),
-              ),
-              title: const Text(
-                'Eliminar tarjeta',
-                style: TextStyle(color: Color(0xFFFF4F6B)),
-              ),
-              onTap: () async {
-                Navigator.of(sheetCtx).pop();
-                final ok = await showDialog<bool>(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    backgroundColor: const Color(0xFF1A1A22),
-                    title: const Text('Eliminar tarjeta'),
-                    content: const Text('Esta acción no se puede deshacer.'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(false),
-                        child: const Text('Cancelar'),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        style: TextButton.styleFrom(
-                          foregroundColor: const Color(0xFFFF4F6B),
-                        ),
-                        child: const Text('Eliminar'),
-                      ),
-                    ],
-                  ),
-                );
-                if (ok == true) {
-                  await ref.read(cardRepositoryProvider).deleteCard(c.id);
-                  invalidateAfterCardChange(ref);
-                }
-              },
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
-  }
-
   Future<void> _answer(bool correct) async {
     if (_answered || _saving) return;
     HapticFeedback.mediumImpact();
@@ -173,10 +100,8 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
       _saving = true;
       _wasCorrect = correct;
     });
-    // Snapshot del nivel antes para detectar level-up
-    final beforeProgress = ref
-        .read(characterProgressProvider)
-        .maybeWhen(data: (p) => p, orElse: () => null);
+    final completion = ReviewCompletionHandler(ref);
+    final beforeProgress = completion.snapshotBefore();
     await ref.read(reviewRepositoryProvider).recordReview(
           cardId: widget.card.id,
           correct: correct,
@@ -188,59 +113,17 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
       _answered = true;
       _saving = false;
     });
-
-    // Detectar level-up + title-up por mazo
-    if (beforeProgress != null) {
-      try {
-        final after = await ref.read(characterProgressProvider.future);
-        if (!mounted) return;
-        // Title-up: rango del mazo de esta card
-        final beforeDeck = beforeProgress.decks.firstWhere(
-          (d) => d.deckId == widget.card.deckId,
-          orElse: () => DeckProgress(
-            deckId: widget.card.deckId,
-            name: widget.card.deck,
-            iconName: widget.card.deckIconName,
-            colorHex: '',
-            reviews: 0,
-            correct: 0,
-            level: 1,
-            rank: DeckRank.none,
-          ),
-        );
-        final afterDeck = after.decks.firstWhere(
-          (d) => d.deckId == widget.card.deckId,
-          orElse: () => beforeDeck,
-        );
-        if (afterDeck.rank.index > beforeDeck.rank.index) {
-          // ignore: use_build_context_synchronously
-          TitleUnlockOverlay.show(
-            context,
-            deckName: afterDeck.name,
-            newRank: afterDeck.rank,
-            accent: widget.card.deckColor,
-          );
-          // Pequeño delay para no superponer con level-up
-          await Future.delayed(const Duration(milliseconds: 2900));
-          if (!mounted) return;
-        }
-        if (after.level > beforeProgress.level) {
-          LevelUpOverlay.show(
-            // ignore: use_build_context_synchronously
-            context,
-            newLevel: after.level,
-            title: after.title != beforeProgress.title ? after.title : null,
-          );
-        }
-      } catch (_) {}
-    }
+    await completion.handleAfter(
+      context: context,
+      beforeProgress: beforeProgress,
+      card: widget.card,
+      isMounted: () => mounted,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final c = widget.card;
-    final frontImg = c.frontImagePath;
-    final backImg = c.backImagePath;
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       decoration: BoxDecoration(
@@ -266,9 +149,13 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _Header(
+          FeedPostHeader(
             card: c,
-            onMore: () => _showMoreMenu(context),
+            onMore: () => FeedPostMoreMenu.show(
+              context: context,
+              ref: ref,
+              card: c,
+            ),
           ),
           GestureDetector(
             onTap: (_revealed || _answered) ? null : _reveal,
@@ -277,79 +164,22 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
             child: Stack(
               alignment: Alignment.center,
               children: [
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeOutCubic,
-                  alignment: Alignment.topCenter,
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 250),
-                    switchInCurve: Curves.easeOutCubic,
-                    switchOutCurve: Curves.easeInCubic,
-                    transitionBuilder: (child, anim) => FadeTransition(
-                      opacity: anim,
-                      child: child,
-                    ),
-                    child: !_revealed
-                        ? _QuestionBlock(
-                            key: const ValueKey('question'),
-                            card: c,
-                            frontImagePath: frontImg,
-                          )
-                        : _AnswerBlock(
-                            key: const ValueKey('answer'),
-                            card: c,
-                            backImagePath: backImg,
-                            frontImagePath: frontImg,
-                          ),
-                  ),
+                FeedPostContent(
+                  card: c,
+                  revealed: _revealed,
+                  frontImagePath: c.frontImagePath,
+                  backImagePath: c.backImagePath,
                 ),
                 IgnorePointer(
                   child: AnimatedBuilder(
                     animation: _heartOverlay,
-                    builder: (ctx, _) {
-                      final t = _heartOverlay.value;
-                      if (t == 0) return const SizedBox.shrink();
-                      // Fase 1 (0..0.35): scale 0 -> 1.2, opacidad 0 -> 1
-                      // Fase 2 (0.35..0.6): scale 1.2 -> 1.0, opacidad 1
-                      // Fase 3 (0.6..1): scale 1.0 -> 0.95, opacidad 1 -> 0
-                      final double scale;
-                      final double opacity;
-                      if (t < 0.35) {
-                        final p = t / 0.35;
-                        scale = Curves.easeOutBack.transform(p) * 1.2;
-                        opacity = (p * 1.2).clamp(0.0, 1.0);
-                      } else if (t < 0.6) {
-                        scale = 1.2 - (t - 0.35) / 0.25 * 0.2;
-                        opacity = 1.0;
-                      } else {
-                        scale = 1.0 - (t - 0.6) / 0.4 * 0.05;
-                        opacity = 1.0 - (t - 0.6) / 0.4;
-                      }
-                      return Opacity(
-                        opacity: opacity.clamp(0.0, 1.0),
-                        child: Transform.scale(
-                          scale: scale.clamp(0.0, 2.0),
-                          child: Icon(
-                            Icons.favorite_rounded,
-                            size: 110,
-                            color: Colors.white.withValues(alpha: 0.92),
-                            shadows: [
-                              Shadow(
-                                color: Colors.black.withValues(alpha: 0.5),
-                                blurRadius: 18,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+                    builder: (ctx, _) => FeedDoubleTapHeart(t: _heartOverlay.value),
                   ),
                 ),
               ],
             ),
           ),
-          _ActionRow(
+          FeedPostActions(
             answered: _answered,
             wasCorrect: _wasCorrect,
             bookmarked: _bookmarked,
@@ -376,423 +206,15 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
                 ),
               ),
             ),
-          _StatsLine(cardId: widget.card.id),
+          FeedPostStatsLine(cardId: widget.card.id),
           if (_answered)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-              child: _AnsweredPill(correct: _wasCorrect == true),
+              child: FeedAnsweredPill(correct: _wasCorrect == true),
             )
           else
             const SizedBox(height: 10),
         ],
-      ),
-    );
-  }
-}
-
-class _StatsLine extends ConsumerWidget {
-  final String cardId;
-
-  const _StatsLine({required this.cardId});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final statsAsync = ref.watch(cardStatsProvider);
-    final stats = statsAsync.maybeWhen(
-      data: (m) => m[cardId],
-      orElse: () => null,
-    );
-    if (stats == null || !stats.hasReviews) {
-      return const SizedBox(height: 4);
-    }
-    final relTime = formatRelativeTime(stats.lastReviewMs);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 4),
-      child: Text(
-        '${stats.correct} aciertos · ${stats.total} intentos · última $relTime',
-        style: TextStyle(
-          fontSize: 12,
-          color: Colors.white.withValues(alpha: 0.45),
-        ),
-      ),
-    );
-  }
-}
-
-class _AnsweredPill extends StatelessWidget {
-  final bool correct;
-
-  const _AnsweredPill({required this.correct});
-
-  @override
-  Widget build(BuildContext context) {
-    final color =
-        correct ? const Color(0xFF4FFFB0) : const Color(0xFFFF4F6B);
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.13),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            correct ? Icons.check_circle_rounded : Icons.cancel_rounded,
-            color: color,
-            size: 16,
-          ),
-          const SizedBox(width: 6),
-          Text(
-            correct ? 'Marcada como acertada' : 'Marcada como fallada',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Header extends ConsumerWidget {
-  final MemoraCard card;
-  final VoidCallback onMore;
-
-  const _Header({required this.card, required this.onMore});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final schedulesAsync = ref.watch(allCardSchedulesProvider);
-    final schedule = schedulesAsync.maybeWhen(
-      data: (m) => m[card.id],
-      orElse: () => null,
-    );
-    final stateLabel = _stateLabelFor(schedule);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 10, 6, 10),
-      child: Row(
-        children: [
-          // Avatar circular con anillo gradient + icono del mazo
-          Container(
-            width: 40,
-            height: 40,
-            padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [
-                  card.deckColor,
-                  card.deckColor.withValues(alpha: 0.5),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-            child: Container(
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFF1A1A22),
-              ),
-              child: Center(
-                child: Icon(
-                  DeckVisuals.iconFor(card.deckIconName),
-                  color: card.deckColor,
-                  size: 20,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  card.deck,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  stateLabel,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.white.withValues(alpha: 0.5),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.more_vert_rounded, size: 22),
-            color: Colors.white.withValues(alpha: 0.7),
-            onPressed: onMore,
-            tooltip: 'Más',
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _stateLabelFor(CardScheduleRow? s) {
-    if (s == null || s.state == 'new') return 'Nueva';
-    if (s.state == 'learning') return 'Aprendiendo';
-    final now = DateTime.now();
-    final next = DateTime.fromMillisecondsSinceEpoch(s.nextReviewDate);
-    final today = DateTime(now.year, now.month, now.day);
-    final nextDay = DateTime(next.year, next.month, next.day);
-    final diffDays = nextDay.difference(today).inDays;
-    if (diffDays <= 0) return 'Due ahora';
-    if (diffDays == 1) return 'Due mañana';
-    if (diffDays < 7) return 'En $diffDays días';
-    final weeks = (diffDays / 7).round();
-    return weeks == 1 ? 'En 1 semana' : 'En $weeks semanas';
-  }
-}
-
-class _QuestionBlock extends StatelessWidget {
-  final MemoraCard card;
-  final String? frontImagePath;
-
-  const _QuestionBlock({
-    super.key,
-    required this.card,
-    required this.frontImagePath,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (frontImagePath != null)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            child: MemoraImage(path: frontImagePath!, height: 220),
-          ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-          child: Text.rich(
-            TextSpan(
-              style: const TextStyle(
-                fontSize: 15,
-                height: 1.45,
-                color: Colors.white,
-              ),
-              children: [
-                TextSpan(
-                  text: card.deck,
-                  style: const TextStyle(fontWeight: FontWeight.w800),
-                ),
-                const TextSpan(text: '  '),
-                TextSpan(text: card.front),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _AnswerBlock extends StatelessWidget {
-  final MemoraCard card;
-  final String? frontImagePath;
-  final String? backImagePath;
-
-  const _AnswerBlock({
-    super.key,
-    required this.card,
-    required this.frontImagePath,
-    required this.backImagePath,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (frontImagePath != null)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            child: MemoraImage(path: frontImagePath!, height: 220),
-          ),
-        // Caption: deck (bold) + pregunta (color tenue)
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-          child: Text.rich(
-            TextSpan(
-              style: TextStyle(
-                fontSize: 14,
-                height: 1.45,
-                color: Colors.white.withValues(alpha: 0.65),
-              ),
-              children: [
-                TextSpan(
-                  text: card.deck,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                  ),
-                ),
-                const TextSpan(text: '  '),
-                TextSpan(text: card.front),
-              ],
-            ),
-          ),
-        ),
-        // Imagen de respuesta si existe
-        if (backImagePath != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
-            child: MemoraImage(path: backImagePath!, height: 200),
-          ),
-        // Respuesta como párrafo destacado
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 6, 16, 2),
-          child: Text(
-            card.back,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              height: 1.45,
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Fila de acciones estilo Instagram: heart (acerté), X (fallé),
-/// bookmark, share, y a la derecha el estado SRS pill cuando ya fue contestada.
-class _ActionRow extends StatelessWidget {
-  final bool answered;
-  final bool? wasCorrect;
-  final bool bookmarked;
-  final bool saving;
-  final AnimationController heartAnim;
-  final AnimationController bookmarkAnim;
-  final VoidCallback onCorrect;
-  final VoidCallback onIncorrect;
-  final VoidCallback onBookmark;
-  final VoidCallback onShare;
-
-  const _ActionRow({
-    required this.answered,
-    required this.wasCorrect,
-    required this.bookmarked,
-    required this.saving,
-    required this.heartAnim,
-    required this.bookmarkAnim,
-    required this.onCorrect,
-    required this.onIncorrect,
-    required this.onBookmark,
-    required this.onShare,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final liked = answered && wasCorrect == true;
-    final disliked = answered && wasCorrect == false;
-    final disabled = saving;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 6, 8, 4),
-      child: Row(
-        children: [
-          // Heart (Acerté)
-          ScaleTransition(
-            scale: Tween<double>(begin: 1.0, end: 1.35).animate(
-              CurvedAnimation(
-                parent: heartAnim,
-                curve: Curves.elasticOut,
-              ),
-            ),
-            child: _IconAction(
-              icon: liked ? Icons.favorite_rounded : Icons.favorite_outline,
-              color: liked ? const Color(0xFFFF4F6B) : Colors.white,
-              onTap: disabled || answered ? null : onCorrect,
-              tooltip: 'Acerté',
-            ),
-          ),
-          // X (No acerté) — estilo "broken heart" como Instagram
-          _IconAction(
-            icon: disliked
-                ? Icons.heart_broken_rounded
-                : Icons.close_rounded,
-            color: disliked ? const Color(0xFFFF4F6B) : Colors.white,
-            onTap: disabled || answered ? null : onIncorrect,
-            tooltip: 'No acerté',
-          ),
-          // Share
-          _IconAction(
-            icon: Icons.send_rounded,
-            color: Colors.white,
-            onTap: onShare,
-            tooltip: 'Compartir',
-          ),
-          const Spacer(),
-          // Bookmark a la derecha (como en IG) con bounce
-          ScaleTransition(
-            scale: Tween<double>(begin: 1.0, end: 1.35).animate(
-              CurvedAnimation(
-                parent: bookmarkAnim,
-                curve: Curves.elasticOut,
-              ),
-            ),
-            child: _IconAction(
-              icon: bookmarked
-                  ? Icons.bookmark_rounded
-                  : Icons.bookmark_border_rounded,
-              color: bookmarked ? const Color(0xFFFFD24F) : Colors.white,
-              onTap: onBookmark,
-              tooltip: bookmarked ? 'Quitar marcador' : 'Guardar',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _IconAction extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final VoidCallback? onTap;
-  final String tooltip;
-
-  const _IconAction({
-    required this.icon,
-    required this.color,
-    required this.onTap,
-    required this.tooltip,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: InkResponse(
-        radius: 24,
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Icon(
-            icon,
-            size: 26,
-            color: onTap == null
-                ? color.withValues(alpha: 0.3)
-                : color.withValues(alpha: 0.92),
-          ),
-        ),
       ),
     );
   }
