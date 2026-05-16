@@ -8,10 +8,9 @@ import '../../core/models/memora_card.dart';
 import '../../core/widgets/memora_image.dart';
 import '../../data/api/api_client.dart';
 import '../../data/repositories/card_repository.dart';
-import '../../data/repositories/deck_repository.dart';
 import '../../data/repositories/review_repository.dart';
 import '../../data/storage/image_storage.dart';
-import '../review/study_queue.dart';
+import '../review/review_invalidation.dart';
 
 class CardEditorScreen extends ConsumerStatefulWidget {
   final String deckId;
@@ -182,11 +181,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
           .read(reviewRepositoryProvider)
           .getOrCreateSchedule(newId, now: DateTime.now());
     }
-    ref.invalidate(allCardsProvider);
-    ref.invalidate(deckSummariesProvider);
-    ref.invalidate(cardsByDeckProvider(widget.deckId));
-    ref.invalidate(studyQueueProvider(widget.deckId));
-    ref.invalidate(studyQueueProvider(null));
+    invalidateAfterCardChange(ref, deckId: widget.deckId);
 
     if (!mounted) return;
     if (createAnother && !_isEditing) {
@@ -241,11 +236,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
       await storage.delete(_backImagePath);
     }
     await ref.read(cardRepositoryProvider).deleteCard(widget.cardToEdit!.id);
-    ref.invalidate(allCardsProvider);
-    ref.invalidate(deckSummariesProvider);
-    ref.invalidate(cardsByDeckProvider(widget.deckId));
-    ref.invalidate(studyQueueProvider(widget.deckId));
-    ref.invalidate(studyQueueProvider(null));
+    invalidateAfterCardChange(ref, deckId: widget.deckId);
 
     if (!mounted) return;
     Navigator.of(context).pop();

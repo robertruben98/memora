@@ -14,6 +14,7 @@ import '../../data/repositories/card_repository.dart';
 import '../../data/repositories/deck_repository.dart';
 import '../cards/card_editor_screen.dart';
 import '../review/feed_screen.dart';
+import '../review/review_invalidation.dart';
 import '../review/study_queue.dart';
 import 'deck_editor_screen.dart';
 
@@ -464,8 +465,7 @@ class _CardListTile extends ConsumerWidget {
                       frontImagePath: card.frontImagePath,
                       backImagePath: card.backImagePath,
                     );
-                    ref.invalidate(allCardsProvider);
-                    ref.invalidate(cardsByDeckProvider(deckId));
+                    invalidateAfterCardChange(ref, deckId: deckId);
                     messenger.hideCurrentSnackBar();
                     messenger.showSnackBar(
                       const SnackBar(content: Text('Tarjeta duplicada')),
@@ -497,8 +497,7 @@ class _CardListTile extends ConsumerWidget {
                   // Snapshot para posible restore
                   final snapshot = card;
                   await repo.deleteCard(snapshot.id);
-                  ref.invalidate(allCardsProvider);
-                  ref.invalidate(cardsByDeckProvider(deckId));
+                  invalidateAfterCardChange(ref, deckId: deckId);
                   messenger.hideCurrentSnackBar();
                   messenger.showSnackBar(
                     SnackBar(
@@ -517,8 +516,7 @@ class _CardListTile extends ConsumerWidget {
                               frontImagePath: snapshot.frontImagePath,
                               backImagePath: snapshot.backImagePath,
                             );
-                            ref.invalidate(allCardsProvider);
-                            ref.invalidate(cardsByDeckProvider(deckId));
+                            invalidateAfterCardChange(ref, deckId: deckId);
                           } catch (_) {
                             messenger.hideCurrentSnackBar();
                             messenger.showSnackBar(
