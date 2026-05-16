@@ -8,16 +8,13 @@ import '../../../core/theme/deck_visuals.dart';
 import '../../../core/widgets/memora_image.dart';
 import '../../../data/database/database.dart';
 import '../../../data/repositories/card_repository.dart';
-import '../../../data/repositories/deck_repository.dart';
 import '../../../data/repositories/review_repository.dart';
 import '../../cards/card_editor_screen.dart';
 import '../../profile/character_progress.dart';
 import '../../profile/level_up_overlay.dart';
 import '../../profile/title_unlock_overlay.dart';
-import '../../quest/quest_provider.dart';
-import '../../review/study_queue.dart';
+import '../../review/review_invalidation.dart';
 import '../../stats/card_stats_provider.dart';
-import '../../stats/stats_repository.dart';
 
 /// Tarjeta tipo "post de Instagram" para el feed scrollable.
 class FeedPostCard extends ConsumerStatefulWidget {
@@ -155,9 +152,7 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
                 );
                 if (ok == true) {
                   await ref.read(cardRepositoryProvider).deleteCard(c.id);
-                  ref.invalidate(allCardsProvider);
-                  ref.invalidate(deckSummariesProvider);
-                  ref.invalidate(allCardSchedulesProvider);
+                  invalidateAfterCardChange(ref);
                 }
               },
             ),
@@ -188,14 +183,7 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
           now: DateTime.now(),
         );
     if (!mounted) return;
-    ref.invalidate(deckSummariesProvider);
-    ref.invalidate(allCardsProvider);
-    ref.invalidate(studyQueueProvider(null));
-    ref.invalidate(statsSnapshotProvider);
-    ref.invalidate(allCardSchedulesProvider);
-    ref.invalidate(cardStatsProvider);
-    ref.invalidate(characterProgressProvider);
-    ref.invalidate(dailyQuestProvider);
+    invalidateAfterReview(ref);
     setState(() {
       _answered = true;
       _saving = false;

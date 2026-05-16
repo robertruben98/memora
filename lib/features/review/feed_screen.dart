@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/repositories/card_repository.dart';
-import '../../data/repositories/deck_repository.dart';
 import '../../data/repositories/review_repository.dart';
 import '../profile/character_progress.dart';
 import '../profile/level_up_overlay.dart';
 import '../profile/title_unlock_overlay.dart';
-import '../quest/quest_provider.dart';
 import 'feed_session_notifier.dart';
+import 'review_invalidation.dart';
 import 'study_queue.dart';
 import 'widgets/card_page.dart';
 
@@ -79,14 +77,7 @@ class _ActiveFeedState extends ConsumerState<_ActiveFeed> {
           now: DateTime.now(),
         );
     if (!context.mounted) return;
-    ref.invalidate(deckSummariesProvider);
-    ref.invalidate(allCardsProvider);
-    ref.invalidate(studyQueueProvider(null));
-    ref.invalidate(characterProgressProvider);
-    ref.invalidate(dailyQuestProvider);
-    if (widget.deckId != null) {
-      ref.invalidate(studyQueueProvider(widget.deckId));
-    }
+    invalidateAfterReview(ref, deckId: widget.deckId);
 
     if (state.isCompleted) {
       if (context.mounted) _showCompletion(context, state);
