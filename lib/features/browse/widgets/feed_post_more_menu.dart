@@ -3,9 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/memora_card.dart';
 import '../../../data/repositories/card_repository.dart';
-import '../../../data/repositories/deck_repository.dart';
-import '../../../data/repositories/review_repository.dart';
 import '../../cards/card_editor_screen.dart';
+import '../../review/review_invalidation.dart';
 
 /// Bottom sheet con acciones de "Editar tarjeta" y "Eliminar tarjeta".
 class FeedPostMoreMenu {
@@ -84,9 +83,7 @@ class FeedPostMoreMenu {
                 );
                 if (ok == true) {
                   await ref.read(cardRepositoryProvider).deleteCard(card.id);
-                  ref.invalidate(allCardsProvider);
-                  ref.invalidate(deckSummariesProvider);
-                  ref.invalidate(allCardSchedulesProvider);
+                  invalidateAfterCardChange(ref);
                 }
               },
             ),
