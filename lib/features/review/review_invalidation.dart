@@ -32,12 +32,27 @@ void invalidateAfterReview(WidgetRef ref, {String? deckId}) {
 }
 
 /// Invalida providers tras una operacion de cambio de tarjeta
-/// (crear/editar/eliminar) que no es un review.
+/// (crear/editar/eliminar/duplicar/restore) que no es un review.
 ///
 /// Es un subconjunto de [invalidateAfterReview]: solo afecta a la
-/// estructura de tarjetas y schedules, sin tocar stats/progreso/quest.
-void invalidateAfterCardChange(WidgetRef ref) {
+/// estructura de tarjetas, schedules y colas de estudio, sin tocar
+/// stats/progreso/quest.
+///
+/// [deckId] es opcional: si se proporciona, se invalida tambien
+/// `cardsByDeckProvider(deckId)` y `studyQueueProvider(deckId)`. La
+/// cola global `studyQueueProvider(null)` siempre se invalida porque
+/// cualquier cambio en cards puede afectar el feed agregado.
+///
+/// IMPORTANTE: este es el unico punto de cambio para nuevos providers
+/// dependientes de operaciones CRUD de tarjetas. No duplicar bloques
+/// `ref.invalidate(...)` en pantallas; extender este helper.
+void invalidateAfterCardChange(WidgetRef ref, {String? deckId}) {
   ref.invalidate(allCardsProvider);
   ref.invalidate(deckSummariesProvider);
   ref.invalidate(allCardSchedulesProvider);
+  ref.invalidate(studyQueueProvider(null));
+  if (deckId != null) {
+    ref.invalidate(cardsByDeckProvider(deckId));
+    ref.invalidate(studyQueueProvider(deckId));
+  }
 }
