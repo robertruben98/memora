@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/logging/app_logger.dart';
 import '../../data/api/api_client.dart';
 import '../../data/sync/sync_service.dart';
 import 'auth_state.dart';
@@ -63,8 +64,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 : 'Error ${e.statusCode}';
       });
     } catch (e, st) {
-      // ignore: avoid_print
-      print('Auth error: $e\n$st');
+      appLogger.warn('auth', 'Auth error', error: e, stackTrace: st);
       setState(() {
         _busy = false;
         _error = 'Error: $e\n${st.toString().split('\n').take(3).join('\n')}';

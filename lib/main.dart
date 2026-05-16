@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/logging/app_logger.dart';
 import 'core/srs/study_settings.dart';
 import 'core/theme/theme_provider.dart';
 import 'data/api/api_client.dart';
@@ -41,9 +42,13 @@ Future<void> main() async {
   // Si falla la red, seguimos con lo que haya en local.
   try {
     await container.read(syncServiceProvider).bootstrapFromServer();
-  } catch (e) {
-    // ignore: avoid_print
-    print('Sync bootstrap failed (offline?): $e');
+  } catch (e, st) {
+    appLogger.warn(
+      'sync',
+      'Sync bootstrap failed (offline?)',
+      error: e,
+      stackTrace: st,
+    );
   }
 
   // Cargar settings persistidos en estado.
