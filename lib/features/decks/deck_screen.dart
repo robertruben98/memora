@@ -457,11 +457,38 @@ class _CardListTile extends ConsumerWidget {
                 ),
                 onTap: () async {
                   Navigator.of(sheetCtx).pop();
-                  await ref
-                      .read(cardRepositoryProvider)
-                      .deleteCard(card.id);
+                  final messenger = ScaffoldMessenger.of(context);
+                  final repo = ref.read(cardRepositoryProvider);
+                  final snapshot = card;
+                  await repo.deleteCard(snapshot.id);
                   ref.invalidate(allCardsProvider);
                   ref.invalidate(cardsByDeckProvider(deckId));
+                  messenger.hideCurrentSnackBar();
+                  messenger.showSnackBar(
+                    SnackBar(
+                      content: const Text('Tarjeta eliminada'),
+                      duration: const Duration(seconds: 5),
+                      action: SnackBarAction(
+                        label: 'Deshacer',
+                        textColor: const Color(0xFF7C5CFF),
+                        onPressed: () async {
+                          try {
+                            await repo.restoreCard(snapshot);
+                            ref.invalidate(allCardsProvider);
+                            ref.invalidate(cardsByDeckProvider(deckId));
+                          } catch (_) {
+                            messenger.hideCurrentSnackBar();
+                            messenger.showSnackBar(
+                              const SnackBar(
+                                content: Text('No se pudo restaurar'),
+                                backgroundColor: Color(0xFFFF4F6B),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  );
                 },
               ),
             ],

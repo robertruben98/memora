@@ -120,6 +120,19 @@ class CardRepository {
     await _sync.deleteCard(id);
     await _cardDao.deleteCard(id);
   }
+
+  /// Restaura una tarjeta previamente eliminada (soft delete con undo).
+  /// Reutiliza createCard, que ya hace upsert tanto en remoto como en BD local.
+  Future<void> restoreCard(MemoraCard card) async {
+    await createCard(
+      id: card.id,
+      deckId: card.deckId,
+      frontText: card.front,
+      backText: card.back,
+      frontImagePath: card.frontImagePath,
+      backImagePath: card.backImagePath,
+    );
+  }
 }
 
 Color _parseColor(String hex) {
