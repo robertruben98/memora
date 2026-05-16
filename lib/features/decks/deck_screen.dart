@@ -65,7 +65,7 @@ class DeckScreen extends ConsumerWidget {
   }
 }
 
-class _DeckBody extends StatelessWidget {
+class _DeckBody extends StatefulWidget {
   final DeckSummary deck;
   final List<MemoraCard> cards;
   final VoidCallback onEditDeck;
@@ -77,7 +77,45 @@ class _DeckBody extends StatelessWidget {
   });
 
   @override
+  State<_DeckBody> createState() => _DeckBodyState();
+}
+
+class _DeckBodyState extends State<_DeckBody> {
+  late final TextEditingController _searchController;
+  String _query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<MemoraCard> get _filteredCards {
+    if (_query.isEmpty) return widget.cards;
+    final q = _query.toLowerCase();
+    return widget.cards
+        .where((c) =>
+            c.front.toLowerCase().contains(q) ||
+            c.back.toLowerCase().contains(q))
+        .toList();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final deck = widget.deck;
+    final cards = widget.cards;
+    final filtered = _filteredCards;
+    final hasQuery = _query.isNotEmpty;
+    final countLabel = hasQuery
+        ? 'Tarjetas (${filtered.length}/${cards.length})'
+        : 'Tarjetas (${cards.length})';
+
     return CustomScrollView(
       slivers: [
         SliverAppBar(
@@ -89,7 +127,7 @@ class _DeckBody extends StatelessWidget {
             _ExportAnkiButton(deckId: deck.id, deckName: deck.name),
             IconButton(
               icon: const Icon(Icons.edit_rounded),
-              onPressed: onEditDeck,
+              onPressed: widget.onEditDeck,
               tooltip: 'Editar mazo',
             ),
           ],
@@ -137,11 +175,40 @@ class _DeckBody extends StatelessWidget {
                     );
                   },
                 ),
+                if (cards.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _searchController,
+                    onChanged: (v) => setState(() => _query = v),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      hintText: 'Buscar tarjeta...',
+                      prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                      suffixIcon: hasQuery
+                          ? IconButton(
+                              icon: const Icon(Icons.close_rounded, size: 18),
+                              tooltip: 'Limpiar busqueda',
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() => _query = '');
+                              },
+                            )
+                          : null,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 24),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Tarjetas (${cards.length})',
+                    countLabel,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -157,14 +224,31 @@ class _DeckBody extends StatelessWidget {
             hasScrollBody: false,
             child: _EmptyState(),
           )
+        else if (filtered.isEmpty)
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  "Sin coincidencias para '$_query'",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white.withValues(alpha: 0.55),
+                  ),
+                ),
+              ),
+            ),
+          )
         else
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
             sliver: SliverList.separated(
-              itemCount: cards.length,
+              itemCount: filtered.length,
               separatorBuilder: (_, _) => const SizedBox(height: 8),
               itemBuilder: (context, i) {
-                final card = cards[i];
+                final card = filtered[i];
                 return _CardListTile(
                   card: card,
                   deckId: deck.id,
