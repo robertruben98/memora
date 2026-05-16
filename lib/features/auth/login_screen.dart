@@ -62,10 +62,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ? 'Email ya registrado'
                 : 'Error ${e.statusCode}';
       });
-    } catch (e) {
+    } catch (e, st) {
+      // ignore: avoid_print
+      print('Auth error: $e\n$st');
       setState(() {
         _busy = false;
-        _error = 'Error: $e';
+        _error = 'Error: $e\n${st.toString().split('\n').take(3).join('\n')}';
       });
     }
   }
