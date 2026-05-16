@@ -10,6 +10,7 @@ import '../decks/deck_screen.dart';
 import '../quest/quest_provider.dart';
 import '../review/feed_screen.dart';
 import '../review/study_queue.dart';
+import 'deck_sort_preference.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -19,6 +20,7 @@ class HomeScreen extends ConsumerWidget {
     final decksAsync = ref.watch(deckSummariesProvider);
     final globalQueueAsync = ref.watch(studyQueueProvider(null));
     final questAsync = ref.watch(dailyQuestProvider);
+    final sortOption = ref.watch(deckSortProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -31,6 +33,37 @@ class HomeScreen extends ConsumerWidget {
             letterSpacing: -0.4,
           ),
         ),
+        actions: [
+          PopupMenuButton<DeckSortOption>(
+            icon: const Icon(Icons.sort_rounded),
+            tooltip: 'Ordenar mazos',
+            initialValue: sortOption,
+            onSelected: (o) =>
+                ref.read(deckSortProvider.notifier).setOption(o),
+            itemBuilder: (context) => DeckSortOption.values
+                .map(
+                  (o) => PopupMenuItem<DeckSortOption>(
+                    value: o,
+                    child: Row(
+                      children: [
+                        Icon(
+                          o == sortOption
+                              ? Icons.check_rounded
+                              : Icons.circle_outlined,
+                          size: 18,
+                          color: o == sortOption
+                              ? const Color(0xFF7C5CFF)
+                              : Colors.white.withValues(alpha: 0.4),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(deckSortOptionLabel(o)),
+                      ],
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+        ],
       ),
       body: decksAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -45,6 +78,7 @@ class HomeScreen extends ConsumerWidget {
               ),
             );
           }
+          final sorted = sortDecks(decks, sortOption);
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
             children: [
@@ -77,7 +111,7 @@ class HomeScreen extends ConsumerWidget {
                     orElse: () => false,
                   ))
                 const SizedBox(height: 16),
-              ...decks.map(
+              ...sorted.map(
                 (deck) => Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: _DeckTile(

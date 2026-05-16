@@ -32,6 +32,7 @@ class DeckSummary {
   final int dueCount;
   final int totalCount;
   final List<MemoraCard> cards;
+  final int createdAt;
 
   const DeckSummary({
     required this.id,
@@ -41,5 +42,6 @@ class DeckSummary {
     required this.dueCount,
     required this.totalCount,
     required this.cards,
+    this.createdAt = 0,
   });
 }
