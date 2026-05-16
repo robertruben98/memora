@@ -18,6 +18,70 @@ import '../review/review_invalidation.dart';
 import '../review/study_queue.dart';
 import 'deck_editor_screen.dart';
 
+/// Borra [card] e invalida los providers de cards. Muestra un `SnackBar`
+/// de 5s con accion "Deshacer" que re-crea la tarjeta con el snapshot
+/// original (mismo id, deckId, textos e imagenes).
+///
+/// Usado tanto por el swipe-to-delete del listado como por la opcion
+/// "Eliminar" del bottom sheet de long-press.
+Future<void> deleteCardWithUndo({
+  required BuildContext context,
+  required WidgetRef ref,
+  required MemoraCard card,
+  required String deckId,
+}) async {
+  final messenger = ScaffoldMessenger.of(context);
+  final repo = ref.read(cardRepositoryProvider);
+  final snapshot = card;
+  try {
+    await repo.deleteCard(snapshot.id);
+  } catch (_) {
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      const SnackBar(
+        content: Text('No se pudo eliminar'),
+        backgroundColor: Color(0xFFFF4F6B),
+      ),
+    );
+    return;
+  }
+  ref.invalidate(allCardsProvider);
+  ref.invalidate(cardsByDeckProvider(deckId));
+  messenger.hideCurrentSnackBar();
+  messenger.showSnackBar(
+    SnackBar(
+      content: const Text('Tarjeta eliminada'),
+      duration: const Duration(seconds: 5),
+      action: SnackBarAction(
+        label: 'Deshacer',
+        textColor: const Color(0xFF7C5CFF),
+        onPressed: () async {
+          try {
+            await repo.createCard(
+              id: snapshot.id,
+              deckId: snapshot.deckId,
+              frontText: snapshot.front,
+              backText: snapshot.back,
+              frontImagePath: snapshot.frontImagePath,
+              backImagePath: snapshot.backImagePath,
+            );
+            ref.invalidate(allCardsProvider);
+            ref.invalidate(cardsByDeckProvider(deckId));
+          } catch (_) {
+            messenger.hideCurrentSnackBar();
+            messenger.showSnackBar(
+              const SnackBar(
+                content: Text('No se pudo restaurar'),
+                backgroundColor: Color(0xFFFF4F6B),
+              ),
+            );
+          }
+        },
+      ),
+    ),
+  );
+}
+
 class DeckScreen extends ConsumerWidget {
   final DeckSummary deck;
 
@@ -250,10 +314,39 @@ class _DeckBodyState extends State<_DeckBody> {
               separatorBuilder: (_, _) => const SizedBox(height: 8),
               itemBuilder: (context, i) {
                 final card = filtered[i];
-                return _CardListTile(
-                  card: card,
-                  deckId: deck.id,
-                  color: deck.color,
+                return Consumer(
+                  key: ValueKey('dismiss-${card.id}'),
+                  builder: (context, ref, _) {
+                    return Dismissible(
+                      key: ValueKey(card.id),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFF4F6B),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.delete_outline_rounded,
+                          color: Colors.white,
+                        ),
+                      ),
+                      onDismissed: (_) {
+                        deleteCardWithUndo(
+                          context: context,
+                          ref: ref,
+                          card: card,
+                          deckId: deck.id,
+                        );
+                      },
+                      child: _CardListTile(
+                        card: card,
+                        deckId: deck.id,
+                        color: deck.color,
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -490,45 +583,13 @@ class _CardListTile extends ConsumerWidget {
                   'Eliminar',
                   style: TextStyle(color: Color(0xFFFF4F6B)),
                 ),
-                onTap: () async {
+                onTap: () {
                   Navigator.of(sheetCtx).pop();
-                  final messenger = ScaffoldMessenger.of(context);
-                  final repo = ref.read(cardRepositoryProvider);
-                  // Snapshot para posible restore
-                  final snapshot = card;
-                  await repo.deleteCard(snapshot.id);
-                  invalidateAfterCardChange(ref, deckId: deckId);
-                  messenger.hideCurrentSnackBar();
-                  messenger.showSnackBar(
-                    SnackBar(
-                      content: const Text('Tarjeta eliminada'),
-                      duration: const Duration(seconds: 5),
-                      action: SnackBarAction(
-                        label: 'Deshacer',
-                        textColor: const Color(0xFF7C5CFF),
-                        onPressed: () async {
-                          try {
-                            await repo.createCard(
-                              id: snapshot.id,
-                              deckId: snapshot.deckId,
-                              frontText: snapshot.front,
-                              backText: snapshot.back,
-                              frontImagePath: snapshot.frontImagePath,
-                              backImagePath: snapshot.backImagePath,
-                            );
-                            invalidateAfterCardChange(ref, deckId: deckId);
-                          } catch (_) {
-                            messenger.hideCurrentSnackBar();
-                            messenger.showSnackBar(
-                              const SnackBar(
-                                content: Text('No se pudo restaurar'),
-                                backgroundColor: Color(0xFFFF4F6B),
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                    ),
+                  deleteCardWithUndo(
+                    context: context,
+                    ref: ref,
+                    card: card,
+                    deckId: deckId,
                   );
                 },
               ),
