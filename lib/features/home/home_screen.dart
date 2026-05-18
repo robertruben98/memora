@@ -7,6 +7,7 @@ import '../../data/repositories/deck_repository.dart';
 import '../ai_gen/ai_generate_screen.dart';
 import '../decks/deck_editor_screen.dart';
 import '../decks/deck_screen.dart';
+import '../dgt/dgt_exam_screen.dart';
 import '../dgt/dgt_settings.dart';
 import '../quest/quest_provider.dart';
 import '../review/feed_screen.dart';
@@ -122,6 +123,14 @@ class HomeScreen extends ConsumerWidget {
                     orElse: () => false,
                   ))
                 const SizedBox(height: 16),
+              _DgtExamBanner(
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const DgtExamScreen(),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
               ...sorted.map(
                 (deck) => Padding(
                   padding: const EdgeInsets.only(bottom: 10),
@@ -462,6 +471,72 @@ class _DgtBanner extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _DgtExamBanner extends StatelessWidget {
+  final VoidCallback onTap;
+  const _DgtExamBanner({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFF8A4F), Color(0xFFE04FFF)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.directions_car_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Simulacro DGT',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      '30 preguntas · 30 min · permiso B',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.play_arrow_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
