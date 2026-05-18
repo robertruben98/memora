@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/models/memora_card.dart';
+import 'dgt_exam_history.dart';
 import 'dgt_exam_screen.dart';
+import 'dgt_history_screen.dart';
 
 /// Resultado del simulacro DGT: score, veredicto, tiempo y revision.
 class DgtExamAnswer {
@@ -17,7 +20,7 @@ class DgtExamAnswer {
   });
 }
 
-class DgtExamResultScreen extends StatelessWidget {
+class DgtExamResultScreen extends ConsumerStatefulWidget {
   final List<DgtExamAnswer> answers;
   final Duration timeUsed;
   final bool expired;
@@ -29,8 +32,50 @@ class DgtExamResultScreen extends StatelessWidget {
     this.expired = false,
   });
 
-  int get _correct => answers.where((a) => a.correct).length;
-  int get _failed => answers.length - _correct;
+  @override
+  ConsumerState<DgtExamResultScreen> createState() =>
+      _DgtExamResultScreenState();
+}
+
+class _DgtExamResultScreenState extends ConsumerState<DgtExamResultScreen> {
+  bool _persisted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Persistir el simulacro completado una sola vez al entrar a la pantalla
+    // de resultado. Best-effort: si falla no rompe la UI.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _persistEntry());
+  }
+
+  Future<void> _persistEntry() async {
+    if (_persisted) return;
+    _persisted = true;
+    final answers = widget.answers;
+    if (answers.isEmpty) return;
+    final correct = answers.where((a) => a.correct).length;
+    final failed = answers.length - correct;
+    final passed = failed <= DgtExamScreen.passingThreshold;
+    final entry = DgtExamHistoryEntry(
+      date: DateTime.now(),
+      correct: correct,
+      total: answers.length,
+      timeUsed: widget.timeUsed,
+      passed: passed,
+    );
+    try {
+      final repo = ref.read(dgtExamHistoryRepositoryProvider);
+      await repo.append(entry);
+      // Refrescar provider para que la pantalla de historial vea la entrada
+      // nueva sin reiniciar la app.
+      if (mounted) ref.invalidate(dgtExamHistoryProvider);
+    } catch (_) {
+      // best-effort
+    }
+  }
+
+  int get _correct => widget.answers.where((a) => a.correct).length;
+  int get _failed => widget.answers.length - _correct;
   bool get _passed => _failed <= DgtExamScreen.passingThreshold;
 
   String _fmtDuration(Duration d) {
@@ -41,6 +86,9 @@ class DgtExamResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final answers = widget.answers;
+    final timeUsed = widget.timeUsed;
+    final expired = widget.expired;
     final wrong = answers.where((a) => !a.correct).toList();
     return Scaffold(
       appBar: AppBar(
@@ -109,11 +157,25 @@ class DgtExamResultScreen extends StatelessWidget {
                 ),
             ],
             const SizedBox(height: 12),
-            TextButton(
-              onPressed: () => Navigator.of(context).popUntil(
-                (r) => r.isFirst,
-              ),
-              child: const Text('Volver al inicio'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton.icon(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const DgtHistoryScreen(),
+                    ),
+                  ),
+                  icon: const Icon(Icons.history_rounded, size: 18),
+                  label: const Text('Ver historial'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).popUntil(
+                    (r) => r.isFirst,
+                  ),
+                  child: const Text('Volver al inicio'),
+                ),
+              ],
             ),
           ],
         ),
@@ -127,8 +189,8 @@ class DgtExamResultScreen extends StatelessWidget {
   /// Formato suspenso:   "Simulacro DGT - 22/30 (SUSPENSO) en 18:42. Memora App."
   /// Incluye emojis discretos (check verde / libro). No expone datos personales.
   String _buildShareText() {
-    final total = answers.length;
-    final time = _fmtDuration(timeUsed);
+    final total = widget.answers.length;
+    final time = _fmtDuration(widget.timeUsed);
     final emoji = _passed ? '✅' : '📚';
     final veredicto = _passed ? 'APROBADO' : 'SUSPENSO';
     return '$emoji Simulacro DGT - $_correct/$total ($veredicto) en $time. Memora App.';
