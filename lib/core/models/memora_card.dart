@@ -10,6 +10,11 @@ class MemoraCard {
   final String deck;
   final String deckIconName;
   final Color deckColor;
+  // DGT issue #42: refuerzo didactico al fallar.
+  // Campos opcionales y aditivos: no afectan a flujos existentes.
+  final String? explanation;
+  final String? normativaRef;
+  final String? sourceUrl;
 
   const MemoraCard({
     required this.id,
@@ -21,6 +26,9 @@ class MemoraCard {
     required this.deck,
     required this.deckIconName,
     required this.deckColor,
+    this.explanation,
+    this.normativaRef,
+    this.sourceUrl,
   });
 }
 

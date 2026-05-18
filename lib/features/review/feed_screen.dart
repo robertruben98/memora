@@ -3,9 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repositories/review_repository.dart';
+import '../dgt/dgt_settings.dart';
 import '../profile/character_progress.dart';
 import '../profile/level_up_overlay.dart';
 import '../profile/title_unlock_overlay.dart';
+import '../study/widgets/explanation_bottom_sheet.dart';
 import 'feed_session_notifier.dart';
 import 'review_invalidation.dart';
 import 'study_queue.dart';
@@ -78,6 +80,17 @@ class _ActiveFeedState extends ConsumerState<_ActiveFeed> {
         );
     if (!context.mounted) return;
     invalidateAfterReview(ref, deckId: widget.deckId);
+
+    // DGT issue #42: refuerzo didactico al fallar.
+    // Mostrar BottomSheet con explicacion ANTES de avanzar.
+    // Aditivo: si el setting esta OFF, no se ejecuta nada extra.
+    if (!correct) {
+      final dgt = ref.read(dgtSettingsProvider).valueOrNull;
+      if ((dgt?.showExplanationOnFail ?? true) && context.mounted) {
+        await ExplanationBottomSheet.show(context, currentCard);
+      }
+    }
+    if (!context.mounted) return;
 
     if (state.isCompleted) {
       if (context.mounted) _showCompletion(context, state);
