@@ -10,6 +10,7 @@ import '../review/study_queue.dart';
 import 'dgt_exam_history.dart';
 import 'dgt_exam_screen.dart';
 import 'dgt_history_screen.dart';
+import 'dgt_sections_screen.dart';
 import 'failed_cards_provider.dart';
 import 'failed_review_screen.dart';
 import 'marked_cards_provider.dart';
@@ -75,6 +76,14 @@ class StudyHubScreen extends ConsumerWidget {
                 ),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const DgtHistoryScreen()),
+            ),
+          ),
+          const SizedBox(height: 14),
+          _DgtSectionsTile(
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const DgtStudySectionsScreen(),
+              ),
             ),
           ),
           const SizedBox(height: 14),
@@ -765,6 +774,78 @@ class _DgtHistoryTile extends StatelessWidget {
               Icon(
                 Icons.arrow_forward_rounded,
                 color: Colors.white.withValues(alpha: 0.5),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DgtSectionsTile extends StatelessWidget {
+  final VoidCallback onTap;
+  const _DgtSectionsTile({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A22),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: const Color(0xFF7C5CFF).withValues(alpha: 0.45),
+            ),
+          ),
+          padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7C5CFF).withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.menu_book_rounded,
+                  color: Color(0xFFB9A6FF),
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Estudiar por Secciones',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Clases teoricas DGT por bloque tematico (lectura)',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_rounded,
+                color: Colors.white.withValues(alpha: 0.55),
               ),
             ],
           ),
