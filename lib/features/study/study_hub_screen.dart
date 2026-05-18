@@ -10,6 +10,8 @@ import '../review/study_queue.dart';
 import 'dgt_exam_screen.dart';
 import 'failed_cards_provider.dart';
 import 'failed_review_screen.dart';
+import 'marked_cards_provider.dart';
+import 'marked_review_screen.dart';
 
 class StudyHubScreen extends ConsumerWidget {
   const StudyHubScreen({super.key});
@@ -71,6 +73,13 @@ class StudyHubScreen extends ConsumerWidget {
                 ),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const FailedReviewScreen()),
+            ),
+          ),
+          const SizedBox(height: 14),
+          _MarkedReviewTile(
+            markedCount: ref.watch(markedCardsProvider).count,
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const MarkedReviewScreen()),
             ),
           ),
           const SizedBox(height: 14),
@@ -560,6 +569,106 @@ class _FailedReviewTile extends StatelessWidget {
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
+                    ),
+                  ),
+                )
+              else
+                Icon(
+                  Icons.arrow_forward_rounded,
+                  color: Colors.white.withValues(alpha: 0.5),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MarkedReviewTile extends StatelessWidget {
+  final VoidCallback onTap;
+  final int markedCount;
+  const _MarkedReviewTile({required this.onTap, required this.markedCount});
+
+  @override
+  Widget build(BuildContext context) {
+    final hasMarked = markedCount > 0;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A22),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: hasMarked
+                  ? const Color(0xFFFFC857).withValues(alpha: 0.45)
+                  : Colors.white.withValues(alpha: 0.08),
+            ),
+          ),
+          padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFC857).withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.star_rounded,
+                  color: Color(0xFFFFC857),
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      hasMarked
+                          ? 'Repasar marcadas ($markedCount)'
+                          : 'Repasar marcadas',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      hasMarked
+                          ? 'Tus preguntas peligrosas para repasar pre-examen'
+                          : 'Marca preguntas con la estrella durante el estudio',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (hasMarked)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFC857),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '$markedCount',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF1A1A22),
                     ),
                   ),
                 )
