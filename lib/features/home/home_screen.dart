@@ -7,6 +7,7 @@ import '../../data/repositories/deck_repository.dart';
 import '../ai_gen/ai_generate_screen.dart';
 import '../decks/deck_editor_screen.dart';
 import '../decks/deck_screen.dart';
+import '../dgt/dgt_settings.dart';
 import '../quest/quest_provider.dart';
 import '../review/feed_screen.dart';
 import '../review/study_queue.dart';
@@ -21,6 +22,7 @@ class HomeScreen extends ConsumerWidget {
     final globalQueueAsync = ref.watch(studyQueueProvider(null));
     final questAsync = ref.watch(dailyQuestProvider);
     final sortOption = ref.watch(deckSortProvider);
+    final dgtSettingsAsync = ref.watch(dgtSettingsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -82,6 +84,15 @@ class HomeScreen extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
             children: [
+              dgtSettingsAsync.maybeWhen(
+                data: (s) => s.examDate != null
+                    ? Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _DgtBanner(settings: s),
+                      )
+                    : const SizedBox.shrink(),
+                orElse: () => const SizedBox.shrink(),
+              ),
               questAsync.maybeWhen(
                 data: (q) => _QuestBanner(quest: q),
                 orElse: () => const SizedBox.shrink(),
@@ -394,6 +405,59 @@ class _QuestBanner extends StatelessWidget {
                     ),
                   ),
                 ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DgtBanner extends StatelessWidget {
+  final DgtSettings settings;
+  const _DgtBanner({required this.settings});
+
+  @override
+  Widget build(BuildContext context) {
+    final days = settings.daysUntilExam;
+    final goal = settings.dailyGoal;
+    final license = settings.licenseType.code;
+    final String msg;
+    if (days == null) {
+      msg = 'Permiso $license - meta hoy: $goal preguntas';
+    } else if (days < 0) {
+      msg = 'Examen pasado - sigue practicando ($goal/dia)';
+    } else if (days == 0) {
+      msg = 'Hoy es tu examen! Suerte (Permiso $license)';
+    } else {
+      msg = 'Examen en $days dia${days == 1 ? '' : 's'} - meta hoy: '
+          '$goal preguntas';
+    }
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A22),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: const Color(0xFF4F8AFF).withValues(alpha: 0.45),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.directions_car_filled_rounded,
+            color: Color(0xFF4F8AFF),
+            size: 22,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              msg,
+              style: const TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
