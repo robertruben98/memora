@@ -8,6 +8,7 @@ import '../ai_gen/ai_generate_screen.dart';
 import '../decks/deck_editor_screen.dart';
 import '../decks/deck_screen.dart';
 import '../dgt/dgt_exam_screen.dart';
+import '../dgt/dgt_quick_review_screen.dart';
 import '../dgt/dgt_settings.dart';
 import '../quest/quest_provider.dart';
 import '../review/feed_screen.dart';
@@ -454,21 +455,50 @@ class _DgtBanner extends StatelessWidget {
           color: const Color(0xFF4F8AFF).withValues(alpha: 0.45),
         ),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Icon(
-            Icons.directions_car_filled_rounded,
-            color: Color(0xFF4F8AFF),
-            size: 22,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              msg,
-              style: const TextStyle(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w700,
+          Row(
+            children: [
+              const Icon(
+                Icons.directions_car_filled_rounded,
+                color: Color(0xFF4F8AFF),
+                size: 22,
               ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  msg,
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // CTA secundario: Repaso rapido (10 preguntas, 3 min). Pensado para
+          // micro-sesiones. No persiste en historial. Issue #53.
+          OutlinedButton.icon(
+            // 44px tap-target accesible (Material guidelines).
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(44),
+              foregroundColor: const Color(0xFF4F8AFF),
+              side: BorderSide(
+                color: const Color(0xFF4F8AFF).withValues(alpha: 0.45),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+            ),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const DgtQuickReviewScreen(),
+              ),
+            ),
+            icon: const Icon(Icons.bolt_rounded, size: 18),
+            label: const Text(
+              'Repaso rapido (3 min)',
+              style: TextStyle(fontWeight: FontWeight.w700),
             ),
           ),
         ],
