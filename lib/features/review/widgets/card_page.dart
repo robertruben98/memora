@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/memora_card.dart';
 import '../../../core/widgets/memora_image.dart';
+import '../../study/widgets/star_toggle_button.dart';
 
 class CardPage extends ConsumerStatefulWidget {
   final MemoraCard card;
@@ -46,9 +47,16 @@ class _CardPageState extends ConsumerState<CardPage> {
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         child: Column(
           children: [
-            _DeckBadge(
-              name: widget.card.deck,
-              color: widget.card.deckColor,
+            Row(
+              children: [
+                Expanded(
+                  child: _DeckBadge(
+                    name: widget.card.deck,
+                    color: widget.card.deckColor,
+                  ),
+                ),
+                StarToggleButton(cardId: widget.card.id),
+              ],
             ),
             const SizedBox(height: 24),
             Expanded(
