@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../core/models/memora_card.dart';
 import 'dgt_exam_screen.dart';
@@ -45,6 +46,13 @@ class DgtExamResultScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Resultado simulacro'),
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            tooltip: 'Compartir resultado',
+            icon: const Icon(Icons.share_rounded),
+            onPressed: () => _share(context),
+          ),
+        ],
       ),
       body: SafeArea(
         child: ListView(
@@ -111,6 +119,24 @@ class DgtExamResultScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Genera el texto para compartir y lo expone via share_plus.
+  ///
+  /// Formato aprobado:   "Simulacro DGT - 27/30 (APROBADO) en 18:42. Memora App."
+  /// Formato suspenso:   "Simulacro DGT - 22/30 (SUSPENSO) en 18:42. Memora App."
+  /// Incluye emojis discretos (check verde / libro). No expone datos personales.
+  String _buildShareText() {
+    final total = answers.length;
+    final time = _fmtDuration(timeUsed);
+    final emoji = _passed ? '✅' : '📚';
+    final veredicto = _passed ? 'APROBADO' : 'SUSPENSO';
+    return '$emoji Simulacro DGT - $_correct/$total ($veredicto) en $time. Memora App.';
+  }
+
+  Future<void> _share(BuildContext context) async {
+    final text = _buildShareText();
+    await Share.share(text, subject: 'Resultado simulacro DGT');
   }
 
   void _showReview(BuildContext context, List<DgtExamAnswer> wrong) {
