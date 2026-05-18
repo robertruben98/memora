@@ -28,17 +28,22 @@ class DgtSettings {
   final DgtLicenseType licenseType;
   final DateTime? examDate;
   final int dailyGoal;
+  // DGT issue #42: mostrar modal explicativo al fallar una card.
+  // Aditivo, opcional, default ON. No rompe llamadas existentes.
+  final bool showExplanationOnFail;
 
   const DgtSettings({
     required this.licenseType,
     required this.examDate,
     required this.dailyGoal,
+    this.showExplanationOnFail = true,
   });
 
   static const DgtSettings defaults = DgtSettings(
     licenseType: DgtLicenseType.b,
     examDate: null,
     dailyGoal: 20,
+    showExplanationOnFail: true,
   );
 
   DgtSettings copyWith({
@@ -46,11 +51,14 @@ class DgtSettings {
     DateTime? examDate,
     bool clearExamDate = false,
     int? dailyGoal,
+    bool? showExplanationOnFail,
   }) {
     return DgtSettings(
       licenseType: licenseType ?? this.licenseType,
       examDate: clearExamDate ? null : (examDate ?? this.examDate),
       dailyGoal: dailyGoal ?? this.dailyGoal,
+      showExplanationOnFail:
+          showExplanationOnFail ?? this.showExplanationOnFail,
     );
   }
 
@@ -68,6 +76,7 @@ const kDgtLicenseTypeKey = 'dgt_license_type';
 const kDgtExamDateKey = 'dgt_exam_date';
 const kDgtDailyGoalKey = 'dgt_daily_goal';
 const kDgtOnboardedKey = 'dgt_onboarded';
+const kDgtShowExplanationOnFailKey = 'dgt_show_explanation_on_fail';
 
 /// Repositorio: lee/escribe ajustes DGT en settingsDao.
 class DgtSettingsRepository {
@@ -78,10 +87,17 @@ class DgtSettingsRepository {
     final license = await _db.settingsDao.getValue(kDgtLicenseTypeKey);
     final exam = await _db.settingsDao.getValue(kDgtExamDateKey);
     final goal = await _db.settingsDao.getValue(kDgtDailyGoalKey);
+    final showExp =
+        await _db.settingsDao.getValue(kDgtShowExplanationOnFailKey);
     return DgtSettings(
       licenseType: DgtLicenseType.fromCode(license),
       examDate: (exam == null || exam.isEmpty) ? null : DateTime.tryParse(exam),
       dailyGoal: int.tryParse(goal ?? '') ?? DgtSettings.defaults.dailyGoal,
+      // Si el valor no existe (instalaciones previas al issue #42),
+      // mantenemos el default ON.
+      showExplanationOnFail: showExp == null
+          ? DgtSettings.defaults.showExplanationOnFail
+          : showExp == '1',
     );
   }
 
@@ -97,6 +113,10 @@ class DgtSettingsRepository {
     }
     await _db.settingsDao.setValue(kDgtDailyGoalKey, s.dailyGoal.toString());
     await _db.settingsDao.setValue(kDgtOnboardedKey, '1');
+    await _db.settingsDao.setValue(
+      kDgtShowExplanationOnFailKey,
+      s.showExplanationOnFail ? '1' : '0',
+    );
   }
 }
 

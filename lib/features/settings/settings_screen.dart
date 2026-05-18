@@ -693,6 +693,28 @@ class _DgtSection extends StatelessWidget {
                 )
                 .toList(),
           ),
+          const SizedBox(height: 12),
+          // DGT issue #42: toggle del modal explicativo al fallar.
+          SwitchListTile.adaptive(
+            contentPadding: EdgeInsets.zero,
+            value: settings.showExplanationOnFail,
+            onChanged: (v) =>
+                onChanged(settings.copyWith(showExplanationOnFail: v)),
+            title: const Text(
+              'Mostrar explicacion al fallar',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              'Al marcar una tarjeta como incorrecta, muestra un panel '
+              'con la normativa y la respuesta correcta antes de avanzar.',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.white.withValues(alpha: 0.6),
+                height: 1.35,
+              ),
+            ),
+            activeThumbColor: const Color(0xFF7C5CFF),
+          ),
         ],
       ),
     );
