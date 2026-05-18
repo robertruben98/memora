@@ -61,6 +61,8 @@ class CardRepository {
     required String backText,
     String? frontImagePath,
     String? backImagePath,
+    String cardType = 'flashcard',
+    String? questionPayloadJson,
   }) async {
     await _sync.upsertCard(
       id: id,
@@ -69,6 +71,8 @@ class CardRepository {
       backText: backText,
       frontImagePath: frontImagePath,
       backImagePath: backImagePath,
+      cardType: cardType,
+      questionPayloadJson: questionPayloadJson,
     );
     final now = DateTime.now().millisecondsSinceEpoch;
     await _cardDao.insertCard(
@@ -79,6 +83,8 @@ class CardRepository {
         backText: backText,
         frontImagePath: Value(frontImagePath),
         backImagePath: Value(backImagePath),
+        cardType: Value(cardType),
+        questionPayloadJson: Value(questionPayloadJson),
         createdAt: now,
         updatedAt: now,
       ),
@@ -91,9 +97,14 @@ class CardRepository {
     required String backText,
     String? frontImagePath,
     String? backImagePath,
+    String? cardType,
+    String? questionPayloadJson,
   }) async {
     final existing = await _cardDao.getCardById(id);
     if (existing == null) return;
+    final effectiveCardType = cardType ?? existing.cardType;
+    final effectivePayload =
+        questionPayloadJson ?? existing.questionPayloadJson;
     await _sync.upsertCard(
       id: id,
       deckId: existing.deckId,
@@ -101,6 +112,8 @@ class CardRepository {
       backText: backText,
       frontImagePath: frontImagePath,
       backImagePath: backImagePath,
+      cardType: effectiveCardType,
+      questionPayloadJson: effectivePayload,
     );
     await _cardDao.updateCard(
       CardsCompanion(
@@ -110,6 +123,8 @@ class CardRepository {
         backText: Value(backText),
         frontImagePath: Value(frontImagePath),
         backImagePath: Value(backImagePath),
+        cardType: Value(effectiveCardType),
+        questionPayloadJson: Value(effectivePayload),
         createdAt: Value(existing.createdAt),
         updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
       ),

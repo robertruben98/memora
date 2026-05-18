@@ -24,6 +24,11 @@ class Cards extends Table {
   TextColumn get backText => text()();
   TextColumn get frontImagePath => text().nullable()();
   TextColumn get backImagePath => text().nullable()();
+  // DGT pivot prep (schema v2): cardType permite distinguir flashcard vs
+  // dgt_question. questionPayloadJson guarda payload tipado (multi-choice,
+  // explicacion, normativa). NULL/'flashcard' preserva el comportamiento actual.
+  TextColumn get cardType => text().withDefault(const Constant('flashcard'))();
+  TextColumn get questionPayloadJson => text().nullable()();
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
 

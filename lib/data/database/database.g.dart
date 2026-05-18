@@ -432,6 +432,20 @@ class $CardsTable extends Cards with TableInfo<$CardsTable, CardRow> {
   late final GeneratedColumn<String> backImagePath = GeneratedColumn<String>(
       'back_image_path', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _cardTypeMeta =
+      const VerificationMeta('cardType');
+  @override
+  late final GeneratedColumn<String> cardType = GeneratedColumn<String>(
+      'card_type', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('flashcard'));
+  static const VerificationMeta _questionPayloadJsonMeta =
+      const VerificationMeta('questionPayloadJson');
+  @override
+  late final GeneratedColumn<String> questionPayloadJson =
+      GeneratedColumn<String>('question_payload_json', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -452,6 +466,8 @@ class $CardsTable extends Cards with TableInfo<$CardsTable, CardRow> {
         backText,
         frontImagePath,
         backImagePath,
+        cardType,
+        questionPayloadJson,
         createdAt,
         updatedAt
       ];
@@ -500,6 +516,16 @@ class $CardsTable extends Cards with TableInfo<$CardsTable, CardRow> {
           backImagePath.isAcceptableOrUnknown(
               data['back_image_path']!, _backImagePathMeta));
     }
+    if (data.containsKey('card_type')) {
+      context.handle(_cardTypeMeta,
+          cardType.isAcceptableOrUnknown(data['card_type']!, _cardTypeMeta));
+    }
+    if (data.containsKey('question_payload_json')) {
+      context.handle(
+          _questionPayloadJsonMeta,
+          questionPayloadJson.isAcceptableOrUnknown(
+              data['question_payload_json']!, _questionPayloadJsonMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -533,6 +559,11 @@ class $CardsTable extends Cards with TableInfo<$CardsTable, CardRow> {
           DriftSqlType.string, data['${effectivePrefix}front_image_path']),
       backImagePath: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}back_image_path']),
+      cardType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}card_type'])!,
+      questionPayloadJson: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}question_payload_json']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -553,6 +584,8 @@ class CardRow extends DataClass implements Insertable<CardRow> {
   final String backText;
   final String? frontImagePath;
   final String? backImagePath;
+  final String cardType;
+  final String? questionPayloadJson;
   final int createdAt;
   final int updatedAt;
   const CardRow(
@@ -562,6 +595,8 @@ class CardRow extends DataClass implements Insertable<CardRow> {
       required this.backText,
       this.frontImagePath,
       this.backImagePath,
+      required this.cardType,
+      this.questionPayloadJson,
       required this.createdAt,
       required this.updatedAt});
   @override
@@ -576,6 +611,10 @@ class CardRow extends DataClass implements Insertable<CardRow> {
     }
     if (!nullToAbsent || backImagePath != null) {
       map['back_image_path'] = Variable<String>(backImagePath);
+    }
+    map['card_type'] = Variable<String>(cardType);
+    if (!nullToAbsent || questionPayloadJson != null) {
+      map['question_payload_json'] = Variable<String>(questionPayloadJson);
     }
     map['created_at'] = Variable<int>(createdAt);
     map['updated_at'] = Variable<int>(updatedAt);
@@ -594,6 +633,10 @@ class CardRow extends DataClass implements Insertable<CardRow> {
       backImagePath: backImagePath == null && nullToAbsent
           ? const Value.absent()
           : Value(backImagePath),
+      cardType: Value(cardType),
+      questionPayloadJson: questionPayloadJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(questionPayloadJson),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -609,6 +652,9 @@ class CardRow extends DataClass implements Insertable<CardRow> {
       backText: serializer.fromJson<String>(json['backText']),
       frontImagePath: serializer.fromJson<String?>(json['frontImagePath']),
       backImagePath: serializer.fromJson<String?>(json['backImagePath']),
+      cardType: serializer.fromJson<String>(json['cardType']),
+      questionPayloadJson:
+          serializer.fromJson<String?>(json['questionPayloadJson']),
       createdAt: serializer.fromJson<int>(json['createdAt']),
       updatedAt: serializer.fromJson<int>(json['updatedAt']),
     );
@@ -623,6 +669,9 @@ class CardRow extends DataClass implements Insertable<CardRow> {
       'backText': serializer.toJson<String>(backText),
       'frontImagePath': serializer.toJson<String?>(frontImagePath),
       'backImagePath': serializer.toJson<String?>(backImagePath),
+      'cardType': serializer.toJson<String>(cardType),
+      'questionPayloadJson':
+          serializer.toJson<String?>(questionPayloadJson),
       'createdAt': serializer.toJson<int>(createdAt),
       'updatedAt': serializer.toJson<int>(updatedAt),
     };
@@ -635,6 +684,8 @@ class CardRow extends DataClass implements Insertable<CardRow> {
           String? backText,
           Value<String?> frontImagePath = const Value.absent(),
           Value<String?> backImagePath = const Value.absent(),
+          String? cardType,
+          Value<String?> questionPayloadJson = const Value.absent(),
           int? createdAt,
           int? updatedAt}) =>
       CardRow(
@@ -646,6 +697,10 @@ class CardRow extends DataClass implements Insertable<CardRow> {
             frontImagePath.present ? frontImagePath.value : this.frontImagePath,
         backImagePath:
             backImagePath.present ? backImagePath.value : this.backImagePath,
+        cardType: cardType ?? this.cardType,
+        questionPayloadJson: questionPayloadJson.present
+            ? questionPayloadJson.value
+            : this.questionPayloadJson,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
       );
@@ -661,6 +716,10 @@ class CardRow extends DataClass implements Insertable<CardRow> {
       backImagePath: data.backImagePath.present
           ? data.backImagePath.value
           : this.backImagePath,
+      cardType: data.cardType.present ? data.cardType.value : this.cardType,
+      questionPayloadJson: data.questionPayloadJson.present
+          ? data.questionPayloadJson.value
+          : this.questionPayloadJson,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -675,6 +734,8 @@ class CardRow extends DataClass implements Insertable<CardRow> {
           ..write('backText: $backText, ')
           ..write('frontImagePath: $frontImagePath, ')
           ..write('backImagePath: $backImagePath, ')
+          ..write('cardType: $cardType, ')
+          ..write('questionPayloadJson: $questionPayloadJson, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -683,7 +744,7 @@ class CardRow extends DataClass implements Insertable<CardRow> {
 
   @override
   int get hashCode => Object.hash(id, deckId, frontText, backText,
-      frontImagePath, backImagePath, createdAt, updatedAt);
+      frontImagePath, backImagePath, cardType, questionPayloadJson, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -694,6 +755,8 @@ class CardRow extends DataClass implements Insertable<CardRow> {
           other.backText == this.backText &&
           other.frontImagePath == this.frontImagePath &&
           other.backImagePath == this.backImagePath &&
+          other.cardType == this.cardType &&
+          other.questionPayloadJson == this.questionPayloadJson &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -705,6 +768,8 @@ class CardsCompanion extends UpdateCompanion<CardRow> {
   final Value<String> backText;
   final Value<String?> frontImagePath;
   final Value<String?> backImagePath;
+  final Value<String> cardType;
+  final Value<String?> questionPayloadJson;
   final Value<int> createdAt;
   final Value<int> updatedAt;
   final Value<int> rowid;
@@ -715,6 +780,8 @@ class CardsCompanion extends UpdateCompanion<CardRow> {
     this.backText = const Value.absent(),
     this.frontImagePath = const Value.absent(),
     this.backImagePath = const Value.absent(),
+    this.cardType = const Value.absent(),
+    this.questionPayloadJson = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -726,6 +793,8 @@ class CardsCompanion extends UpdateCompanion<CardRow> {
     required String backText,
     this.frontImagePath = const Value.absent(),
     this.backImagePath = const Value.absent(),
+    this.cardType = const Value.absent(),
+    this.questionPayloadJson = const Value.absent(),
     required int createdAt,
     required int updatedAt,
     this.rowid = const Value.absent(),
@@ -742,6 +811,8 @@ class CardsCompanion extends UpdateCompanion<CardRow> {
     Expression<String>? backText,
     Expression<String>? frontImagePath,
     Expression<String>? backImagePath,
+    Expression<String>? cardType,
+    Expression<String>? questionPayloadJson,
     Expression<int>? createdAt,
     Expression<int>? updatedAt,
     Expression<int>? rowid,
@@ -753,6 +824,9 @@ class CardsCompanion extends UpdateCompanion<CardRow> {
       if (backText != null) 'back_text': backText,
       if (frontImagePath != null) 'front_image_path': frontImagePath,
       if (backImagePath != null) 'back_image_path': backImagePath,
+      if (cardType != null) 'card_type': cardType,
+      if (questionPayloadJson != null)
+        'question_payload_json': questionPayloadJson,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -766,6 +840,8 @@ class CardsCompanion extends UpdateCompanion<CardRow> {
       Value<String>? backText,
       Value<String?>? frontImagePath,
       Value<String?>? backImagePath,
+      Value<String>? cardType,
+      Value<String?>? questionPayloadJson,
       Value<int>? createdAt,
       Value<int>? updatedAt,
       Value<int>? rowid}) {
@@ -776,6 +852,8 @@ class CardsCompanion extends UpdateCompanion<CardRow> {
       backText: backText ?? this.backText,
       frontImagePath: frontImagePath ?? this.frontImagePath,
       backImagePath: backImagePath ?? this.backImagePath,
+      cardType: cardType ?? this.cardType,
+      questionPayloadJson: questionPayloadJson ?? this.questionPayloadJson,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -803,6 +881,13 @@ class CardsCompanion extends UpdateCompanion<CardRow> {
     if (backImagePath.present) {
       map['back_image_path'] = Variable<String>(backImagePath.value);
     }
+    if (cardType.present) {
+      map['card_type'] = Variable<String>(cardType.value);
+    }
+    if (questionPayloadJson.present) {
+      map['question_payload_json'] =
+          Variable<String>(questionPayloadJson.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<int>(createdAt.value);
     }
@@ -824,6 +909,8 @@ class CardsCompanion extends UpdateCompanion<CardRow> {
           ..write('backText: $backText, ')
           ..write('frontImagePath: $frontImagePath, ')
           ..write('backImagePath: $backImagePath, ')
+          ..write('cardType: $cardType, ')
+          ..write('questionPayloadJson: $questionPayloadJson, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -2115,6 +2202,8 @@ typedef $$CardsTableCreateCompanionBuilder = CardsCompanion Function({
   required String backText,
   Value<String?> frontImagePath,
   Value<String?> backImagePath,
+  Value<String> cardType,
+  Value<String?> questionPayloadJson,
   required int createdAt,
   required int updatedAt,
   Value<int> rowid,
@@ -2126,6 +2215,8 @@ typedef $$CardsTableUpdateCompanionBuilder = CardsCompanion Function({
   Value<String> backText,
   Value<String?> frontImagePath,
   Value<String?> backImagePath,
+  Value<String> cardType,
+  Value<String?> questionPayloadJson,
   Value<int> createdAt,
   Value<int> updatedAt,
   Value<int> rowid,
@@ -2203,6 +2294,13 @@ class $$CardsTableFilterComposer
 
   ColumnFilters<String> get backImagePath => $composableBuilder(
       column: $table.backImagePath, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get cardType => $composableBuilder(
+      column: $table.cardType, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get questionPayloadJson => $composableBuilder(
+      column: $table.questionPayloadJson,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -2299,6 +2397,13 @@ class $$CardsTableOrderingComposer
       column: $table.backImagePath,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get cardType => $composableBuilder(
+      column: $table.cardType, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get questionPayloadJson => $composableBuilder(
+      column: $table.questionPayloadJson,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<int> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -2349,6 +2454,12 @@ class $$CardsTableAnnotationComposer
 
   GeneratedColumn<String> get backImagePath => $composableBuilder(
       column: $table.backImagePath, builder: (column) => column);
+
+  GeneratedColumn<String> get cardType =>
+      $composableBuilder(column: $table.cardType, builder: (column) => column);
+
+  GeneratedColumn<String> get questionPayloadJson => $composableBuilder(
+      column: $table.questionPayloadJson, builder: (column) => column);
 
   GeneratedColumn<int> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -2449,6 +2560,8 @@ class $$CardsTableTableManager extends RootTableManager<
             Value<String> backText = const Value.absent(),
             Value<String?> frontImagePath = const Value.absent(),
             Value<String?> backImagePath = const Value.absent(),
+            Value<String> cardType = const Value.absent(),
+            Value<String?> questionPayloadJson = const Value.absent(),
             Value<int> createdAt = const Value.absent(),
             Value<int> updatedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -2460,6 +2573,8 @@ class $$CardsTableTableManager extends RootTableManager<
             backText: backText,
             frontImagePath: frontImagePath,
             backImagePath: backImagePath,
+            cardType: cardType,
+            questionPayloadJson: questionPayloadJson,
             createdAt: createdAt,
             updatedAt: updatedAt,
             rowid: rowid,
@@ -2471,6 +2586,8 @@ class $$CardsTableTableManager extends RootTableManager<
             required String backText,
             Value<String?> frontImagePath = const Value.absent(),
             Value<String?> backImagePath = const Value.absent(),
+            Value<String> cardType = const Value.absent(),
+            Value<String?> questionPayloadJson = const Value.absent(),
             required int createdAt,
             required int updatedAt,
             Value<int> rowid = const Value.absent(),
@@ -2482,6 +2599,8 @@ class $$CardsTableTableManager extends RootTableManager<
             backText: backText,
             frontImagePath: frontImagePath,
             backImagePath: backImagePath,
+            cardType: cardType,
+            questionPayloadJson: questionPayloadJson,
             createdAt: createdAt,
             updatedAt: updatedAt,
             rowid: rowid,
