@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_practice_screen.dart';
+import 'dgt_topic_stats_screen.dart';
 
 /// Selector de bloques tematicos DGT para modo "Practica por tema".
 ///
@@ -118,6 +119,19 @@ class _DgtTopicsScreenState extends ConsumerState<DgtTopicsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Practica por tema'),
+        actions: [
+          IconButton(
+            tooltip: 'Estadisticas por tema',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const DgtTopicStatsScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.insights_outlined),
+          ),
+        ],
       ),
       body: FutureBuilder<List<DgtTopic>>(
         future: _future,

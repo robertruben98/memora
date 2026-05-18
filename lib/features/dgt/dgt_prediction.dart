@@ -149,7 +149,35 @@ class DgtPredictionRepository {
       return DgtPrediction.empty;
     }
   }
+
+  /// Devuelve el desglose crudo por tema (issue #67). Consume el mismo
+  /// endpoint GET /dgt/stats/topics que [fetchPrediction] pero retorna la
+  /// lista sin agregar (`accuracyPct` por bloque). UI nueva (estadisticas
+  /// por tema) lo usa para listar y ordenar por debilidad.
+  ///
+  /// Si el endpoint no esta disponible o devuelve algo distinto a una
+  /// lista, retorna lista vacia: la UI degrada a estado "sin datos aun".
+  Future<List<DgtTopicStat>> fetchTopicStats({int days = 30}) async {
+    try {
+      final res =
+          await _api.get('/dgt/stats/topics', query: {'days': '$days'});
+      if (res is! List) return const <DgtTopicStat>[];
+      return res
+          .whereType<Map>()
+          .map((e) => DgtTopicStat.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
+    } catch (_) {
+      return const <DgtTopicStat>[];
+    }
+  }
 }
+
+/// Provider con la lista cruda de stats por tema (issue #67). Aditivo
+/// respecto a [dgtPredictionProvider]; no se mezclan.
+final dgtTopicStatsProvider =
+    FutureProvider<List<DgtTopicStat>>((ref) async {
+  return ref.watch(dgtPredictionRepositoryProvider).fetchTopicStats();
+});
 
 final dgtPredictionRepositoryProvider =
     Provider<DgtPredictionRepository>((ref) {
@@ -168,7 +196,15 @@ class DgtPredictionCard extends ConsumerWidget {
   /// Si es `null`, la card NO muestra el boton (modo informativo).
   final void Function(String topicId)? onPracticeWeakest;
 
-  const DgtPredictionCard({super.key, this.onPracticeWeakest});
+  /// Callback al pulsar "Ver detalle por tema" (issue #67). Si es `null`,
+  /// el boton no se muestra (aditivo, no rompe usos existentes).
+  final VoidCallback? onViewTopicStats;
+
+  const DgtPredictionCard({
+    super.key,
+    this.onPracticeWeakest,
+    this.onViewTopicStats,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -197,6 +233,27 @@ class DgtPredictionCard extends ConsumerWidget {
     final score = p.expectedScore!;
     final pct = (score * 100).round();
     final tier = _tierFor(score);
+    // Trailing: si hay weakest + callback de practica, mostramos boton
+    // "Practicar tema X". Si NO hay practica pero si hay callback de stats
+    // por tema (#67), mostramos "Ver detalle" como fallback informativo.
+    Widget? trailing;
+    if (p.weakestTopic != null && onPracticeWeakest != null) {
+      trailing = TextButton(
+        onPressed: () => onPracticeWeakest!(p.weakestTopic!.topicId),
+        child: Text(
+          'Practicar ${p.weakestTopic!.topicName ?? "tema"}',
+          style: TextStyle(color: tier.accent),
+        ),
+      );
+    } else if (onViewTopicStats != null) {
+      trailing = TextButton(
+        onPressed: onViewTopicStats,
+        child: Text(
+          'Ver detalle',
+          style: TextStyle(color: tier.accent),
+        ),
+      );
+    }
     return _baseCard(
       color: tier.background,
       accent: tier.accent,
@@ -205,16 +262,7 @@ class DgtPredictionCard extends ConsumerWidget {
           ? 'Tu punto debil: ${p.weakestTopic!.topicName ?? p.weakestTopic!.topicId} '
               '(${p.weakestTopic!.accuracyPct.toStringAsFixed(0)}% acierto)'
           : 'Sigue practicando para afinar la estimacion.',
-      trailing: p.weakestTopic != null && onPracticeWeakest != null
-          ? TextButton(
-              onPressed: () =>
-                  onPracticeWeakest!(p.weakestTopic!.topicId),
-              child: Text(
-                'Practicar ${p.weakestTopic!.topicName ?? "tema"}',
-                style: TextStyle(color: tier.accent),
-              ),
-            )
-          : null,
+      trailing: trailing,
     );
   }
 
