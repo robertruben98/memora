@@ -7,7 +7,9 @@ import '../../data/repositories/deck_repository.dart';
 import '../learn/learn_methods_screen.dart';
 import '../review/feed_screen.dart';
 import '../review/study_queue.dart';
+import 'dgt_exam_history.dart';
 import 'dgt_exam_screen.dart';
+import 'dgt_history_screen.dart';
 import 'failed_cards_provider.dart';
 import 'failed_review_screen.dart';
 import 'marked_cards_provider.dart';
@@ -63,6 +65,16 @@ class StudyHubScreen extends ConsumerWidget {
           _DgtExamTile(
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const DgtExamScreen()),
+            ),
+          ),
+          const SizedBox(height: 10),
+          _DgtHistoryTile(
+            historyCount: ref.watch(dgtExamHistoryProvider).maybeWhen(
+                  data: (entries) => entries.length,
+                  orElse: () => null,
+                ),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const DgtHistoryScreen()),
             ),
           ),
           const SizedBox(height: 14),
@@ -677,6 +689,83 @@ class _MarkedReviewTile extends StatelessWidget {
                   Icons.arrow_forward_rounded,
                   color: Colors.white.withValues(alpha: 0.5),
                 ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DgtHistoryTile extends StatelessWidget {
+  final VoidCallback onTap;
+  final int? historyCount;
+  const _DgtHistoryTile({required this.onTap, required this.historyCount});
+
+  @override
+  Widget build(BuildContext context) {
+    final count = historyCount ?? 0;
+    final hasHistory = count > 0;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A22),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: const Color(0xFFFF6B35).withValues(alpha: 0.35),
+            ),
+          ),
+          padding: const EdgeInsets.fromLTRB(16, 12, 14, 12),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF6B35).withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.history_rounded,
+                  color: Color(0xFFFF6B35),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Historial de simulacros',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      hasHistory
+                          ? '$count simulacro${count == 1 ? '' : 's'} guardado${count == 1 ? '' : 's'}'
+                          : 'Aun sin simulacros completados',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_rounded,
+                color: Colors.white.withValues(alpha: 0.5),
+              ),
             ],
           ),
         ),
