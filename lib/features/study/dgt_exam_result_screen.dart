@@ -1,0 +1,318 @@
+import 'package:flutter/material.dart';
+
+import '../../core/models/memora_card.dart';
+import 'dgt_exam_screen.dart';
+
+/// Resultado del simulacro DGT: score, veredicto, tiempo y revision.
+class DgtExamAnswer {
+  final MemoraCard card;
+  final bool correct;
+  final bool answered;
+
+  const DgtExamAnswer({
+    required this.card,
+    required this.correct,
+    required this.answered,
+  });
+}
+
+class DgtExamResultScreen extends StatelessWidget {
+  final List<DgtExamAnswer> answers;
+  final Duration timeUsed;
+  final bool expired;
+
+  const DgtExamResultScreen({
+    super.key,
+    required this.answers,
+    required this.timeUsed,
+    this.expired = false,
+  });
+
+  int get _correct => answers.where((a) => a.correct).length;
+  int get _failed => answers.length - _correct;
+  bool get _passed => _failed <= DgtExamScreen.passingThreshold;
+
+  String _fmtDuration(Duration d) {
+    final m = d.inMinutes.toString().padLeft(2, '0');
+    final s = (d.inSeconds % 60).toString().padLeft(2, '0');
+    return '$m:$s';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final wrong = answers.where((a) => !a.correct).toList();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Resultado simulacro'),
+        automaticallyImplyLeading: false,
+      ),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            _ScoreCard(
+              correct: _correct,
+              total: answers.length,
+              passed: _passed,
+              timeUsed: _fmtDuration(timeUsed),
+              expired: expired,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (_) => const DgtExamScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.replay_rounded),
+                    label: const Text('Repetir simulacro'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: wrong.isEmpty
+                        ? null
+                        : () => _showReview(context, wrong),
+                    icon: const Icon(Icons.error_outline_rounded),
+                    label: Text('Revisar falladas (${wrong.length})'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            if (wrong.isEmpty)
+              _AllCorrectBanner()
+            else ...[
+              const Text(
+                'Preguntas falladas',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 10),
+              for (final a in wrong)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: _WrongTile(answer: a),
+                ),
+            ],
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () => Navigator.of(context).popUntil(
+                (r) => r.isFirst,
+              ),
+              child: const Text('Volver al inicio'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showReview(BuildContext context, List<DgtExamAnswer> wrong) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => _ReviewWrongScreen(answers: wrong),
+      ),
+    );
+  }
+}
+
+class _ScoreCard extends StatelessWidget {
+  final int correct;
+  final int total;
+  final bool passed;
+  final String timeUsed;
+  final bool expired;
+
+  const _ScoreCard({
+    required this.correct,
+    required this.total,
+    required this.passed,
+    required this.timeUsed,
+    required this.expired,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = passed
+        ? const Color(0xFF4FFFB0)
+        : Colors.redAccent.shade200;
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                passed
+                    ? Icons.check_circle_rounded
+                    : Icons.cancel_rounded,
+                color: color,
+                size: 36,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                passed ? 'Aprobado' : 'Suspenso',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  color: color,
+                  letterSpacing: -0.5,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '$correct/$total correctas',
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Criterio DGT: maximo 3 fallos para aprobar',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.white.withValues(alpha: 0.65),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const Icon(Icons.timer_outlined, size: 16, color: Colors.white70),
+              const SizedBox(width: 6),
+              Text(
+                'Tiempo usado: $timeUsed',
+                style: const TextStyle(fontSize: 13, color: Colors.white70),
+              ),
+              if (expired) ...[
+                const SizedBox(width: 10),
+                const Icon(
+                  Icons.warning_amber_rounded,
+                  size: 16,
+                  color: Colors.amber,
+                ),
+                const SizedBox(width: 4),
+                const Text(
+                  'Tiempo agotado',
+                  style: TextStyle(fontSize: 12, color: Colors.amber),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AllCorrectBanner extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFF4FFFB0).withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFF4FFFB0)),
+      ),
+      child: const Row(
+        children: [
+          Icon(Icons.emoji_events_rounded, color: Color(0xFF4FFFB0)),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Examen perfecto. Sin fallos para revisar.',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WrongTile extends StatelessWidget {
+  final DgtExamAnswer answer;
+  const _WrongTile({required this.answer});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A22),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.4)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.cancel_outlined,
+                color: Colors.redAccent,
+                size: 18,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                answer.answered ? 'Marcaste incorrecta' : 'Sin responder',
+                style: const TextStyle(
+                  color: Colors.redAccent,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            answer.card.front,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Explicacion: ${answer.card.back}',
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.white.withValues(alpha: 0.75),
+              height: 1.35,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReviewWrongScreen extends StatelessWidget {
+  final List<DgtExamAnswer> answers;
+  const _ReviewWrongScreen({required this.answers});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Revisar falladas (${answers.length})')),
+      body: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: answers.length,
+        separatorBuilder: (context, i) => const SizedBox(height: 10),
+        itemBuilder: (_, i) => _WrongTile(answer: answers[i]),
+      ),
+    );
+  }
+}

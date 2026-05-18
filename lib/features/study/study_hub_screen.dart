@@ -7,6 +7,7 @@ import '../../data/repositories/deck_repository.dart';
 import '../learn/learn_methods_screen.dart';
 import '../review/feed_screen.dart';
 import '../review/study_queue.dart';
+import 'dgt_exam_screen.dart';
 
 class StudyHubScreen extends ConsumerWidget {
   const StudyHubScreen({super.key});
@@ -52,6 +53,12 @@ class StudyHubScreen extends ConsumerWidget {
             ),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const FeedScreen()),
+            ),
+          ),
+          const SizedBox(height: 14),
+          _DgtExamTile(
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const DgtExamScreen()),
             ),
           ),
           const SizedBox(height: 14),
@@ -368,6 +375,88 @@ class _DeckQuickRow extends ConsumerWidget {
                     ? const Color(0xFF4FFFB0)
                     : deck.color,
                 size: 22,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DgtExamTile extends StatelessWidget {
+  final VoidCallback onTap;
+  const _DgtExamTile({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFF6B35), Color(0xFFFFA552)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFFF6B35).withValues(alpha: 0.3),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.22),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.directions_car_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Simulacro DGT',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.2,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      '30 preguntas, 30 minutos, criterio examen oficial',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.play_arrow_rounded,
+                color: Colors.white,
+                size: 26,
               ),
             ],
           ),
