@@ -7,14 +7,12 @@ import '../../data/repositories/deck_repository.dart';
 import '../learn/learn_methods_screen.dart';
 import '../review/feed_screen.dart';
 import '../review/study_queue.dart';
-import 'dgt_exam_history.dart';
-import 'dgt_exam_screen.dart';
-import 'dgt_history_screen.dart';
-import 'dgt_sections_screen.dart';
 import 'failed_cards_provider.dart';
 import 'failed_review_screen.dart';
 import 'marked_cards_provider.dart';
 import 'marked_review_screen.dart';
+import 'widgets/dgt_section.dart';
+import 'widgets/study_mode_tile.dart';
 
 class StudyHubScreen extends ConsumerWidget {
   const StudyHubScreen({super.key});
@@ -23,6 +21,11 @@ class StudyHubScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final queueAsync = ref.watch(studyQueueProvider(null));
     final decksAsync = ref.watch(deckSummariesProvider);
+    final failedCount = ref.watch(failedCardsProvider).maybeWhen(
+          data: (r) => r.count,
+          orElse: () => null,
+        );
+    final markedCount = ref.watch(markedCardsProvider).count;
 
     return Scaffold(
       appBar: AppBar(
@@ -68,51 +71,46 @@ class StudyHubScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 14),
-          _DgtExamTile(
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const DgtExamScreen()),
-            ),
-          ),
-          const SizedBox(height: 10),
-          _DgtHistoryTile(
-            historyCount: ref.watch(dgtExamHistoryProvider).maybeWhen(
-                  data: (entries) => entries.length,
-                  orElse: () => null,
-                ),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const DgtHistoryScreen()),
-            ),
-          ),
+          const DgtStudySection(),
           const SizedBox(height: 14),
-          _DgtSectionsTile(
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => const DgtStudySectionsScreen(),
-              ),
-            ),
-          ),
-          const SizedBox(height: 14),
-          _FailedReviewTile(
-            failedCount: ref.watch(failedCardsProvider).maybeWhen(
-                  data: (r) => r.count,
-                  orElse: () => null,
-                ),
+          StudyModeTile(
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const FailedReviewScreen()),
             ),
+            accentColor: const Color(0xFFFF6B6B),
+            leadingIcon: Icons.replay_rounded,
+            title: 'Repaso de falladas',
+            subtitle: (failedCount ?? 0) > 0
+                ? 'Refuerza las cards que fallaste recientemente'
+                : 'Sin fallos recientes',
+            badgeCount: failedCount,
           ),
           const SizedBox(height: 14),
-          _MarkedReviewTile(
-            markedCount: ref.watch(markedCardsProvider).count,
+          StudyModeTile(
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const MarkedReviewScreen()),
             ),
+            accentColor: const Color(0xFFFFC857),
+            leadingIcon: Icons.star_rounded,
+            title: markedCount > 0
+                ? 'Repasar marcadas ($markedCount)'
+                : 'Repasar marcadas',
+            subtitle: markedCount > 0
+                ? 'Tus preguntas peligrosas para repasar pre-examen'
+                : 'Marca preguntas con la estrella durante el estudio',
+            badgeCount: markedCount > 0 ? markedCount : null,
+            badgeTextColor: const Color(0xFF1A1A22),
           ),
           const SizedBox(height: 14),
-          _LearnMethodsTile(
+          StudyModeTile(
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const LearnMethodsScreen()),
             ),
+            accentColor: const Color(0xFF4FFFB0),
+            leadingEmoji: '📖',
+            title: 'Aprende a aprender',
+            subtitle:
+                'Métodos con evidencia: SRS, recall, Feynman, mnemónicas…',
           ),
           const SizedBox(height: 28),
           const Padding(
@@ -422,503 +420,6 @@ class _DeckQuickRow extends ConsumerWidget {
                     ? const Color(0xFF4FFFB0)
                     : deck.color,
                 size: 22,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DgtExamTile extends StatelessWidget {
-  final VoidCallback onTap;
-  const _DgtExamTile({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Ink(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFFFF6B35), Color(0xFFFFA552)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFFFF6B35).withValues(alpha: 0.3),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.22),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.directions_car_rounded,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Simulacro DGT',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.2,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      '30 preguntas, 30 minutos, criterio examen oficial',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(
-                Icons.play_arrow_rounded,
-                color: Colors.white,
-                size: 26,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FailedReviewTile extends StatelessWidget {
-  final VoidCallback onTap;
-  final int? failedCount;
-  const _FailedReviewTile({required this.onTap, required this.failedCount});
-
-  @override
-  Widget build(BuildContext context) {
-    final hasFailed = (failedCount ?? 0) > 0;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A1A22),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: hasFailed
-                  ? const Color(0xFFFF6B6B).withValues(alpha: 0.45)
-                  : Colors.white.withValues(alpha: 0.08),
-            ),
-          ),
-          padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFF6B6B).withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.replay_rounded,
-                  color: Color(0xFFFF6B6B),
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Repaso de falladas',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      hasFailed
-                          ? 'Refuerza las cards que fallaste recientemente'
-                          : 'Sin fallos recientes',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (hasFailed)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF6B6B),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    '$failedCount',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                    ),
-                  ),
-                )
-              else
-                Icon(
-                  Icons.arrow_forward_rounded,
-                  color: Colors.white.withValues(alpha: 0.5),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MarkedReviewTile extends StatelessWidget {
-  final VoidCallback onTap;
-  final int markedCount;
-  const _MarkedReviewTile({required this.onTap, required this.markedCount});
-
-  @override
-  Widget build(BuildContext context) {
-    final hasMarked = markedCount > 0;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A1A22),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: hasMarked
-                  ? const Color(0xFFFFC857).withValues(alpha: 0.45)
-                  : Colors.white.withValues(alpha: 0.08),
-            ),
-          ),
-          padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFC857).withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.star_rounded,
-                  color: Color(0xFFFFC857),
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      hasMarked
-                          ? 'Repasar marcadas ($markedCount)'
-                          : 'Repasar marcadas',
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      hasMarked
-                          ? 'Tus preguntas peligrosas para repasar pre-examen'
-                          : 'Marca preguntas con la estrella durante el estudio',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (hasMarked)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFC857),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    '$markedCount',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF1A1A22),
-                    ),
-                  ),
-                )
-              else
-                Icon(
-                  Icons.arrow_forward_rounded,
-                  color: Colors.white.withValues(alpha: 0.5),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DgtHistoryTile extends StatelessWidget {
-  final VoidCallback onTap;
-  final int? historyCount;
-  const _DgtHistoryTile({required this.onTap, required this.historyCount});
-
-  @override
-  Widget build(BuildContext context) {
-    final count = historyCount ?? 0;
-    final hasHistory = count > 0;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A1A22),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: const Color(0xFFFF6B35).withValues(alpha: 0.35),
-            ),
-          ),
-          padding: const EdgeInsets.fromLTRB(16, 12, 14, 12),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFF6B35).withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.history_rounded,
-                  color: Color(0xFFFF6B35),
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Historial de simulacros',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      hasHistory
-                          ? '$count simulacro${count == 1 ? '' : 's'} guardado${count == 1 ? '' : 's'}'
-                          : 'Aun sin simulacros completados',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_rounded,
-                color: Colors.white.withValues(alpha: 0.5),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DgtSectionsTile extends StatelessWidget {
-  final VoidCallback onTap;
-  const _DgtSectionsTile({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A1A22),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: const Color(0xFF7C5CFF).withValues(alpha: 0.45),
-            ),
-          ),
-          padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF7C5CFF).withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.menu_book_rounded,
-                  color: Color(0xFFB9A6FF),
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Estudiar por Secciones',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Clases teoricas DGT por bloque tematico (lectura)',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_rounded,
-                color: Colors.white.withValues(alpha: 0.55),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _LearnMethodsTile extends StatelessWidget {
-  final VoidCallback onTap;
-  const _LearnMethodsTile({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A1A22),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: const Color(0xFF4FFFB0).withValues(alpha: 0.35),
-            ),
-          ),
-          padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF4FFFB0).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignment: Alignment.center,
-                child: const Text('📖', style: TextStyle(fontSize: 22)),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Aprende a aprender',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Métodos con evidencia: SRS, recall, Feynman, mnemónicas…',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_rounded,
-                color: const Color(0xFF4FFFB0).withValues(alpha: 0.7),
               ),
             ],
           ),
