@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_result_screen.dart';
+import 'dgt_topics_screen.dart';
 
 /// Pantalla principal del simulacro DGT permiso B.
 /// - 30 preguntas, 30 min, criterio aprobado <=3 fallos.
@@ -257,6 +258,17 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
       appBar: AppBar(
         title: const Text('Simulacro DGT'),
         actions: [
+          IconButton(
+            tooltip: 'Practica por tema',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const DgtTopicsScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.category_outlined),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Center(
