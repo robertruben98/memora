@@ -82,8 +82,9 @@ class HomeScreen extends ConsumerWidget {
             );
           }
           final sorted = sortDecks(decks, sortOption);
+          final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
           return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
+            padding: EdgeInsets.fromLTRB(16, 4, 16, 96 + bottomInset),
             children: [
               dgtSettingsAsync.maybeWhen(
                 data: (s) => s.examDate != null

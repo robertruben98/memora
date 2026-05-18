@@ -308,7 +308,12 @@ class _DeckBodyState extends State<_DeckBody> {
           )
         else
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+            padding: EdgeInsets.fromLTRB(
+              16,
+              8,
+              16,
+              96 + MediaQuery.viewPaddingOf(context).bottom,
+            ),
             sliver: SliverList.separated(
               itemCount: filtered.length,
               separatorBuilder: (_, _) => const SizedBox(height: 8),

@@ -31,7 +31,12 @@ class SettingsScreen extends ConsumerWidget {
         ),
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          8,
+          16,
+          32 + MediaQuery.viewPaddingOf(context).bottom,
+        ),
         children: [
           const _SectionTitle('Estudio'),
           const SizedBox(height: 8),
