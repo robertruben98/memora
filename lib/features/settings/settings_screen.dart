@@ -6,6 +6,7 @@ import '../../core/theme/theme_provider.dart';
 import '../../data/backup/backup_service.dart';
 import '../../data/repositories/card_repository.dart';
 import '../../data/repositories/deck_repository.dart';
+import '../../data/repositories/dgt_repository.dart';
 import '../dgt/dgt_settings.dart';
 import '../review/study_queue.dart';
 import '../stats/stats_repository.dart';
@@ -715,7 +716,75 @@ class _DgtSection extends StatelessWidget {
             ),
             activeThumbColor: const Color(0xFF7C5CFF),
           ),
+          const SizedBox(height: 16),
+          const Divider(height: 1, thickness: 0.4),
+          const SizedBox(height: 12),
+          // DGT issue #45: boton para sincronizar/invalidar cache del banco DGT.
+          const _DgtSyncButton(),
         ],
+      ),
+    );
+  }
+}
+
+/// Boton "Sincronizar banco DGT" (issue #45).
+///
+/// Invalida la cache local de preguntas DGT y dispara un refetch al backend
+/// la proxima vez que se abra el simulacro. Util si el usuario sospecha que
+/// el banco esta desactualizado (>7 dias) o quiere forzar version nueva.
+class _DgtSyncButton extends ConsumerStatefulWidget {
+  const _DgtSyncButton();
+
+  @override
+  ConsumerState<_DgtSyncButton> createState() => _DgtSyncButtonState();
+}
+
+class _DgtSyncButtonState extends ConsumerState<_DgtSyncButton> {
+  bool _syncing = false;
+
+  Future<void> _sync() async {
+    if (_syncing) return;
+    setState(() => _syncing = true);
+    try {
+      final repo = ref.read(dgtRepositoryProvider);
+      await repo.invalidateCache();
+      // Pre-fetch para tener el banco fresco listo en el proximo simulacro
+      // (best-effort: si falla offline, la cache queda vacia y se reintentara).
+      await repo.fetchExamQuestions(forceRefresh: true);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Banco DGT sincronizado'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No se pudo sincronizar (sin conexion)'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _syncing = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: _syncing ? null : _sync,
+        icon: _syncing
+            ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.refresh_rounded, size: 18),
+        label: Text(_syncing ? 'Sincronizando...' : 'Sincronizar banco DGT'),
       ),
     );
   }
