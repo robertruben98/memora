@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
+import 'dgt_prediction.dart';
 import 'dgt_result_screen.dart';
 
 /// Pantalla principal del simulacro DGT permiso B.
@@ -28,14 +29,29 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
   Timer? _ticker;
   bool _submitted = false;
 
+  /// Issue #52: el simulacro arranca con una landing que muestra la
+  /// prediccion + boton "Empezar simulacro". El fetch y el timer
+  /// SOLO se inician cuando el usuario pulsa "Empezar".
+  bool _started = false;
+
   @override
   void initState() {
     super.initState();
+    // No prefetch: esperamos a que el usuario pulse "Empezar simulacro"
+    // tras leer su prediccion. Esto evita gastar bandwidth para usuarios
+    // que entran solo a consultar progreso.
+  }
+
+  void _startExam() {
+    if (_started) return;
     final repo = ref.read(dgtRepositoryProvider);
-    _future = repo.fetchExamQuestions(limit: 30).then((qs) {
-      _questions = qs;
-      _startTimer();
-      return qs;
+    setState(() {
+      _started = true;
+      _future = repo.fetchExamQuestions(limit: 30).then((qs) {
+        _questions = qs;
+        _startTimer();
+        return qs;
+      });
     });
   }
 
@@ -251,8 +267,71 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
     );
   }
 
+  /// Landing pre-simulacro: prediccion (#52) + boton "Empezar simulacro".
+  /// Se muestra hasta que el usuario pulsa "Empezar".
+  Widget _buildLanding(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
+      children: [
+        // Banner prediccion: tema mas debil + CTA practicar.
+        DgtPredictionCard(
+          onPractice: (topicId) {
+            // Fallback segun issue #52: si no hay deeplink al modo
+            // practica por tema, hacemos scroll al boton de empezar.
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Modo practica del tema "$topicId" proximamente. '
+                  'Mientras tanto, este simulacro lo cubre.',
+                ),
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          },
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Simulacro DGT',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                '30 preguntas, 30 minutos. Aprobado con max 3 fallos.',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.7),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: _startExam,
+                  icon: const Icon(Icons.play_arrow_rounded),
+                  label: const Text('Empezar simulacro'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (!_started) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Simulacro DGT')),
+        body: _buildLanding(context),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Simulacro DGT'),
