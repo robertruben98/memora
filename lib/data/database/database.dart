@@ -22,13 +22,25 @@ part 'database.g.dart';
 class MemoraDatabase extends _$MemoraDatabase {
   MemoraDatabase() : super(_openConnection());
 
+  /// Constructor para tests / inyeccion (in-memory). Aditivo, no usado en
+  /// runtime normal.
+  MemoraDatabase.forTesting(super.connection);
+
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) async {
           await m.createAll();
+        },
+        onUpgrade: (m, from, to) async {
+          // v1 -> v2: anadir columnas cardType y questionPayloadJson a Cards
+          // (pivot DGT). Aditivo, sin perder filas existentes.
+          if (from < 2) {
+            await m.addColumn(cards, cards.cardType);
+            await m.addColumn(cards, cards.questionPayloadJson);
+          }
         },
       );
 }

@@ -47,6 +47,12 @@ class SyncService {
                 backText: c['back_text'] as String,
                 frontImagePath: Value(c['front_image_path'] as String?),
                 backImagePath: Value(c['back_image_path'] as String?),
+                // DGT pivot prep (aditivo): si el server aun no envia estos
+                // campos, queda el default 'flashcard' y null.
+                cardType: c['card_type'] is String
+                    ? Value(c['card_type'] as String)
+                    : const Value.absent(),
+                questionPayloadJson: Value(c['question_payload'] as String?),
                 createdAt: (c['created_at'] as num).toInt(),
                 updatedAt: (c['updated_at'] as num).toInt(),
               ),
@@ -122,6 +128,8 @@ class SyncService {
     required String backText,
     String? frontImagePath,
     String? backImagePath,
+    String cardType = 'flashcard',
+    String? questionPayloadJson,
   }) async {
     await _api.put('/cards/$id', {
       'id': id,
@@ -130,6 +138,10 @@ class SyncService {
       'back_text': backText,
       'front_image_path': frontImagePath,
       'back_image_path': backImagePath,
+      // DGT pivot prep: el backend puede ignorar estos campos hasta que
+      // implemente la columna correspondiente (aditivo, no breaking).
+      'card_type': cardType,
+      'question_payload': questionPayloadJson,
     });
   }
 
