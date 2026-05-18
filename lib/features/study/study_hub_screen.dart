@@ -42,7 +42,12 @@ class StudyHubScreen extends ConsumerWidget {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          8,
+          16,
+          32 + MediaQuery.viewPaddingOf(context).bottom,
+        ),
         children: [
           _StudyAllHero(
             pendingCount: queueAsync.maybeWhen(

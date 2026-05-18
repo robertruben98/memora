@@ -52,7 +52,12 @@ class DgtResultScreen extends StatelessWidget {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          12,
+          16,
+          24 + MediaQuery.viewPaddingOf(context).bottom,
+        ),
         children: [
           Container(
             padding: const EdgeInsets.all(20),

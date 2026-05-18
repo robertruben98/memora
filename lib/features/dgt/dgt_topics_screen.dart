@@ -142,7 +142,12 @@ class _DgtTopicsScreenState extends ConsumerState<DgtTopicsScreen> {
           return RefreshIndicator(
             onRefresh: _refresh,
             child: ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                12,
+                16,
+                24 + MediaQuery.viewPaddingOf(context).bottom,
+              ),
               itemCount: topics.length,
               separatorBuilder: (_, _) => const SizedBox(height: 10),
               itemBuilder: (_, i) {
