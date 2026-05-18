@@ -4,6 +4,34 @@ import '../api/api_client.dart';
 import '../local/dgt_questions_cache.dart';
 import 'dgt_local_bank.dart';
 
+/// Bloque tematico DGT (ej "Senales", "Normas", "Mecanica").
+class DgtTopic {
+  final String id;
+  final String name;
+  final int questionCount;
+
+  const DgtTopic({
+    required this.id,
+    required this.name,
+    this.questionCount = 0,
+  });
+
+  factory DgtTopic.fromJson(Map<String, dynamic> j) {
+    return DgtTopic(
+      id: (j['id'] ?? j['slug'] ?? j['name'] ?? '').toString(),
+      name: (j['name'] ?? j['title'] ?? j['id'] ?? '').toString(),
+      questionCount: _asInt(j['question_count'] ?? j['count'] ?? j['total']),
+    );
+  }
+
+  static int _asInt(dynamic v) {
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    if (v is String) return int.tryParse(v) ?? 0;
+    return 0;
+  }
+}
+
 /// Pregunta DGT multi-choice (a/b/c).
 class DgtQuestion {
   final String id;
@@ -146,6 +174,68 @@ class DgtRepository {
           .toList();
     }
     return null;
+  }
+
+  /// Lista los bloques DGT disponibles. Backend: GET /dgt/topics.
+  /// Si el endpoint falla, deriva bloques unicos del banco local.
+  Future<List<DgtTopic>> fetchTopics() async {
+    try {
+      final res = await _api.get('/dgt/topics');
+      List<dynamic>? raw;
+      if (res is List) raw = res;
+      if (res is Map && res['topics'] is List) raw = res['topics'] as List;
+      if (raw != null) {
+        return raw
+            .map((e) => DgtTopic.fromJson(e as Map<String, dynamic>))
+            .where((t) => t.id.isNotEmpty)
+            .toList();
+      }
+    } catch (_) {
+      // Fallback local: agrupar por campo `topic` del banco.
+    }
+    return _topicsFromLocalBank();
+  }
+
+  List<DgtTopic> _topicsFromLocalBank() {
+    final counts = <String, int>{};
+    for (final q in dgtLocalBank) {
+      final t = (q.topic ?? '').trim();
+      if (t.isEmpty) continue;
+      counts[t] = (counts[t] ?? 0) + 1;
+    }
+    final out = counts.entries
+        .map((e) => DgtTopic(id: e.key, name: e.key, questionCount: e.value))
+        .toList();
+    out.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    return out;
+  }
+
+  /// Preguntas filtradas por tema. Backend:
+  /// GET /dgt/questions?topic_id={id}&limit={N}. Si falla, filtra el banco
+  /// local por campo `topic` (case-insensitive sobre id o name).
+  Future<List<DgtQuestion>> fetchQuestionsByTopic({
+    required String topicId,
+    int? limit,
+  }) async {
+    try {
+      final query = <String, String>{'topic_id': topicId};
+      if (limit != null) query['limit'] = '$limit';
+      final res = await _api.get('/dgt/questions', query: query);
+      final parsed = _parseQuestions(res);
+      if (parsed != null) {
+        return parsed;
+      }
+    } catch (_) {
+      // Backend aun no soporta filtro. Cae a fallback local.
+    }
+    final norm = topicId.toLowerCase().trim();
+    final filtered = dgtLocalBank
+        .where((q) => (q.topic ?? '').toLowerCase().trim() == norm)
+        .toList();
+    if (limit != null && filtered.length > limit) {
+      return filtered.take(limit).toList();
+    }
+    return filtered;
   }
 }
 
