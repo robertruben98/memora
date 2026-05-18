@@ -6,6 +6,7 @@ import '../../core/theme/theme_provider.dart';
 import '../../data/backup/backup_service.dart';
 import '../../data/repositories/card_repository.dart';
 import '../../data/repositories/deck_repository.dart';
+import '../dgt/dgt_settings.dart';
 import '../review/study_queue.dart';
 import '../stats/stats_repository.dart';
 import 'settings_repository.dart';
@@ -17,6 +18,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final study = ref.watch(studySettingsProvider);
     final theme = ref.watch(themeModeProvider);
+    final dgtAsync = ref.watch(dgtSettingsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -65,6 +67,23 @@ class SettingsScreen extends ConsumerWidget {
                   .saveStudySettings(newSettings);
               ref.invalidate(studyQueueProvider(null));
             },
+          ),
+          const SizedBox(height: 24),
+          const _SectionTitle('DGT'),
+          const SizedBox(height: 8),
+          dgtAsync.when(
+            loading: () => const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (e, _) => Text('Error: $e'),
+            data: (dgt) => _DgtSection(
+              settings: dgt,
+              onChanged: (next) async {
+                await ref.read(dgtSettingsRepositoryProvider).save(next);
+                ref.invalidate(dgtSettingsProvider);
+              },
+            ),
           ),
           const SizedBox(height: 24),
           const _SectionTitle('Apariencia'),
@@ -570,6 +589,111 @@ class _DangerCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _DgtSection extends StatelessWidget {
+  final DgtSettings settings;
+  final ValueChanged<DgtSettings> onChanged;
+
+  const _DgtSection({required this.settings, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A22),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Permiso',
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: DgtLicenseType.values
+                .map(
+                  (t) => ChoiceChip(
+                    label: Text('${t.code} - ${t.shortLabel}'),
+                    selected: settings.licenseType == t,
+                    onSelected: (_) =>
+                        onChanged(settings.copyWith(licenseType: t)),
+                  ),
+                )
+                .toList(),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Fecha examen',
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    final now = DateTime.now();
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: settings.examDate ??
+                          now.add(const Duration(days: 30)),
+                      firstDate: now,
+                      lastDate: now.add(const Duration(days: 365 * 2)),
+                    );
+                    if (picked != null) {
+                      onChanged(settings.copyWith(examDate: picked));
+                    }
+                  },
+                  icon: const Icon(Icons.calendar_today_rounded, size: 18),
+                  label: Text(
+                    settings.examDate == null
+                        ? 'Elegir fecha'
+                        : '${settings.examDate!.day}/'
+                            '${settings.examDate!.month}/'
+                            '${settings.examDate!.year}',
+                  ),
+                ),
+              ),
+              if (settings.examDate != null)
+                IconButton(
+                  icon: const Icon(Icons.clear_rounded),
+                  tooltip: 'Quitar fecha',
+                  onPressed: () =>
+                      onChanged(settings.copyWith(clearExamDate: true)),
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Meta diaria de preguntas',
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: const [10, 20, 30, 50]
+                .map(
+                  (n) => ChoiceChip(
+                    label: Text('$n'),
+                    selected: settings.dailyGoal == n,
+                    onSelected: (_) =>
+                        onChanged(settings.copyWith(dailyGoal: n)),
+                  ),
+                )
+                .toList(),
+          ),
+        ],
       ),
     );
   }
