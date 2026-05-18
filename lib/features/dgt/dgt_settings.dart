@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/database/database.dart';
@@ -87,8 +88,9 @@ class DgtSettingsRepository {
     final license = await _db.settingsDao.getValue(kDgtLicenseTypeKey);
     final exam = await _db.settingsDao.getValue(kDgtExamDateKey);
     final goal = await _db.settingsDao.getValue(kDgtDailyGoalKey);
-    final showExp =
-        await _db.settingsDao.getValue(kDgtShowExplanationOnFailKey);
+    final showExp = await _db.settingsDao.getValue(
+      kDgtShowExplanationOnFailKey,
+    );
     return DgtSettings(
       licenseType: DgtLicenseType.fromCode(license),
       examDate: (exam == null || exam.isEmpty) ? null : DateTime.tryParse(exam),
@@ -128,3 +130,14 @@ final dgtSettingsRepositoryProvider = Provider<DgtSettingsRepository>((ref) {
 final dgtSettingsProvider = FutureProvider<DgtSettings>((ref) async {
   return ref.watch(dgtSettingsRepositoryProvider).load();
 });
+
+/// Issue #54: color del banner DGT segun proximidad al examen.
+/// verde >30d, ambar 7-30d, rojo <7d, azul (default) si null o pasado.
+/// Aditivo, helper puro sin estado.
+Color dgtBannerAccentColor(int? daysUntilExam) {
+  if (daysUntilExam == null) return const Color(0xFF4F8AFF);
+  if (daysUntilExam < 0) return const Color(0xFF4F8AFF);
+  if (daysUntilExam < 7) return const Color(0xFFFF5C5C);
+  if (daysUntilExam <= 30) return const Color(0xFFFFB74F);
+  return const Color(0xFF4FFFB0);
+}

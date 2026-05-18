@@ -8,8 +8,10 @@ import '../ai_gen/ai_generate_screen.dart';
 import '../decks/deck_editor_screen.dart';
 import '../decks/deck_screen.dart';
 import '../dgt/dgt_exam_screen.dart';
+import '../dgt/dgt_preparation_provider.dart';
 import '../dgt/dgt_quick_review_screen.dart';
 import '../dgt/dgt_settings.dart';
+import '../stats/stats_screen.dart';
 import '../quest/quest_provider.dart';
 import '../review/feed_screen.dart';
 import '../review/study_queue.dart';
@@ -25,6 +27,7 @@ class HomeScreen extends ConsumerWidget {
     final questAsync = ref.watch(dailyQuestProvider);
     final sortOption = ref.watch(deckSortProvider);
     final dgtSettingsAsync = ref.watch(dgtSettingsProvider);
+    final dgtPreparationAsync = ref.watch(dgtPreparationProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -32,18 +35,14 @@ class HomeScreen extends ConsumerWidget {
         elevation: 0,
         title: const Text(
           'Mazos',
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.4,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: -0.4),
         ),
         actions: [
           PopupMenuButton<DeckSortOption>(
             icon: const Icon(Icons.sort_rounded),
             tooltip: 'Ordenar mazos',
             initialValue: sortOption,
-            onSelected: (o) =>
-                ref.read(deckSortProvider.notifier).setOption(o),
+            onSelected: (o) => ref.read(deckSortProvider.notifier).setOption(o),
             itemBuilder: (context) => DeckSortOption.values
                 .map(
                   (o) => PopupMenuItem<DeckSortOption>(
@@ -76,9 +75,7 @@ class HomeScreen extends ConsumerWidget {
           if (decks.isEmpty) {
             return _HomeEmptyState(
               onCreateDeck: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => const DeckEditorScreen(),
-                ),
+                MaterialPageRoute(builder: (_) => const DeckEditorScreen()),
               ),
             );
           }
@@ -91,7 +88,13 @@ class HomeScreen extends ConsumerWidget {
                 data: (s) => s.examDate != null
                     ? Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: _DgtBanner(settings: s),
+                        child: _DgtBanner(
+                          settings: s,
+                          preparation: dgtPreparationAsync.maybeWhen(
+                            data: (p) => p,
+                            orElse: () => null,
+                          ),
+                        ),
                       )
                     : const SizedBox.shrink(),
                 orElse: () => const SizedBox.shrink(),
@@ -100,36 +103,29 @@ class HomeScreen extends ConsumerWidget {
                 data: (q) => _QuestBanner(quest: q),
                 orElse: () => const SizedBox.shrink(),
               ),
-              if (questAsync.maybeWhen(
-                    data: (_) => true,
-                    orElse: () => false,
-                  ))
+              if (questAsync.maybeWhen(data: (_) => true, orElse: () => false))
                 const SizedBox(height: 12),
               if (globalQueueAsync.maybeWhen(
-                    data: (q) => q.totalAvailable > 0,
-                    orElse: () => false,
-                  ))
+                data: (q) => q.totalAvailable > 0,
+                orElse: () => false,
+              ))
                 _DueBanner(
                   pending: globalQueueAsync.maybeWhen(
                     data: (q) => q.totalAvailable,
                     orElse: () => 0,
                   ),
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const FeedScreen(),
-                    ),
-                  ),
+                  onTap: () => Navigator.of(
+                    context,
+                  ).push(MaterialPageRoute(builder: (_) => const FeedScreen())),
                 ),
               if (globalQueueAsync.maybeWhen(
-                    data: (q) => q.totalAvailable > 0,
-                    orElse: () => false,
-                  ))
+                data: (q) => q.totalAvailable > 0,
+                orElse: () => false,
+              ))
                 const SizedBox(height: 16),
               _DgtExamBanner(
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const DgtExamScreen(),
-                  ),
+                  MaterialPageRoute(builder: (_) => const DgtExamScreen()),
                 ),
               ),
               const SizedBox(height: 16),
@@ -139,9 +135,7 @@ class HomeScreen extends ConsumerWidget {
                   child: _DeckTile(
                     deck: deck,
                     onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => DeckScreen(deck: deck),
-                      ),
+                      MaterialPageRoute(builder: (_) => DeckScreen(deck: deck)),
                     ),
                   ),
                 ),
@@ -154,7 +148,6 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 }
-
 
 class _DeckTile extends StatelessWidget {
   final DeckSummary deck;
@@ -276,8 +269,7 @@ class _HomeEmptyState extends StatelessWidget {
             icon: const Icon(Icons.add_rounded),
             label: const Text('Crear primer mazo'),
             style: FilledButton.styleFrom(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
             ),
           ),
         ],
@@ -285,7 +277,6 @@ class _HomeEmptyState extends StatelessWidget {
     );
   }
 }
-
 
 class _DueBanner extends StatelessWidget {
   final int pending;
@@ -312,11 +303,7 @@ class _DueBanner extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Row(
             children: [
-              const Icon(
-                Icons.bolt_rounded,
-                color: Colors.white,
-                size: 22,
-              ),
+              const Icon(Icons.bolt_rounded, color: Colors.white, size: 22),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -395,7 +382,7 @@ class _QuestBanner extends StatelessWidget {
             complete
                 ? 'Quest completada — ¡a por mañana!'
                 : 'Estudia ${quest.target} tarjetas hoy '
-                    '(${quest.completed}/${quest.target})',
+                      '(${quest.completed}/${quest.target})',
             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
@@ -425,83 +412,133 @@ class _QuestBanner extends StatelessWidget {
   }
 }
 
+/// Banner Home con mini-dashboard de preparacion DGT (issue #54).
+/// - Header: dias hasta examen con color (verde >30, ambar 7-30, rojo <7).
+/// - Body: progreso meta diaria (X/dailyGoal) + barra.
+/// - Footer: prediccion APROBADO/SUSPENSO segun expectedScore vs >=0.90.
+/// Tap en el banner navega a StatsScreen (vista DGT con detalle por tema).
+/// Si `preparation` es null (loading o error inicial), degrada a la version
+/// minima previa (solo header) para no romper el Home.
 class _DgtBanner extends StatelessWidget {
   final DgtSettings settings;
-  const _DgtBanner({required this.settings});
+  final DgtPreparation? preparation;
+  const _DgtBanner({required this.settings, this.preparation});
 
   @override
   Widget build(BuildContext context) {
     final days = settings.daysUntilExam;
     final goal = settings.dailyGoal;
     final license = settings.licenseType.code;
-    final String msg;
+    final accent = dgtBannerAccentColor(days);
+    final String header;
     if (days == null) {
-      msg = 'Permiso $license - meta hoy: $goal preguntas';
+      header = 'Permiso $license - meta hoy: $goal preguntas';
     } else if (days < 0) {
-      msg = 'Examen pasado - sigue practicando ($goal/dia)';
+      header = 'Examen pasado - sigue practicando ($goal/dia)';
     } else if (days == 0) {
-      msg = 'Hoy es tu examen! Suerte (Permiso $license)';
+      header = 'Hoy es tu examen! Suerte (Permiso $license)';
     } else {
-      msg = 'Examen en $days dia${days == 1 ? '' : 's'} - meta hoy: '
-          '$goal preguntas';
+      header = 'Examen en $days dia${days == 1 ? '' : 's'} (Permiso $license)';
     }
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+    final answered = preparation?.answeredToday ?? 0;
+    final progress = preparation?.dailyProgress ?? 0.0;
+    final verdictLabel = preparation?.verdictLabel ?? 'Prediccion: cargando...';
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const StatsScreen())),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: const Color(0xFF4F8AFF).withValues(alpha: 0.45),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
+        child: Ink(
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A22),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: accent.withValues(alpha: 0.55)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Icon(
-                Icons.directions_car_filled_rounded,
-                color: Color(0xFF4F8AFF),
-                size: 22,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  msg,
-                  style: const TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w700,
+              Row(
+                children: [
+                  Icon(
+                    Icons.directions_car_filled_rounded,
+                    color: accent,
+                    size: 22,
                   ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      header,
+                      style: const TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 6,
+                        backgroundColor: Colors.white.withValues(alpha: 0.08),
+                        valueColor: AlwaysStoppedAnimation<Color>(accent),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    '$answered/$goal',
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                verdictLabel,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white.withValues(alpha: 0.78),
+                ),
+              ),
+              const SizedBox(height: 10),
+              // CTA secundario: Repaso rapido (10 preguntas, 3 min). Pensado
+              // para micro-sesiones. No persiste en historial. Issue #53.
+              OutlinedButton.icon(
+                // 44px tap-target accesible (Material guidelines).
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(44),
+                  foregroundColor: accent,
+                  side: BorderSide(color: accent.withValues(alpha: 0.45)),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                ),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const DgtQuickReviewScreen(),
+                  ),
+                ),
+                icon: const Icon(Icons.bolt_rounded, size: 18),
+                label: const Text(
+                  'Repaso rapido (3 min)',
+                  style: TextStyle(fontWeight: FontWeight.w700),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          // CTA secundario: Repaso rapido (10 preguntas, 3 min). Pensado para
-          // micro-sesiones. No persiste en historial. Issue #53.
-          OutlinedButton.icon(
-            // 44px tap-target accesible (Material guidelines).
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(44),
-              foregroundColor: const Color(0xFF4F8AFF),
-              side: BorderSide(
-                color: const Color(0xFF4F8AFF).withValues(alpha: 0.45),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-            ),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const DgtQuickReviewScreen(),
-              ),
-            ),
-            icon: const Icon(Icons.bolt_rounded, size: 18),
-            label: const Text(
-              'Repaso rapido (3 min)',
-              style: TextStyle(fontWeight: FontWeight.w700),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -585,21 +622,17 @@ class _HomeFab extends StatelessWidget {
           backgroundColor: const Color(0xFFE04FFF),
           mini: true,
           tooltip: 'Generar con IA',
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => const AiGenerateScreen(),
-            ),
-          ),
+          onPressed: () => Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const AiGenerateScreen())),
           child: const Icon(Icons.auto_awesome_rounded, color: Colors.white),
         ),
         const SizedBox(height: 10),
         FloatingActionButton.extended(
           heroTag: 'fab-deck',
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => const DeckEditorScreen(),
-            ),
-          ),
+          onPressed: () => Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const DeckEditorScreen())),
           icon: const Icon(Icons.add_rounded),
           label: const Text('Nuevo mazo'),
         ),
