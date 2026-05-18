@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
+import 'dgt_prediction.dart';
 import 'dgt_result_screen.dart';
 import 'dgt_topics_screen.dart';
 
@@ -29,14 +30,29 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
   Timer? _ticker;
   bool _submitted = false;
 
+  /// Modo intro: muestra Card de prediccion antes del simulacro.
+  /// Issue #52: usuario ve "tu probabilidad de aprobar" y tema mas debil
+  /// antes de empezar. Pulsa "Empezar simulacro" -> _begin().
+  bool _started = false;
+
   @override
   void initState() {
     super.initState();
+    // Disparamos el fetch de prediccion al construir; el simulacro se
+    // carga solo cuando el usuario pulsa "Empezar".
+    ref.read(dgtPredictionProvider);
+  }
+
+  void _begin() {
+    if (_started) return;
     final repo = ref.read(dgtRepositoryProvider);
-    _future = repo.fetchExamQuestions(limit: 30).then((qs) {
-      _questions = qs;
-      _startTimer();
-      return qs;
+    setState(() {
+      _started = true;
+      _future = repo.fetchExamQuestions(limit: 30).then((qs) {
+        _questions = qs;
+        _startTimer();
+        return qs;
+      });
     });
   }
 
@@ -252,8 +268,88 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
     );
   }
 
+  /// Pantalla previa al simulacro. Muestra la Card de prediccion (issue #52)
+  /// y el boton "Empezar simulacro". Aditiva: si el usuario quiere saltarla
+  /// no hay forma de skippearla porque es valor anadido — el flujo previo
+  /// no tenia confirmacion explicita.
+  Widget _buildIntro(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Simulacro DGT')),
+      body: SafeArea(
+        child: Column(
+          children: [
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Examen oficial DGT',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white.withValues(alpha: 0.95),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '30 preguntas - 30 minutos - aprobado con max 3 fallos.',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            DgtPredictionCard(
+              onPracticeWeakest: (topicId) {
+                // Sin pantalla de practica por tema todavia (issue #51 en curso):
+                // mostramos un snackbar informativo. Cuando #51 aterrice se
+                // sustituira por un Navigator.push al modo practica.
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Modo practica por tema todavia no disponible. '
+                      'Tema sugerido: $topicId',
+                    ),
+                    duration: const Duration(seconds: 3),
+                  ),
+                );
+              },
+            ),
+            const Spacer(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: _begin,
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: const Color(0xFF7C5CFF),
+                  ),
+                  icon: const Icon(Icons.play_arrow_rounded),
+                  label: const Text(
+                    'Empezar simulacro',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (!_started) return _buildIntro(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Simulacro DGT'),
