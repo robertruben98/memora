@@ -34,6 +34,32 @@ const Map<String, double> kDgtTopicWeights = {
 /// Bajo ese umbral, recomendamos "haz un simulacro" sin numero.
 const int kDgtMinReviewsForPrediction = 10;
 
+/// Tamanio aproximado del banco oficial por tema DGT (issue #117).
+/// Usado como denominador del indicador "coverage %" (preguntas vistas /
+/// total del banco) cuando el backend no expone totales en /dgt/stats/topics.
+/// Valores derivados de `app/seed_dgt.py` (DGT_QUESTIONS por topic_id).
+/// Si el catalogo crece, este map debe actualizarse — el helper degrada a
+/// `kDgtDefaultBankSize` cuando un topic_id no esta listado.
+const Map<String, int> kDgtTopicBankSize = {
+  'dgt-t-01': 19,
+  'dgt-t-02': 10,
+  'dgt-t-03': 11,
+  'dgt-t-04': 11,
+  'dgt-t-05': 7,
+  'dgt-t-06': 10,
+  'dgt-t-07': 11,
+  'dgt-t-08': 33,
+  'dgt-t-09': 8,
+  'dgt-t-10': 24,
+  'dgt-t-11': 9,
+  'dgt-t-12': 28,
+  'dgt-t-13': 28,
+  'dgt-t-14': 23,
+};
+
+/// Fallback cuando un topic_id no esta en [kDgtTopicBankSize].
+const int kDgtDefaultBankSize = 20;
+
 /// Umbrales de aprobado (>=27 / 30 = 0.90), casi (>=0.75) y necesita repaso.
 const double kDgtThresholdReady = 0.90;
 const double kDgtThresholdAlmost = 0.75;
@@ -62,6 +88,22 @@ class DgtTopicStat {
       correct: (j['correct'] as num?)?.toInt() ?? 0,
       accuracyPct: (j['accuracy_pct'] as num?)?.toDouble() ?? 0.0,
     );
+  }
+
+  /// Tamanio estimado del banco oficial para este tema. Si el topicId no
+  /// figura en [kDgtTopicBankSize] degrada a [kDgtDefaultBankSize] para
+  /// que la UI siga teniendo un denominador razonable.
+  int get bankSize => kDgtTopicBankSize[topicId] ?? kDgtDefaultBankSize;
+
+  /// "Cobertura": que % del banco hemos tocado. Issue #117. Es un
+  /// aproximado (cuenta repeticiones como "vistas"), suficiente como
+  /// indicador "hay temas intactos que aun no he abierto". Backend no
+  /// expone aun "seen_unique" — cuando lo haga, mover esto a usar ese
+  /// campo en lugar de [totalAnswered].
+  double get coveragePct {
+    if (bankSize <= 0) return 0.0;
+    final ratio = totalAnswered / bankSize;
+    return (ratio * 100.0).clamp(0.0, 100.0);
   }
 }
 

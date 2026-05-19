@@ -50,6 +50,48 @@ void main() {
       expect(TopicStatTile.colorFor(95), const Color(0xFF4FFFB0));
     });
 
+    test(
+        'issue #117: coverage color helper gris<30 / ambar 30-70 / verde>=70',
+        () {
+      expect(TopicStatTile.coverageColorFor(0), const Color(0xFF7A7A7A));
+      expect(TopicStatTile.coverageColorFor(29.9), const Color(0xFF7A7A7A));
+      expect(TopicStatTile.coverageColorFor(30), const Color(0xFFFFB74F));
+      expect(TopicStatTile.coverageColorFor(69.9), const Color(0xFFFFB74F));
+      expect(TopicStatTile.coverageColorFor(70), const Color(0xFF4FFFB0));
+      expect(TopicStatTile.coverageColorFor(100), const Color(0xFF4FFFB0));
+    });
+
+    test('issue #117: DgtTopicStat.coveragePct usa kDgtTopicBankSize', () {
+      // dgt-t-01 -> 19 questions. answered=19 -> 100%.
+      const full = DgtTopicStat(
+        topicId: 'dgt-t-01',
+        totalAnswered: 19,
+        correct: 19,
+        accuracyPct: 100,
+      );
+      expect(full.bankSize, 19);
+      expect(full.coveragePct, 100.0);
+
+      // answered>bank => clamped.
+      const over = DgtTopicStat(
+        topicId: 'dgt-t-01',
+        totalAnswered: 50,
+        correct: 50,
+        accuracyPct: 100,
+      );
+      expect(over.coveragePct, 100.0);
+
+      // topic desconocido -> fallback kDgtDefaultBankSize.
+      const unknown = DgtTopicStat(
+        topicId: 'dgt-t-99',
+        totalAnswered: 10,
+        correct: 5,
+        accuracyPct: 50,
+      );
+      expect(unknown.bankSize, kDgtDefaultBankSize);
+      expect(unknown.coveragePct, (10 / kDgtDefaultBankSize) * 100.0);
+    });
+
     testWidgets('cae a topicId cuando topicName es null o vacio',
         (tester) async {
       const s = DgtTopicStat(
@@ -116,10 +158,12 @@ void main() {
       expect(find.text('Reintentar'), findsOneWidget);
     });
 
-    testWidgets('filtra temas con totalAnswered=0', (tester) async {
+    testWidgets(
+        'issue #117: temas con totalAnswered=0 se muestran como "Sin tocar"',
+        (tester) async {
       final stats = [
         _stat('dgt-t-01', 'Senales', 5, 4),
-        _stat('dgt-t-08', 'Normas', 0, 0), // sin respuestas, debe filtrarse
+        _stat('dgt-t-08', 'Normas', 0, 0), // intacto: visible al final
       ];
       await tester.pumpWidget(
         ProviderScope(
@@ -131,7 +175,50 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('Senales'), findsOneWidget);
-      expect(find.text('Normas'), findsNothing);
+      expect(find.text('Normas'), findsOneWidget);
+      expect(find.text('Sin tocar'), findsOneWidget);
+      // Tema con respuestas primero, intacto despues.
+      final senalesY = tester.getTopLeft(find.text('Senales')).dy;
+      final normasY = tester.getTopLeft(find.text('Normas')).dy;
+      expect(senalesY, lessThan(normasY));
+    });
+
+    testWidgets('issue #117: muestra barra de cobertura con denominador',
+        (tester) async {
+      // dgt-t-01 tiene 19 preguntas en kDgtTopicBankSize, respondidas 5 -> 5/19.
+      final stats = [_stat('dgt-t-01', 'Senales', 5, 4)];
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            dgtTopicStatsProvider.overrideWith((ref) async => stats),
+          ],
+          child: const MaterialApp(home: DgtTopicStatsScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Cobertura'), findsOneWidget);
+      expect(find.text('Accuracy'), findsOneWidget);
+      expect(find.text('5/19'), findsOneWidget); // trailing cobertura
+      expect(find.text('4/5'), findsOneWidget); // trailing accuracy
+    });
+
+    testWidgets('issue #117: tooltip de leyenda accessible desde AppBar',
+        (tester) async {
+      final stats = [_stat('dgt-t-01', 'Senales', 5, 4)];
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            dgtTopicStatsProvider.overrideWith((ref) async => stats),
+          ],
+          child: const MaterialApp(home: DgtTopicStatsScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      // El boton help_outline abre dialog con texto sobre cobertura.
+      await tester.tap(find.byIcon(Icons.help_outline_rounded));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Cobertura'), findsWidgets);
+      expect(find.text('Entendido'), findsOneWidget);
     });
 
     testWidgets('estado loading muestra CircularProgressIndicator',

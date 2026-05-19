@@ -26,6 +26,13 @@ class DgtTopicStatsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Estadisticas por tema'),
+        actions: [
+          IconButton(
+            tooltip: 'Que significa accuracy vs cobertura',
+            icon: const Icon(Icons.help_outline_rounded),
+            onPressed: () => _showLegend(context),
+          ),
+        ],
       ),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -34,15 +41,24 @@ class DgtTopicStatsScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(dgtTopicStatsProvider),
         ),
         data: (stats) {
-          final answered = stats.where((s) => s.totalAnswered > 0).toList();
-          if (answered.isEmpty) {
+          if (stats.where((s) => s.totalAnswered > 0).isEmpty) {
             return _EmptyView(
               onRetry: () => ref.invalidate(dgtTopicStatsProvider),
             );
           }
-          // Peor accuracy primero (foco en debilidades).
-          final sorted = [...answered]
-            ..sort((a, b) => a.accuracyPct.compareTo(b.accuracyPct));
+          // Issue #117: ya no filtramos temas con totalAnswered=0; los
+          // mostramos al final como "intactos" para que el estudiante
+          // vea que partes del temario no ha tocado nunca.
+          final sorted = [...stats]
+            ..sort((a, b) {
+              // Primero los que tienen respuestas (peor accuracy primero).
+              final aHas = a.totalAnswered > 0;
+              final bHas = b.totalAnswered > 0;
+              if (aHas != bHas) return aHas ? -1 : 1;
+              if (aHas) return a.accuracyPct.compareTo(b.accuracyPct);
+              // Entre intactos, orden estable por topicId.
+              return a.topicId.compareTo(b.topicId);
+            });
           return RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(dgtTopicStatsProvider);
@@ -67,6 +83,30 @@ class DgtTopicStatsScreen extends ConsumerWidget {
             ),
           );
         },
+      ),
+    );
+  }
+
+  void _showLegend(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Accuracy vs Cobertura'),
+        content: const Text(
+          'Accuracy = % de aciertos sobre las preguntas que has '
+          'respondido en este tema.\n\n'
+          'Cobertura = % del temario que has tocado (preguntas vistas / '
+          'total estimado del banco DGT por tema).\n\n'
+          'Un tema con 90% accuracy y 10% cobertura significa que '
+          'aciertas, pero solo has visto una pequena parte: aun no '
+          'puedes dar por dominado el bloque.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Entendido'),
+          ),
+        ],
       ),
     );
   }
@@ -106,13 +146,25 @@ class TopicStatTile extends StatelessWidget {
     return const Color(0xFFFF5C5C);
   }
 
+  /// Umbrales de color para la barra de COBERTURA (issue #117).
+  /// Gris <30, ambar 30-70, verde >=70. Semantica: cuanto del temario
+  /// has tocado, no que tan bien.
+  static Color coverageColorFor(double coveragePct) {
+    if (coveragePct >= 70) return const Color(0xFF4FFFB0);
+    if (coveragePct >= 30) return const Color(0xFFFFB74F);
+    return const Color(0xFF7A7A7A);
+  }
+
   @override
   Widget build(BuildContext context) {
     final color = colorFor(stat.accuracyPct);
     final pct = stat.accuracyPct.clamp(0.0, 100.0);
+    final coveragePct = stat.coveragePct;
+    final coverageColor = coverageColorFor(coveragePct);
     final name = (stat.topicName == null || stat.topicName!.isEmpty)
         ? stat.topicId
         : stat.topicName!;
+    final isIntact = stat.totalAnswered <= 0;
     return Material(
       color: Colors.white.withValues(alpha: 0.06),
       borderRadius: BorderRadius.circular(14),
@@ -135,40 +187,127 @@ class TopicStatTile extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Text(
-                    '${pct.toStringAsFixed(0)}%',
-                    style: TextStyle(
-                      color: color,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14,
+                  if (isIntact)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF7A7A7A).withValues(alpha: 0.25),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Text(
+                        'Sin tocar',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    )
+                  else
+                    Text(
+                      '${pct.toStringAsFixed(0)}%',
+                      style: TextStyle(
+                        color: color,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                      ),
                     ),
-                  ),
                   const SizedBox(width: 4),
                   const Icon(Icons.chevron_right_rounded, size: 20),
                 ],
               ),
               const SizedBox(height: 6),
               Text(
-                '${stat.correct}/${stat.totalAnswered} aciertos',
+                isIntact
+                    ? 'Aun no has respondido preguntas de este tema'
+                    : '${stat.correct}/${stat.totalAnswered} aciertos',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.white.withValues(alpha: 0.65),
                 ),
               ),
-              const SizedBox(height: 8),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: pct / 100.0,
-                  minHeight: 6,
-                  backgroundColor: Colors.white.withValues(alpha: 0.08),
-                  valueColor: AlwaysStoppedAnimation<Color>(color),
+              if (!isIntact) ...[
+                const SizedBox(height: 8),
+                _BarRow(
+                  label: 'Accuracy',
+                  pct: pct,
+                  color: color,
+                  trailing: '${stat.correct}/${stat.totalAnswered}',
                 ),
+              ],
+              const SizedBox(height: 8),
+              _BarRow(
+                label: 'Cobertura',
+                pct: coveragePct,
+                color: coverageColor,
+                trailing:
+                    '${stat.totalAnswered.clamp(0, stat.bankSize)}/'
+                    '${stat.bankSize}',
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Fila visual barra + etiqueta + porcentaje. Privada: solo se usa dentro
+/// de [TopicStatTile] (no expuesta para no inflar la API publica).
+class _BarRow extends StatelessWidget {
+  final String label;
+  final double pct;
+  final Color color;
+  final String? trailing;
+
+  const _BarRow({
+    required this.label,
+    required this.pct,
+    required this.color,
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final clamped = pct.clamp(0.0, 100.0);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Text(
+              trailing ?? '${clamped.toStringAsFixed(0)}%',
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.white.withValues(alpha: 0.75),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: clamped / 100.0,
+            minHeight: 6,
+            backgroundColor: Colors.white.withValues(alpha: 0.08),
+            valueColor: AlwaysStoppedAnimation<Color>(color),
+          ),
+        ),
+      ],
     );
   }
 }
