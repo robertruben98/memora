@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_failures_repository.dart';
+import 'widgets/dgt_report_question_sheet.dart';
 
 /// Issue #95 (dgt-content): pantalla "Repaso de fallos" - re-quiz de
 /// preguntas falladas en los ultimos 7 dias.
@@ -59,9 +60,30 @@ class _DgtFailuresReviewScreenState
   @override
   Widget build(BuildContext context) {
     final failuresAsync = ref.watch(dgtRecentFailuresProvider);
+    // Issue #129 (dgt-ux): pregunta actual para el boton "Reportar errata"
+    // del AppBar. Solo disponible cuando hay entries y el quiz no termino.
+    DgtQuestion? currentQ;
+    failuresAsync.whenData((entries) {
+      if (entries.isNotEmpty && !_finished) {
+        final idx = _current.clamp(0, entries.length - 1);
+        currentQ = entries[idx].question;
+      }
+    });
     return Scaffold(
       appBar: AppBar(
         title: const Text('Repaso de fallos'),
+        actions: [
+          if (currentQ != null)
+            IconButton(
+              tooltip: 'Reportar errata',
+              icon: const Icon(Icons.flag_outlined),
+              onPressed: () => DgtReportQuestionSheet.show(
+                context: context,
+                ref: ref,
+                questionId: currentQ!.id,
+              ),
+            ),
+        ],
       ),
       body: failuresAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
