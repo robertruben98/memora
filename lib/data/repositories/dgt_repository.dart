@@ -32,6 +32,58 @@ class DgtTopic {
   }
 }
 
+/// Pregunta DGT 2026 con video de percepcion de riesgo (issue #77).
+///
+/// Shape distinto a [DgtQuestion]: en lugar de `image_url` + `difficulty`,
+/// expone `videoUrl` (obligatorio), `thumbnailUrl` (opcional) y `riskType`
+/// (peaton_oculto / ciclista_cruce / vehiculo_tapa_vision / semaforo_ambar /
+/// otro). El backend marca estos registros con `card_type='dgt_video'`.
+class DgtVideoQuestion {
+  final String id;
+  final String statement;
+  final String optionA;
+  final String optionB;
+  final String optionC;
+
+  /// Letra correcta: 'a' | 'b' | 'c'.
+  final String correct;
+  final String explanation;
+  final String videoUrl;
+  final String? thumbnailUrl;
+  final String topicId;
+  final String riskType;
+
+  const DgtVideoQuestion({
+    required this.id,
+    required this.statement,
+    required this.optionA,
+    required this.optionB,
+    required this.optionC,
+    required this.correct,
+    required this.explanation,
+    required this.videoUrl,
+    required this.topicId,
+    required this.riskType,
+    this.thumbnailUrl,
+  });
+
+  factory DgtVideoQuestion.fromJson(Map<String, dynamic> j) {
+    return DgtVideoQuestion(
+      id: (j['id'] ?? '').toString(),
+      statement: (j['statement'] ?? '').toString(),
+      optionA: (j['option_a'] ?? '').toString(),
+      optionB: (j['option_b'] ?? '').toString(),
+      optionC: (j['option_c'] ?? '').toString(),
+      correct: (j['correct'] ?? 'a').toString().toLowerCase(),
+      explanation: (j['explanation'] ?? '').toString(),
+      videoUrl: (j['video_url'] ?? '').toString(),
+      thumbnailUrl: j['thumbnail_url'] as String?,
+      topicId: (j['topic_id'] ?? '').toString(),
+      riskType: (j['risk_type'] ?? 'otro').toString(),
+    );
+  }
+}
+
 /// Pregunta DGT multi-choice (a/b/c).
 class DgtQuestion {
   final String id;
@@ -194,6 +246,39 @@ class DgtRepository {
       // Fallback local: agrupar por campo `topic` del banco.
     }
     return _topicsFromLocalBank();
+  }
+
+  /// Preguntas DGT 2026 con video de percepcion de riesgo (issue #77).
+  ///
+  /// Backend endpoint: `GET /dgt/video-questions?limit={N}` (publico, sin auth).
+  /// El endpoint puede no estar disponible en backends antiguos o devolver lista
+  /// vacia mientras se cargan los videos oficiales. En ambos casos devolvemos
+  /// una lista vacia y el caller muestra empty state.
+  ///
+  /// Aditivo: no reemplaza ningun metodo existente. No usa cache local (los
+  /// videos son streaming, no tiene sentido cachear el JSON pesado).
+  Future<List<DgtVideoQuestion>> fetchVideoQuestions({int limit = 10}) async {
+    try {
+      final res = await _api.get(
+        '/dgt/video-questions',
+        query: {'limit': '$limit'},
+      );
+      if (res is List) {
+        return res
+            .whereType<Map>()
+            .map((e) => DgtVideoQuestion.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+      }
+      if (res is Map && res['questions'] is List) {
+        return (res['questions'] as List)
+            .whereType<Map>()
+            .map((e) => DgtVideoQuestion.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+      }
+    } catch (_) {
+      // Backend antiguo sin /dgt/video-questions, offline, o 5xx -> empty.
+    }
+    return const <DgtVideoQuestion>[];
   }
 
   List<DgtTopic> _topicsFromLocalBank() {

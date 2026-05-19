@@ -8,6 +8,7 @@ import '../../data/repositories/dgt_repository.dart';
 import 'dgt_prediction.dart';
 import 'dgt_result_screen.dart';
 import 'dgt_topics_screen.dart';
+import 'dgt_video_questions_screen.dart';
 
 /// Pantalla principal del simulacro DGT permiso B.
 /// - 30 preguntas, 30 min, criterio aprobado <=3 fallos.
@@ -303,6 +304,21 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
                 ],
               ),
             ),
+            // Seccion "Examen 2026": novedades del examen oficial (videos de
+            // percepcion de riesgo). Issue #77. Boton aditivo, no toca el flow
+            // del simulacro clasico de 30 preguntas.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+              child: _Examen2026Section(
+                onOpenVideos: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const DgtVideoQuestionsScreen(),
+                    ),
+                  );
+                },
+              ),
+            ),
             DgtPredictionCard(
               onPracticeWeakest: (topicId) {
                 // Sin pantalla de practica por tema todavia (issue #51 en curso):
@@ -587,6 +603,121 @@ class _AnswerTile extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Seccion "Examen 2026" en el intro del simulacro (issue #77).
+///
+/// Card promocional que abre el modo "Videos de percepcion de riesgo", la
+/// novedad oficial DGT 2026. Aditivo: si el usuario no toca el boton, el
+/// flow del simulacro clasico es identico al anterior.
+class _Examen2026Section extends StatelessWidget {
+  final VoidCallback onOpenVideos;
+  const _Examen2026Section({required this.onOpenVideos});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFB74F).withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Text(
+                    'NOVEDAD 2026',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFFFFB74F),
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Examen 2026',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white.withValues(alpha: 0.85),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onOpenVideos,
+              borderRadius: BorderRadius.circular(14),
+              child: Ink(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF7C5CFF), Color(0xFFE04FFF)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.movie_filter_rounded,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Videos de percepcion de riesgo',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'Practica el nuevo formato del examen DGT 2026',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(
+                      Icons.chevron_right_rounded,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -60,6 +60,9 @@ dependencies:
   # Confetti animation (issue #76 - celebracion al aprobar simulacro DGT)
   confetti: ^0.7.0
 
+  # Video player para preguntas de percepcion de riesgo DGT 2026 (issue #77)
+  video_player: ^2.9.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
