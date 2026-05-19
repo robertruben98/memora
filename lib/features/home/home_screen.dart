@@ -16,18 +16,40 @@ import '../quest/quest_provider.dart';
 import '../review/feed_screen.dart';
 import '../review/study_queue.dart';
 import 'deck_sort_preference.dart';
+import 'welcome_tour.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  /// Issue #84 (dgt-ux): controla la visibilidad del tour de bienvenida.
+  /// Se setea a `true` en el primer build si la flag no esta completada;
+  /// el overlay se desmonta tocando "Siguiente" en el ultimo paso o "Saltar".
+  bool _showTour = false;
+
+  @override
+  Widget build(BuildContext context) {
     final decksAsync = ref.watch(deckSummariesProvider);
     final globalQueueAsync = ref.watch(studyQueueProvider(null));
     final questAsync = ref.watch(dailyQuestProvider);
     final sortOption = ref.watch(deckSortProvider);
     final dgtSettingsAsync = ref.watch(dgtSettingsProvider);
     final dgtPreparationAsync = ref.watch(dgtPreparationProvider);
+    final tourCompletedAsync = ref.watch(dgtTourCompletedProvider);
+
+    // Issue #84: si la flag esta cargada y es false, mostrar el tour.
+    // No-op si ya esta visible o ya completado.
+    tourCompletedAsync.whenData((completed) {
+      if (!completed && !_showTour) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && !_showTour) setState(() => _showTour = true);
+        });
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -68,7 +90,9 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: decksAsync.when(
+      body: Stack(
+        children: [
+          decksAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (decks) {
@@ -152,6 +176,22 @@ class HomeScreen extends ConsumerWidget {
             ],
           );
         },
+          ),
+          if (_showTour)
+            Positioned.fill(
+              child: WelcomeTourOverlay(
+                steps: kDefaultDgtTourSteps,
+                onDismiss: () async {
+                  setState(() => _showTour = false);
+                  await setDgtTourCompleted(ref, true);
+                },
+                onCompleted: () async {
+                  setState(() => _showTour = false);
+                  await setDgtTourCompleted(ref, true);
+                },
+              ),
+            ),
+        ],
       ),
       floatingActionButton: _HomeFab(),
     );
