@@ -324,6 +324,40 @@ class DgtRepository {
     return dgtLocalBank.take(limit).toList();
   }
 
+  /// Preguntas trampa DGT 2026 (issue #74). Backend:
+  /// `GET /dgt/quiz/trick-questions?limit={N}`.
+  ///
+  /// El endpoint devuelve preguntas con palabras clave trampa
+  /// (siempre/nunca/excepto/solo) que son las que mas suspenden en el examen
+  /// real. Si el backend es antiguo / offline / 5xx, devuelve fallback del
+  /// banco local filtrado por presencia de las palabras trampa en el
+  /// enunciado. Aditivo: no toca otros metodos.
+  Future<List<DgtQuestion>> fetchTrickQuestions({int limit = 20}) async {
+    try {
+      final res = await _api.get(
+        '/dgt/quiz/trick-questions',
+        query: {'limit': '$limit'},
+      );
+      final parsed = _parseQuestions(res);
+      if (parsed != null && parsed.isNotEmpty) {
+        return parsed;
+      }
+    } catch (_) {
+      // Backend antiguo sin endpoint, offline o 5xx -> fallback local.
+    }
+    final pattern = RegExp(
+      r'\b(siempre|nunca|excepto|solo|s[oó]lo)\b',
+      caseSensitive: false,
+    );
+    final filtered = dgtLocalBank
+        .where((q) => pattern.hasMatch(q.statement))
+        .toList();
+    if (filtered.length > limit) {
+      return filtered.take(limit).toList();
+    }
+    return filtered;
+  }
+
   /// Preguntas filtradas por tema. Backend:
   /// GET /dgt/questions?topic_id={id}&limit={N}. Si falla, filtra el banco
   /// local por campo `topic` (case-insensitive sobre id o name).
