@@ -57,6 +57,9 @@ dependencies:
   # Token persistence
   shared_preferences: ^2.3.4
 
+  # Confetti animation (issue #76 - celebracion al aprobar simulacro DGT)
+  confetti: ^0.7.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
