@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repositories/dgt_repository.dart';
+import 'dgt_hard_challenge_screen.dart';
 import 'dgt_practice_screen.dart';
 import 'dgt_topic_stats_screen.dart';
 
@@ -19,17 +20,36 @@ class DgtTopicsScreen extends ConsumerStatefulWidget {
 
 class _DgtTopicsScreenState extends ConsumerState<DgtTopicsScreen> {
   late Future<List<DgtTopic>> _future;
+  DgtHardChallengeLastAttempt? _lastHardAttempt;
 
   @override
   void initState() {
     super.initState();
     _future = ref.read(dgtRepositoryProvider).fetchTopics();
+    _loadLastHardAttempt();
+  }
+
+  Future<void> _loadLastHardAttempt() async {
+    final last = await DgtHardChallengeScreen.readLastAttempt();
+    if (!mounted) return;
+    setState(() => _lastHardAttempt = last);
   }
 
   Future<void> _refresh() async {
     final next = ref.read(dgtRepositoryProvider).fetchTopics();
     setState(() => _future = next);
     await next;
+    await _loadLastHardAttempt();
+  }
+
+  Future<void> _openHardChallenge() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => const DgtHardChallengeScreen(),
+      ),
+    );
+    // Refrescar badge "ultimo reto" al volver.
+    await _loadLastHardAttempt();
   }
 
   Future<void> _onPickTopic(DgtTopic topic) async {
@@ -162,10 +182,17 @@ class _DgtTopicsScreenState extends ConsumerState<DgtTopicsScreen> {
                 16,
                 24 + MediaQuery.viewPaddingOf(context).bottom,
               ),
-              itemCount: topics.length,
+              // +1: tile "Reto dificultad alta" antes de la lista de temas.
+              itemCount: topics.length + 1,
               separatorBuilder: (_, _) => const SizedBox(height: 10),
               itemBuilder: (_, i) {
-                final t = topics[i];
+                if (i == 0) {
+                  return _HardChallengeTile(
+                    lastAttempt: _lastHardAttempt,
+                    onTap: _openHardChallenge,
+                  );
+                }
+                final t = topics[i - 1];
                 return _TopicTile(topic: t, onTap: () => _onPickTopic(t));
               },
             ),
@@ -294,6 +321,98 @@ class _CountOption extends StatelessWidget {
                 const Icon(Icons.chevron_right_rounded),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Tile "Reto dificultad alta" (issue #78). Icono fuego + subtitulo
+/// "10 preguntas dificiles - 5 min" y, si existe intento previo, badge
+/// con el ultimo score.
+class _HardChallengeTile extends StatelessWidget {
+  final DgtHardChallengeLastAttempt? lastAttempt;
+  final VoidCallback onTap;
+
+  const _HardChallengeTile({required this.lastAttempt, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFF5C5C), Color(0xFFFF8A4F)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
+          child: Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.22),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.local_fire_department_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Reto dificultad alta',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '10 preguntas dificiles - 5 min',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.92),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    if (lastAttempt != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'Tu ultimo reto: '
+                        '${lastAttempt!.correct}/${lastAttempt!.total}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.play_arrow_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+            ],
           ),
         ),
       ),
