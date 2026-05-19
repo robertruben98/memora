@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
@@ -43,17 +44,194 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
   Timer? _audioTimer;
   int _audioRunId = 0;
 
+  // Pomodoro 25/5 modo estudio (issue #93). Aditivo: no afecta el modo audio
+  // ni el flujo normal de practica. Persiste cantidad de pomodoros del dia
+  // en SharedPreferences (key fechada YYYY-MM-DD) y otorga badge a los 4.
+  static const Duration _pomoFocus = Duration(minutes: 25);
+  static const Duration _pomoShortBreak = Duration(minutes: 5);
+  static const Duration _pomoLongBreak = Duration(minutes: 15);
+  static const String _pomoCountPrefix = 'dgt:pomo:count:';
+  static const String _pomoBadgePrefix = 'dgt:pomo:badge:';
+
+  bool _pomoActive = false;
+  bool _pomoOnBreak = false;
+  Duration _pomoRemaining = _pomoFocus;
+  Timer? _pomoTicker;
+  int _pomoCyclesToday = 0;
+  bool _pomoBadgeShownToday = false;
+
   @override
   void initState() {
     super.initState();
     _future = _load();
+    _loadPomoState();
   }
 
   @override
   void dispose() {
     _audioTimer?.cancel();
     _tts?.stop();
+    _pomoTicker?.cancel();
     super.dispose();
+  }
+
+  String _todayKey() {
+    final n = DateTime.now();
+    final mm = n.month.toString().padLeft(2, '0');
+    final dd = n.day.toString().padLeft(2, '0');
+    return '${n.year}-$mm-$dd';
+  }
+
+  Future<void> _loadPomoState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final today = _todayKey();
+    if (!mounted) return;
+    setState(() {
+      _pomoCyclesToday = prefs.getInt('$_pomoCountPrefix$today') ?? 0;
+      _pomoBadgeShownToday = prefs.getBool('$_pomoBadgePrefix$today') ?? false;
+    });
+  }
+
+  Future<void> _togglePomodoro() async {
+    if (_pomoActive) {
+      _pomoTicker?.cancel();
+      setState(() {
+        _pomoActive = false;
+        _pomoOnBreak = false;
+        _pomoRemaining = _pomoFocus;
+      });
+      return;
+    }
+    setState(() {
+      _pomoActive = true;
+      _pomoOnBreak = false;
+      _pomoRemaining = _pomoFocus;
+    });
+    _startPomoTicker();
+  }
+
+  void _startPomoTicker() {
+    _pomoTicker?.cancel();
+    _pomoTicker = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted || !_pomoActive) return;
+      final next = _pomoRemaining - const Duration(seconds: 1);
+      if (next.inSeconds <= 0) {
+        _onPomoPhaseComplete();
+      } else {
+        setState(() => _pomoRemaining = next);
+      }
+    });
+  }
+
+  Future<void> _onPomoPhaseComplete() async {
+    _pomoTicker?.cancel();
+    if (!_pomoOnBreak) {
+      // Foco completado -> incrementa ciclos y entra a descanso.
+      final prefs = await SharedPreferences.getInstance();
+      final today = _todayKey();
+      final newCount = (prefs.getInt('$_pomoCountPrefix$today') ?? 0) + 1;
+      await prefs.setInt('$_pomoCountPrefix$today', newCount);
+      final shouldShowBadge = newCount >= 4 && !_pomoBadgeShownToday;
+      if (shouldShowBadge) {
+        await prefs.setBool('$_pomoBadgePrefix$today', true);
+      }
+      if (!mounted) return;
+      final isLongBreak = newCount % 4 == 0;
+      setState(() {
+        _pomoCyclesToday = newCount;
+        _pomoOnBreak = true;
+        _pomoRemaining = isLongBreak ? _pomoLongBreak : _pomoShortBreak;
+        if (shouldShowBadge) _pomoBadgeShownToday = true;
+      });
+      _showPomoDialog(
+        title: isLongBreak
+            ? 'Descanso largo (15 min)'
+            : 'Descanso corto (5 min)',
+        message: isLongBreak
+            ? 'Llevas $newCount pomodoros hoy. Tomate 15 min antes de seguir.'
+            : 'Pomodoro #$newCount completado. Descansa 5 min.',
+        showBadge: shouldShowBadge,
+      );
+      _startPomoTicker();
+    } else {
+      // Descanso completado -> vuelve a foco.
+      if (!mounted) return;
+      setState(() {
+        _pomoOnBreak = false;
+        _pomoRemaining = _pomoFocus;
+      });
+      _showPomoDialog(
+        title: 'Vuelve al estudio',
+        message: 'Empieza otro ciclo de 25 min.',
+        showBadge: false,
+      );
+      _startPomoTicker();
+    }
+  }
+
+  void _showPomoDialog({
+    required String title,
+    required String message,
+    required bool showBadge,
+  }) {
+    if (!mounted) return;
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.timer_rounded, color: Color(0xFF7C5CFF)),
+            const SizedBox(width: 8),
+            Expanded(child: Text(title)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(message),
+            if (showBadge) ...[
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFB74F).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: const Color(0xFFFFB74F).withValues(alpha: 0.4),
+                  ),
+                ),
+                child: Row(
+                  children: const [
+                    Icon(Icons.emoji_events_rounded,
+                        color: Color(0xFFFFB74F)),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Badge: 4 pomodoros en 1 dia',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatPomoRemaining() {
+    final m = _pomoRemaining.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final s = _pomoRemaining.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$m:$s';
   }
 
   Future<void> _initTtsIfNeeded() async {
@@ -198,6 +376,52 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
       appBar: AppBar(
         title: Text(widget.topic.name),
         actions: [
+          if (_pomoActive)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: (_pomoOnBreak
+                          ? const Color(0xFF4FFFB0)
+                          : const Color(0xFF7C5CFF))
+                      .withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      _pomoOnBreak
+                          ? Icons.self_improvement_rounded
+                          : Icons.timer_rounded,
+                      size: 16,
+                      color: _pomoOnBreak
+                          ? const Color(0xFF4FFFB0)
+                          : const Color(0xFF7C5CFF),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      _formatPomoRemaining(),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          IconButton(
+            tooltip: _pomoActive
+                ? 'Parar Pomodoro (hoy: $_pomoCyclesToday)'
+                : 'Iniciar Pomodoro 25/5 (hoy: $_pomoCyclesToday)',
+            icon: Icon(
+              _pomoActive ? Icons.timer_off_rounded : Icons.timer_rounded,
+              color: _pomoActive ? const Color(0xFF7C5CFF) : null,
+            ),
+            onPressed: _togglePomodoro,
+          ),
           IconButton(
             tooltip: _audioMode ? 'Salir modo audio' : 'Modo audio',
             icon: Icon(
