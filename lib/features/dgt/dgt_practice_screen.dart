@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
+import 'widgets/topic_pill_sheet.dart';
 
 /// Modo practica DGT por tema: sin cronometro, feedback inmediato y
 /// explicacion al fallar (inline). Aditivo respecto a [DgtExamScreen]; no
@@ -65,6 +66,15 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
     super.initState();
     _future = _load();
     _loadPomoState();
+    // Issue #110: muestra pildora didactica pre-quiz si el tema es critico
+    // y aun no fue vista. Aditivo: si no hay pildora definida no hace nada.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      await DgtTopicPillSheet.maybeShow(
+        context: context,
+        topicId: widget.topic.id,
+      );
+    });
   }
 
   @override
