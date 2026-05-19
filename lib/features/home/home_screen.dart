@@ -84,6 +84,15 @@ class HomeScreen extends ConsumerWidget {
           return ListView(
             padding: EdgeInsets.fromLTRB(16, 4, 16, 96 + bottomInset),
             children: [
+              questAsync.maybeWhen(
+                data: (q) => q.streakDays >= 1
+                    ? Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: StreakBadge(streakDays: q.streakDays),
+                      )
+                    : const SizedBox.shrink(),
+                orElse: () => const SizedBox.shrink(),
+              ),
               dgtSettingsAsync.maybeWhen(
                 data: (s) => s.examDate != null
                     ? Padding(
@@ -366,15 +375,6 @@ class _QuestBanner extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              if (quest.streakDays > 0)
-                Text(
-                  '🔥 ${quest.streakDays}d',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFFFF8A4F),
-                  ),
-                ),
             ],
           ),
           const SizedBox(height: 8),
@@ -637,6 +637,100 @@ class _HomeFab extends StatelessWidget {
           label: const Text('Nuevo mazo'),
         ),
       ],
+    );
+  }
+}
+
+/// Issue #80 (dgt-ux): badge prominente del streak diario en Home.
+///
+/// Muestra un pill horizontal con icono fuego y "X dias seguidos". Si el
+/// `streakDays` aumenta respecto al valor previo, dispara una `ScaleTransition`
+/// breve (1.0 -> 1.25 -> 1.0, 600ms). La animacion NO se dispara en el primer
+/// build (initial value). Si `streakDays < 1`, el caller no debe renderizarlo.
+class StreakBadge extends StatefulWidget {
+  final int streakDays;
+  const StreakBadge({super.key, required this.streakDays});
+
+  @override
+  State<StreakBadge> createState() => _StreakBadgeState();
+}
+
+class _StreakBadgeState extends State<StreakBadge>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _scale = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 1.25)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 50,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.25, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeIn)),
+        weight: 50,
+      ),
+    ]).animate(_controller);
+  }
+
+  @override
+  void didUpdateWidget(covariant StreakBadge old) {
+    super.didUpdateWidget(old);
+    if (widget.streakDays > old.streakDays) {
+      _controller.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final label = widget.streakDays == 1
+        ? '1 dia seguido'
+        : '${widget.streakDays} dias seguidos';
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: ScaleTransition(
+        scale: _scale,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A22),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: const Color(0xFFFF8A4F),
+              width: 1.5,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('🔥', style: TextStyle(fontSize: 16)),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFFFF8A4F),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
