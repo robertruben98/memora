@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
+import 'dgt_favorites_provider.dart';
+import 'dgt_favorites_screen.dart';
 import 'dgt_prediction.dart';
 import 'dgt_result_screen.dart';
 import 'dgt_topics_screen.dart';
@@ -331,7 +333,22 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
   /// no tenia confirmacion explicita.
   Widget _buildIntro(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Simulacro DGT')),
+      appBar: AppBar(
+        title: const Text('Simulacro DGT'),
+        actions: [
+          IconButton(
+            tooltip: 'Preguntas favoritas',
+            icon: const Icon(Icons.star_outline_rounded),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const DgtFavoritesScreen(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -447,6 +464,12 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
   @override
   Widget build(BuildContext context) {
     if (!_started) return _buildIntro(context);
+    final currentQ = _questions.isNotEmpty && _current < _questions.length
+        ? _questions[_current]
+        : null;
+    final isFavCurrent = currentQ == null
+        ? false
+        : ref.watch(dgtFavoritesProvider).contains(currentQ.id);
     return Scaffold(
       appBar: AppBar(
         title: Text(_strict ? 'Examen real DGT' : 'Simulacro DGT'),
@@ -455,6 +478,26 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
         // pero no salir "limpio".
         automaticallyImplyLeading: !_strict,
         actions: [
+          // En estricto ocultamos toggle de favoritas y practica por tema:
+          // el modo simula condiciones reales y no permite distracciones
+          // ni navegacion lateral fuera del flujo de examen.
+          if (!_strict && currentQ != null)
+            IconButton(
+              tooltip: isFavCurrent
+                  ? 'Quitar de favoritas'
+                  : 'Marcar favorita',
+              icon: Icon(
+                isFavCurrent
+                    ? Icons.star_rounded
+                    : Icons.star_outline_rounded,
+                color: isFavCurrent ? const Color(0xFFFFC857) : null,
+              ),
+              onPressed: () {
+                ref
+                    .read(dgtFavoritesProvider.notifier)
+                    .toggle(currentQ.id);
+              },
+            ),
           if (!_strict)
             IconButton(
               tooltip: 'Practica por tema',
