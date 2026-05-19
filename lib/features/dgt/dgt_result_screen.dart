@@ -1,4 +1,8 @@
+import 'dart:math' as math;
+
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 
@@ -24,7 +28,7 @@ class DgtExamResult {
   bool get passed => wrongCount <= 3;
 }
 
-class DgtResultScreen extends StatelessWidget {
+class DgtResultScreen extends StatefulWidget {
   final DgtExamResult result;
   final bool autoSubmitted;
 
@@ -35,7 +39,33 @@ class DgtResultScreen extends StatelessWidget {
   });
 
   @override
+  State<DgtResultScreen> createState() => _DgtResultScreenState();
+}
+
+class _DgtResultScreenState extends State<DgtResultScreen> {
+  late final ConfettiController _confettiController;
+
+  @override
+  void initState() {
+    super.initState();
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 3));
+    if (widget.result.passed) {
+      // Refuerzo motivacional: confetti + vibracion al aprobar.
+      _confettiController.play();
+      HapticFeedback.mediumImpact();
+    }
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final result = widget.result;
     final passed = result.passed;
     final color = passed ? const Color(0xFF4FFFB0) : const Color(0xFFFF5C5C);
 
@@ -51,86 +81,127 @@ class DgtResultScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView(
-        padding: EdgeInsets.fromLTRB(
-          16,
-          12,
-          16,
-          24 + MediaQuery.viewPaddingOf(context).bottom,
-        ),
+      body: Stack(
         children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: color.withValues(alpha: 0.5)),
+          ListView(
+            padding: EdgeInsets.fromLTRB(
+              16,
+              12,
+              16,
+              24 + MediaQuery.viewPaddingOf(context).bottom,
             ),
-            child: Column(
-              children: [
-                Icon(
-                  passed ? Icons.emoji_events_rounded : Icons.replay_rounded,
-                  color: color,
-                  size: 48,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: color.withValues(alpha: 0.5)),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  passed ? 'APROBADO' : 'SUSPENSO',
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${result.correct} / ${result.total} aciertos '
-                  '(${result.wrongCount} fallos)',
-                  style: const TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  passed
-                      ? 'Criterio DGT permiso B: hasta 3 fallos.'
-                      : 'Criterio DGT permiso B: maximo 3 fallos.',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 13,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                if (autoSubmitted) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    'Tiempo agotado: entregado automaticamente.',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
-                      fontSize: 12,
+                child: Column(
+                  children: [
+                    Icon(
+                      passed
+                          ? Icons.emoji_events_rounded
+                          : Icons.replay_rounded,
+                      color: color,
+                      size: 48,
                     ),
+                    const SizedBox(height: 8),
+                    Text(
+                      passed ? 'APROBADO' : 'SUSPENSO',
+                      style: TextStyle(
+                        color: color,
+                        fontSize: passed ? 26 : 22,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.2,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    if (passed) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'Sigue asi! 🎉',
+                        style: TextStyle(
+                          color: color,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 4),
+                    Text(
+                      '${result.correct} / ${result.total} aciertos '
+                      '(${result.wrongCount} fallos)',
+                      style: TextStyle(
+                        fontSize: passed ? 18 : 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      passed
+                          ? 'Criterio DGT permiso B: hasta 3 fallos.'
+                          : 'Criterio DGT permiso B: maximo 3 fallos.',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontSize: 13,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    if (widget.autoSubmitted) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        'Tiempo agotado: entregado automaticamente.',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              if (result.wrong.isNotEmpty)
+                const Text(
+                  'Repaso de falladas',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
                   ),
-                ],
-              ],
-            ),
+                ),
+              const SizedBox(height: 8),
+              ...result.wrong.map((r) => _WrongTile(review: r)),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.home_rounded),
+                label: const Text('Volver al inicio'),
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-          if (result.wrong.isNotEmpty)
-            const Text(
-              'Repaso de falladas',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
+          // Overlay de confetti solo cuando se aprueba.
+          if (passed)
+            Align(
+              alignment: Alignment.topCenter,
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirection: math.pi / 2,
+                emissionFrequency: 0.05,
+                numberOfParticles: 20,
+                maxBlastForce: 18,
+                minBlastForce: 6,
+                gravity: 0.25,
+                shouldLoop: false,
+                colors: const [
+                  Color(0xFF4FFFB0),
+                  Color(0xFFFFD24F),
+                  Color(0xFF4FB0FF),
+                  Color(0xFFFF6FB5),
+                ],
               ),
             ),
-          const SizedBox(height: 8),
-          ...result.wrong.map((r) => _WrongTile(review: r)),
-          const SizedBox(height: 24),
-          FilledButton.icon(
-            onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.home_rounded),
-            label: const Text('Volver al inicio'),
-          ),
         ],
       ),
     );
