@@ -63,6 +63,9 @@ dependencies:
   # Video player para preguntas de percepcion de riesgo DGT 2026 (issue #77)
   video_player: ^2.9.1
 
+  # TTS para modo audio practica DGT manos libres (issue #92)
+  flutter_tts: ^4.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
