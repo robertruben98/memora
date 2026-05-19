@@ -8,6 +8,7 @@ import '../../data/repositories/card_repository.dart';
 import '../../data/repositories/deck_repository.dart';
 import '../../data/repositories/dgt_repository.dart';
 import '../dgt/dgt_settings.dart';
+import '../home/welcome_tour.dart';
 import '../review/study_queue.dart';
 import '../stats/stats_repository.dart';
 import 'settings_repository.dart';
@@ -700,6 +701,9 @@ class _DgtSection extends StatelessWidget {
                 .toList(),
           ),
           const SizedBox(height: 12),
+          // DGT issue #84: boton para volver a ver el tour de bienvenida.
+          const _DgtTourRelaunchButton(),
+          const SizedBox(height: 12),
           // DGT issue #42: toggle del modal explicativo al fallar.
           SwitchListTile.adaptive(
             contentPadding: EdgeInsets.zero,
@@ -864,6 +868,35 @@ class _AboutCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Boton "Ver tour de nuevo" en Ajustes (issue #84).
+///
+/// Resetea la flag `dgt_tour_completed` a false. La proxima vez que el
+/// usuario abra Home, el tour se mostrara automaticamente.
+class _DgtTourRelaunchButton extends ConsumerWidget {
+  const _DgtTourRelaunchButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () async {
+          await setDgtTourCompleted(ref, false);
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Tour reseteado. Se mostrara al abrir Inicio.'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        },
+        icon: const Icon(Icons.tour_rounded, size: 18),
+        label: const Text('Ver tour de bienvenida'),
       ),
     );
   }
