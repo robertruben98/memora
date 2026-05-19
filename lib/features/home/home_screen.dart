@@ -14,6 +14,7 @@ import '../dgt/dgt_failures_review_screen.dart';
 import '../dgt/dgt_preparation_provider.dart';
 import '../dgt/dgt_quick_review_screen.dart';
 import '../dgt/dgt_settings.dart';
+import '../dgt/widgets/adaptive_goal_banner.dart';
 import '../stats/stats_screen.dart';
 import '../quest/quest_provider.dart';
 import '../review/feed_screen.dart';
@@ -133,6 +134,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             orElse: () => null,
                           ),
                         ),
+                      )
+                    : const SizedBox.shrink(),
+                orElse: () => const SizedBox.shrink(),
+              ),
+              // Issue #107 (dgt-ux): meta diaria adaptativa. Aditivo;
+              // se auto-oculta si no hay desfase o si el banner fue
+              // dismisseado en las ultimas 24h.
+              dgtSettingsAsync.maybeWhen(
+                data: (s) => s.examDate != null
+                    ? const Padding(
+                        padding: EdgeInsets.only(bottom: 12),
+                        child: DgtAdaptiveGoalBanner(),
                       )
                     : const SizedBox.shrink(),
                 orElse: () => const SizedBox.shrink(),
