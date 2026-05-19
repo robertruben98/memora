@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 
@@ -72,6 +73,44 @@ class _DgtResultScreenState extends State<DgtResultScreen> {
     super.dispose();
   }
 
+  String _composeShareText() {
+    final result = widget.result;
+    final passed = result.passed;
+    final pct = result.total == 0
+        ? 0
+        : ((result.correct / result.total) * 100).round();
+    final buf = StringBuffer();
+    buf.writeln('Simulacro DGT - Memora');
+    buf.writeln(
+        'Resultado: ${result.correct}/${result.total} (${passed ? "APTO" : "NO APTO"})');
+    buf.write('Aciertos: $pct%');
+    if (result.elapsedSeconds != null) {
+      final s = result.elapsedSeconds!;
+      final m = (s ~/ 60).toString().padLeft(2, '0');
+      final ss = (s % 60).toString().padLeft(2, '0');
+      buf.write(' | Tiempo: $m:$ss');
+    }
+    buf.writeln();
+    if (result.wrong.isNotEmpty) {
+      final byTopic = <String, int>{};
+      for (final w in result.wrong) {
+        final t = (w.question.topic ?? '').trim();
+        final key = t.isEmpty ? 'Otros' : t;
+        byTopic[key] = (byTopic[key] ?? 0) + 1;
+      }
+      final parts =
+          byTopic.entries.map((e) => '${e.key} (${e.value})').join(', ');
+      buf.writeln('Fallos por tema: $parts');
+    }
+    buf.write('https://memora.a-robertdev.com');
+    return buf.toString();
+  }
+
+  Future<void> _shareResult() async {
+    final text = _composeShareText();
+    await Share.share(text, subject: 'Mi simulacro DGT en Memora');
+  }
+
   @override
   Widget build(BuildContext context) {
     final result = widget.result;
@@ -83,6 +122,11 @@ class _DgtResultScreenState extends State<DgtResultScreen> {
         title: const Text('Resultado simulacro'),
         automaticallyImplyLeading: false,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.share_rounded),
+            tooltip: 'Compartir',
+            onPressed: _shareResult,
+          ),
           IconButton(
             icon: const Icon(Icons.close_rounded),
             tooltip: 'Cerrar',
