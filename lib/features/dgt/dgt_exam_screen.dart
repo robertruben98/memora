@@ -12,6 +12,7 @@ import 'dgt_prediction.dart';
 import 'dgt_result_screen.dart';
 import 'dgt_topics_screen.dart';
 import 'dgt_video_questions_screen.dart';
+import 'widgets/dgt_report_question_sheet.dart';
 
 /// Pantalla principal del simulacro DGT permiso B.
 /// - 30 preguntas, 30 min, criterio aprobado <=3 fallos.
@@ -523,6 +524,18 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
                 );
               },
               icon: const Icon(Icons.category_outlined),
+            ),
+          // Issue #129 (dgt-ux): reportar errata. Disponible solo en modo
+          // estandar (no estricto) y cuando hay pregunta visible.
+          if (!_strict && currentQ != null)
+            IconButton(
+              tooltip: 'Reportar errata',
+              icon: const Icon(Icons.flag_outlined),
+              onPressed: () => DgtReportQuestionSheet.show(
+                context: context,
+                ref: ref,
+                questionId: currentQ.id,
+              ),
             ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),

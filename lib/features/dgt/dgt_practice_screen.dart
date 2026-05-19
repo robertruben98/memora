@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_session_summary_screen.dart';
+import 'widgets/dgt_report_question_sheet.dart';
 import 'widgets/topic_pill_sheet.dart';
 
 /// Modo practica DGT por tema: sin cronometro, feedback inmediato y
@@ -439,18 +440,33 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
   }
 
   Widget _buildScaffold(BuildContext context) {
+    final currentQ = (_questions.isNotEmpty && _current < _questions.length)
+        ? _questions[_current]
+        : null;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.topic.name),
-        actions: _PracticeAppBarActions(
-          pomoActive: _pomoActive,
-          pomoOnBreak: _pomoOnBreak,
-          pomoRemainingLabel: _formatPomoRemaining(),
-          pomoCyclesToday: _pomoCyclesToday,
-          audioMode: _audioMode,
-          onTogglePomodoro: _togglePomodoro,
-          onToggleAudio: _toggleAudioMode,
-        ).build(context),
+        actions: [
+          if (currentQ != null && !_finished)
+            IconButton(
+              tooltip: 'Reportar errata',
+              icon: const Icon(Icons.flag_outlined),
+              onPressed: () => DgtReportQuestionSheet.show(
+                context: context,
+                ref: ref,
+                questionId: currentQ.id,
+              ),
+            ),
+          ..._PracticeAppBarActions(
+            pomoActive: _pomoActive,
+            pomoOnBreak: _pomoOnBreak,
+            pomoRemainingLabel: _formatPomoRemaining(),
+            pomoCyclesToday: _pomoCyclesToday,
+            audioMode: _audioMode,
+            onTogglePomodoro: _togglePomodoro,
+            onToggleAudio: _toggleAudioMode,
+          ).build(context),
+        ],
       ),
       floatingActionButton: _audioMode
           ? FloatingActionButton(

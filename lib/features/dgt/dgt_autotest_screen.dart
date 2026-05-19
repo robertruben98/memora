@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_failures_repository.dart';
+import 'widgets/dgt_report_question_sheet.dart';
 
 /// Issue #127 (dgt-ux): modo Autotest Mental DGT (active recall puro).
 ///
@@ -97,9 +98,24 @@ class _DgtAutotestScreenState extends ConsumerState<DgtAutotestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currentQ = (_questions.isNotEmpty && _current < _questions.length)
+        ? _questions[_current]
+        : null;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Autotest mental'),
+        actions: [
+          if (currentQ != null && !_finished)
+            IconButton(
+              tooltip: 'Reportar errata',
+              icon: const Icon(Icons.flag_outlined),
+              onPressed: () => DgtReportQuestionSheet.show(
+                context: context,
+                ref: ref,
+                questionId: currentQ.id,
+              ),
+            ),
+        ],
       ),
       body: FutureBuilder<List<DgtQuestion>>(
         future: _future,

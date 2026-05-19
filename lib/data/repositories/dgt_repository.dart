@@ -358,6 +358,36 @@ class DgtRepository {
     return filtered;
   }
 
+  /// Issue #129 (dgt-ux): reportar errata en una pregunta DGT. Backend BE#113:
+  /// `POST /dgt/questions/{id}/report`.
+  ///
+  /// Body: `{reason: str, comment: str?}`. Reasons aceptadas por backend:
+  /// `wrong_answer`, `ambiguous`, `bad_image`, `outdated_law`, `typo`, `other`.
+  ///
+  /// Devuelve `true` si el backend respondio 2xx (report creado), `false` si
+  /// hubo fallo (offline, 5xx, etc). 409 (duplicado mismo user+question) se
+  /// considera `true` porque el reporte original ya existe.
+  Future<bool> reportQuestion({
+    required String questionId,
+    required String reason,
+    String? comment,
+  }) async {
+    try {
+      final body = <String, dynamic>{'reason': reason};
+      if (comment != null && comment.trim().isNotEmpty) {
+        body['comment'] = comment.trim();
+      }
+      await _api.post('/dgt/questions/$questionId/report', body);
+      return true;
+    } on ApiException catch (e) {
+      // 409 = duplicado: el report previo existe, lo consideramos exito UX.
+      if (e.statusCode == 409) return true;
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// Preguntas filtradas por tema. Backend:
   /// GET /dgt/questions?topic_id={id}&limit={N}. Si falla, filtra el banco
   /// local por campo `topic` (case-insensitive sobre id o name).
