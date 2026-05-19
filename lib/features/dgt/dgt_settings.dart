@@ -141,3 +141,37 @@ Color dgtBannerAccentColor(int? daysUntilExam) {
   if (daysUntilExam <= 30) return const Color(0xFFFFB74F);
   return const Color(0xFF4FFFB0);
 }
+
+/// Issue #79 (dgt-ux): mensaje motivacional contextual segun urgencia
+/// (dias hasta examen) cruzado con progreso real (expectedScore).
+///
+/// Devuelve null cuando NO debe mostrarse:
+/// - sin examen fijado (`days == null`)
+/// - examen ya pasado (`days < 0`)
+/// - sin prediccion disponible (`expectedScore == null`)
+///
+/// Matriz:
+///   <7d & score<0.90  -> "Quedan pocos dias y no llegas - dale ya!"
+///   <7d & score>=0.90 -> "A punto! Ultima semana, manten el ritmo"
+///   7-30d & score<0.90  -> "Tienes margen pero hay que acelerar"
+///   7-30d & score>=0.90 -> "Vas bien, sigue asi"
+///   >30d (cualquier score) -> "Calma, hay tiempo de sobra"
+///
+/// Funcion PURA, sin estado, sin IO. Testeada en
+/// test/features/dgt/dgt_motivation_test.dart.
+String? dgtMotivationMessage(int? days, double? expectedScore) {
+  if (days == null) return null;
+  if (days < 0) return null;
+  if (expectedScore == null) return null;
+  const threshold = 0.90;
+  if (days > 30) return 'Calma, hay tiempo de sobra';
+  if (days < 7) {
+    return expectedScore >= threshold
+        ? 'A punto! Ultima semana, manten el ritmo'
+        : 'Quedan pocos dias y no llegas - dale ya!';
+  }
+  // 7..30 inclusive
+  return expectedScore >= threshold
+      ? 'Vas bien, sigue asi'
+      : 'Tienes margen pero hay que acelerar';
+}

@@ -444,6 +444,11 @@ class _DgtBanner extends StatelessWidget {
     final answered = preparation?.answeredToday ?? 0;
     final progress = preparation?.dailyProgress ?? 0.0;
     final verdictLabel = preparation?.verdictLabel ?? 'Prediccion: cargando...';
+    // Issue #79 (dgt-ux): mensaje motivacional contextual.
+    // Null si no aplica (sin examen, examen pasado, sin prediccion).
+    final motivation = (preparation != null && preparation!.prediction.hasEnoughData)
+        ? dgtMotivationMessage(days, preparation!.prediction.expectedScore)
+        : null;
 
     return Material(
       color: Colors.transparent,
@@ -514,6 +519,17 @@ class _DgtBanner extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.78),
                 ),
               ),
+              if (motivation != null) ...[
+                const SizedBox(height: 6),
+                Text(
+                  motivation,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: accent.withValues(alpha: 0.9),
+                  ),
+                ),
+              ],
               const SizedBox(height: 10),
               // CTA secundario: Repaso rapido (10 preguntas, 3 min). Pensado
               // para micro-sesiones. No persiste en historial. Issue #53.
