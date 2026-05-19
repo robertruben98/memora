@@ -66,6 +66,10 @@ dependencies:
   # TTS para modo audio practica DGT manos libres (issue #92)
   flutter_tts: ^4.2.0
 
+  # Notificaciones locales DGT - recordatorio diario de meta de estudio (issue #102)
+  flutter_local_notifications: ^17.2.3
+  timezone: ^0.9.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -10,9 +10,16 @@ import 'data/storage/image_storage.dart';
 import 'data/sync/sync_service.dart';
 import 'features/auth/auth_state.dart';
 import 'features/auth/login_screen.dart';
+import 'features/dgt/dgt_reminder_service.dart';
+import 'features/dgt/dgt_settings.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'features/settings/settings_repository.dart';
 import 'features/shell/root_shell.dart';
+
+/// Global navigator key (issue #102): permite navegar desde callbacks
+/// que no tienen `BuildContext` activo, p.ej. el tap de la notificacion
+/// diaria DGT.
+final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,6 +68,58 @@ Future<void> main() async {
   final onboardingSeen =
       await db.settingsDao.getValue('onboarding_seen') == '1';
 
+  // Issue #102 (dgt-ux): inicializa notificaciones locales DGT y reaplica
+  // la config persistida (si esta enabled, garantiza que zonedSchedule
+  // este vigente tras un reinicio del dispositivo).
+  try {
+    final reminder = container.read(dgtReminderServiceProvider);
+    await reminder.init(
+      onDeeplink: (payload) {
+        if (payload == kDailyChallengeDeeplink) {
+          // Navega a la pestana home donde vive la card "Reto de hoy".
+          // RootShell ya monta el reto diario; con popUntil aseguramos
+          // limpiar pantallas modales si las hubiera.
+          final nav = appNavigatorKey.currentState;
+          if (nav != null) {
+            nav.popUntil((r) => r.isFirst);
+          }
+        }
+      },
+    );
+    final cfg = await reminder.loadConfig();
+    if (cfg.enabled) {
+      // Sincroniza meta diaria + fecha examen cacheadas (SharedPreferences)
+      // con los valores actuales en DB para que el chequeo de "meta cumplida"
+      // sea correcto desde el primer dia.
+      try {
+        final dgtRepo = container.read(dgtSettingsRepositoryProvider);
+        final dgt = await dgtRepo.load();
+        final shouldFire = await DgtReminderService.shouldFireToday();
+        if (shouldFire) {
+          await reminder.reschedule(cfg, examDate: dgt.examDate);
+        } else {
+          // Meta ya cumplida hoy: programar para manana evitando spam.
+          await reminder.cancel();
+          await reminder.reschedule(cfg, examDate: dgt.examDate);
+        }
+      } catch (e, st) {
+        appLogger.warn(
+          'dgt-reminder',
+          'reschedule on boot failed',
+          error: e,
+          stackTrace: st,
+        );
+      }
+    }
+  } catch (e, st) {
+    appLogger.warn(
+      'dgt-reminder',
+      'init failed (notifications disabled)',
+      error: e,
+      stackTrace: st,
+    );
+  }
+
   runApp(
     UncontrolledProviderScope(
       container: container,
@@ -97,6 +156,7 @@ class _MemoraAppState extends ConsumerState<MemoraApp> {
     );
     return MaterialApp(
       title: 'Memora',
+      navigatorKey: appNavigatorKey,
       debugShowCheckedModeBanner: false,
       themeMode: themeMode,
       darkTheme: ThemeData(

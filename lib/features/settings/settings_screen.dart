@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/srs/study_settings.dart';
 import '../../core/theme/theme_provider.dart';
@@ -7,6 +8,7 @@ import '../../data/backup/backup_service.dart';
 import '../../data/repositories/card_repository.dart';
 import '../../data/repositories/deck_repository.dart';
 import '../../data/repositories/dgt_repository.dart';
+import '../dgt/dgt_reminder_service.dart';
 import '../dgt/dgt_settings.dart';
 import '../home/welcome_tour.dart';
 import '../review/study_queue.dart';
@@ -728,6 +730,11 @@ class _DgtSection extends StatelessWidget {
           const SizedBox(height: 16),
           const Divider(height: 1, thickness: 0.4),
           const SizedBox(height: 12),
+          // DGT issue #102 (dgt-ux): recordatorio diario meta DGT.
+          _DgtReminderTile(examDate: settings.examDate, dailyGoal: settings.dailyGoal),
+          const SizedBox(height: 12),
+          const Divider(height: 1, thickness: 0.4),
+          const SizedBox(height: 12),
           // DGT issue #45: boton para sincronizar/invalidar cache del banco DGT.
           const _DgtSyncButton(),
         ],
@@ -898,6 +905,112 @@ class _DgtTourRelaunchButton extends ConsumerWidget {
         icon: const Icon(Icons.tour_rounded, size: 18),
         label: const Text('Ver tour de bienvenida'),
       ),
+    );
+  }
+}
+
+/// Issue #102 (dgt-ux): tile en Ajustes DGT para activar/desactivar el
+/// recordatorio diario y elegir la hora. Persiste en SharedPreferences via
+/// [DgtReminderService] y reprograma al cambiar.
+class _DgtReminderTile extends ConsumerWidget {
+  final DateTime? examDate;
+  final int dailyGoal;
+
+  const _DgtReminderTile({required this.examDate, required this.dailyGoal});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cfgAsync = ref.watch(dgtReminderConfigProvider);
+    return cfgAsync.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 8),
+        child: LinearProgressIndicator(minHeight: 2),
+      ),
+      error: (e, _) => Text('Recordatorio: error ($e)'),
+      data: (cfg) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SwitchListTile.adaptive(
+              contentPadding: EdgeInsets.zero,
+              value: cfg.enabled,
+              onChanged: (v) async {
+                final service = ref.read(dgtReminderServiceProvider);
+                // Si lo activa, pedir permisos (Android 13+/iOS).
+                bool ok = true;
+                if (v) {
+                  ok = await service.requestPermissionsIfNeeded();
+                  if (!ok && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Permiso de notificaciones denegado. Actívalo en Ajustes del sistema.',
+                        ),
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                    // No persistimos enabled=true sin permiso.
+                    return;
+                  }
+                }
+                // Sincronizar meta y fecha cacheadas para el chequeo
+                // de meta cumplida.
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setInt(kDgtDailyGoalLocalKey, dailyGoal);
+                if (examDate != null) {
+                  await prefs.setString(
+                    kDgtExamDateLocalKey,
+                    examDate!.toIso8601String(),
+                  );
+                } else {
+                  await prefs.remove(kDgtExamDateLocalKey);
+                }
+                final next = cfg.copyWith(enabled: v);
+                await service.saveConfig(next);
+                await service.reschedule(next, examDate: examDate);
+                ref.invalidate(dgtReminderConfigProvider);
+              },
+              title: const Text(
+                'Recordatorio diario',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(
+                cfg.enabled
+                    ? 'Aviso diario a las ${cfg.label} para cumplir tu meta DGT.'
+                    : 'Activa una notificacion diaria para no perder la racha.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.white.withValues(alpha: 0.6),
+                  height: 1.35,
+                ),
+              ),
+              activeThumbColor: const Color(0xFF7C5CFF),
+            ),
+            if (cfg.enabled) ...[
+              const SizedBox(height: 4),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final picked = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay(hour: cfg.hour, minute: cfg.minute),
+                  );
+                  if (picked == null) return;
+                  final next = cfg.copyWith(
+                    hour: picked.hour,
+                    minute: picked.minute,
+                  );
+                  final service = ref.read(dgtReminderServiceProvider);
+                  await service.saveConfig(next);
+                  await service.reschedule(next, examDate: examDate);
+                  ref.invalidate(dgtReminderConfigProvider);
+                },
+                icon: const Icon(Icons.schedule_rounded, size: 18),
+                label: Text('Hora: ${cfg.label}'),
+              ),
+            ],
+          ],
+        );
+      },
     );
   }
 }
