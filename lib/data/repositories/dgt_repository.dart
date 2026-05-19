@@ -295,6 +295,35 @@ class DgtRepository {
     return out;
   }
 
+  /// Preguntas filtradas por dificultad (issue #78). Backend:
+  /// `GET /dgt/questions?difficulty={N}&limit={M}`.
+  ///
+  /// [difficulty]: 1 (facil), 2 (media), 3 (dificil). Si backend falla u
+  /// offline, devuelve fallback del banco local mini limitado a [limit]
+  /// (sin filtrar — el banco local no tiene metadato de dificultad).
+  ///
+  /// Aditivo: no toca cache de simulacro, no persiste, no rompe
+  /// `fetchExamQuestions` ni `fetchQuestionsByTopic`.
+  Future<List<DgtQuestion>> fetchQuestionsByDifficulty({
+    required int difficulty,
+    int limit = 10,
+  }) async {
+    try {
+      final res = await _api.get(
+        '/dgt/questions',
+        query: {'difficulty': '$difficulty', 'limit': '$limit'},
+      );
+      final parsed = _parseQuestions(res);
+      if (parsed != null && parsed.isNotEmpty) {
+        return parsed;
+      }
+    } catch (_) {
+      // Backend no soporta el filtro o esta offline.
+    }
+    // Fallback: muestra del banco local sin garantia de dificultad.
+    return dgtLocalBank.take(limit).toList();
+  }
+
   /// Preguntas filtradas por tema. Backend:
   /// GET /dgt/questions?topic_id={id}&limit={N}. Si falla, filtra el banco
   /// local por campo `topic` (case-insensitive sobre id o name).

@@ -189,4 +189,43 @@ void main() {
           reason: 'sin cache -> cada llamada va al backend');
     });
   });
+
+  // Issue #78 (dgt-content): modo "Reto dificultad alta".
+  group('DgtRepository.fetchQuestionsByDifficulty', () {
+    test('backend OK -> devuelve preguntas parseadas', () async {
+      final api = _FakeApiClient([_fakeBank(10)]);
+      final repo = DgtRepository(api);
+
+      final r = await repo.fetchQuestionsByDifficulty(
+        difficulty: 3,
+        limit: 10,
+      );
+      expect(r.length, 10);
+      expect(r.first.id, 'q0');
+      expect(api.getCalls, 1);
+    });
+
+    test('backend 5xx -> cae a banco local mini limitado', () async {
+      final api = _FakeApiClient([ApiException(503, 'down')]);
+      final repo = DgtRepository(api);
+
+      final r = await repo.fetchQuestionsByDifficulty(
+        difficulty: 3,
+        limit: 5,
+      );
+      expect(r.length, lessThanOrEqualTo(5));
+    });
+
+    test('backend lista vacia -> cae a banco local mini', () async {
+      final api = _FakeApiClient([<Map<String, dynamic>>[]]);
+      final repo = DgtRepository(api);
+
+      final r = await repo.fetchQuestionsByDifficulty(
+        difficulty: 3,
+        limit: 10,
+      );
+      // No falla, devuelve algo del banco local (puede estar vacio).
+      expect(r, isNotNull);
+    });
+  });
 }
