@@ -442,62 +442,15 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.topic.name),
-        actions: [
-          if (_pomoActive)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: (_pomoOnBreak
-                          ? const Color(0xFF4FFFB0)
-                          : const Color(0xFF7C5CFF))
-                      .withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _pomoOnBreak
-                          ? Icons.self_improvement_rounded
-                          : Icons.timer_rounded,
-                      size: 16,
-                      color: _pomoOnBreak
-                          ? const Color(0xFF4FFFB0)
-                          : const Color(0xFF7C5CFF),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      _formatPomoRemaining(),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          IconButton(
-            tooltip: _pomoActive
-                ? 'Parar Pomodoro (hoy: $_pomoCyclesToday)'
-                : 'Iniciar Pomodoro 25/5 (hoy: $_pomoCyclesToday)',
-            icon: Icon(
-              _pomoActive ? Icons.timer_off_rounded : Icons.timer_rounded,
-              color: _pomoActive ? const Color(0xFF7C5CFF) : null,
-            ),
-            onPressed: _togglePomodoro,
-          ),
-          IconButton(
-            tooltip: _audioMode ? 'Salir modo audio' : 'Modo audio',
-            icon: Icon(
-              _audioMode ? Icons.headset_off_rounded : Icons.headset_rounded,
-              color: _audioMode ? const Color(0xFF7C5CFF) : null,
-            ),
-            onPressed: _toggleAudioMode,
-          ),
-        ],
+        actions: _PracticeAppBarActions(
+          pomoActive: _pomoActive,
+          pomoOnBreak: _pomoOnBreak,
+          pomoRemainingLabel: _formatPomoRemaining(),
+          pomoCyclesToday: _pomoCyclesToday,
+          audioMode: _audioMode,
+          onTogglePomodoro: _togglePomodoro,
+          onToggleAudio: _toggleAudioMode,
+        ).build(context),
       ),
       floatingActionButton: _audioMode
           ? FloatingActionButton(
@@ -539,7 +492,7 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
     final q = qs[_current];
     final picked = _picked[_current];
     final answered = picked != null;
-    final isCorrect = answered && picked == q.correct;
+    final isLast = _current == qs.length - 1;
 
     return Column(
       children: [
@@ -549,85 +502,18 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
           backgroundColor: Colors.white.withValues(alpha: 0.08),
         ),
         Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Pregunta ${_current + 1} / ${qs.length}',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  q.statement,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    height: 1.35,
-                  ),
-                ),
-                if (q.imageUrl != null && q.imageUrl!.isNotEmpty) ...[
-                  const SizedBox(height: 14),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: _DgtImage(path: q.imageUrl!),
-                  ),
-                ],
-                const SizedBox(height: 16),
-                _AnswerTile(
-                  letter: 'a',
-                  text: q.optionA,
-                  picked: picked,
-                  correct: q.correct,
-                  answered: answered,
-                  onTap: () => _selectAnswer('a'),
-                ),
-                _AnswerTile(
-                  letter: 'b',
-                  text: q.optionB,
-                  picked: picked,
-                  correct: q.correct,
-                  answered: answered,
-                  onTap: () => _selectAnswer('b'),
-                ),
-                _AnswerTile(
-                  letter: 'c',
-                  text: q.optionC,
-                  picked: picked,
-                  correct: q.correct,
-                  answered: answered,
-                  onTap: () => _selectAnswer('c'),
-                ),
-                if (answered) ...[
-                  const SizedBox(height: 16),
-                  _ExplanationCard(question: q, isCorrect: isCorrect),
-                ],
-              ],
-            ),
+          child: _PracticeQuestionView(
+            question: q,
+            index: _current,
+            total: qs.length,
+            picked: picked,
+            onSelect: _selectAnswer,
           ),
         ),
-        SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
-            child: Row(
-              children: [
-                const Spacer(),
-                FilledButton.icon(
-                  onPressed: answered ? _next : null,
-                  icon: Icon(_current == qs.length - 1
-                      ? Icons.flag_rounded
-                      : Icons.chevron_right_rounded),
-                  label: Text(_current == qs.length - 1
-                      ? 'Ver resumen'
-                      : 'Siguiente'),
-                ),
-              ],
-            ),
-          ),
+        _PracticeBottomActions(
+          answered: answered,
+          isLast: isLast,
+          onNext: _next,
         ),
       ],
     );
@@ -908,6 +794,211 @@ class _DgtImage extends ConsumerWidget {
         alignment: Alignment.center,
         color: Colors.white.withValues(alpha: 0.05),
         child: const Icon(Icons.image_not_supported_outlined),
+      ),
+    );
+  }
+}
+
+/// Issue #123 (dgt-tech): sub-componente puro para los `actions` del AppBar de
+/// `DgtPracticeScreen`. Renderiza el chip Pomodoro activo (si corresponde) y
+/// los toggles de Pomodoro y modo audio TTS. Sin estado propio: recibe flags y
+/// callbacks del state principal para preservar el comportamiento original.
+class _PracticeAppBarActions {
+  final bool pomoActive;
+  final bool pomoOnBreak;
+  final String pomoRemainingLabel;
+  final int pomoCyclesToday;
+  final bool audioMode;
+  final VoidCallback onTogglePomodoro;
+  final VoidCallback onToggleAudio;
+
+  const _PracticeAppBarActions({
+    required this.pomoActive,
+    required this.pomoOnBreak,
+    required this.pomoRemainingLabel,
+    required this.pomoCyclesToday,
+    required this.audioMode,
+    required this.onTogglePomodoro,
+    required this.onToggleAudio,
+  });
+
+  List<Widget> build(BuildContext context) {
+    return [
+      if (pomoActive)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: (pomoOnBreak
+                      ? const Color(0xFF4FFFB0)
+                      : const Color(0xFF7C5CFF))
+                  .withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  pomoOnBreak
+                      ? Icons.self_improvement_rounded
+                      : Icons.timer_rounded,
+                  size: 16,
+                  color: pomoOnBreak
+                      ? const Color(0xFF4FFFB0)
+                      : const Color(0xFF7C5CFF),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  pomoRemainingLabel,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      IconButton(
+        tooltip: pomoActive
+            ? 'Parar Pomodoro (hoy: $pomoCyclesToday)'
+            : 'Iniciar Pomodoro 25/5 (hoy: $pomoCyclesToday)',
+        icon: Icon(
+          pomoActive ? Icons.timer_off_rounded : Icons.timer_rounded,
+          color: pomoActive ? const Color(0xFF7C5CFF) : null,
+        ),
+        onPressed: onTogglePomodoro,
+      ),
+      IconButton(
+        tooltip: audioMode ? 'Salir modo audio' : 'Modo audio',
+        icon: Icon(
+          audioMode ? Icons.headset_off_rounded : Icons.headset_rounded,
+          color: audioMode ? const Color(0xFF7C5CFF) : null,
+        ),
+        onPressed: onToggleAudio,
+      ),
+    ];
+  }
+}
+
+/// Issue #123 (dgt-tech): widget puro que renderiza la pregunta actual,
+/// imagen opcional, las 3 opciones y la tarjeta de explicacion una vez
+/// respondida. No tiene estado: recibe `picked` y delega seleccion via
+/// `onSelect`. Equivalente 1:1 al inline anterior dentro de `_buildQuestion`.
+class _PracticeQuestionView extends StatelessWidget {
+  final DgtQuestion question;
+  final int index;
+  final int total;
+  final String? picked;
+  final ValueChanged<String> onSelect;
+
+  const _PracticeQuestionView({
+    required this.question,
+    required this.index,
+    required this.total,
+    required this.picked,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final q = question;
+    final answered = picked != null;
+    final isCorrect = answered && picked == q.correct;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Pregunta ${index + 1} / $total',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.6),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            q.statement,
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              height: 1.35,
+            ),
+          ),
+          if (q.imageUrl != null && q.imageUrl!.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: _DgtImage(path: q.imageUrl!),
+            ),
+          ],
+          const SizedBox(height: 16),
+          _AnswerTile(
+            letter: 'a',
+            text: q.optionA,
+            picked: picked,
+            correct: q.correct,
+            answered: answered,
+            onTap: () => onSelect('a'),
+          ),
+          _AnswerTile(
+            letter: 'b',
+            text: q.optionB,
+            picked: picked,
+            correct: q.correct,
+            answered: answered,
+            onTap: () => onSelect('b'),
+          ),
+          _AnswerTile(
+            letter: 'c',
+            text: q.optionC,
+            picked: picked,
+            correct: q.correct,
+            answered: answered,
+            onTap: () => onSelect('c'),
+          ),
+          if (answered) ...[
+            const SizedBox(height: 16),
+            _ExplanationCard(question: q, isCorrect: isCorrect),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Issue #123 (dgt-tech): boton inferior "Siguiente" / "Ver resumen". El
+/// callback `onNext` queda desactivado mientras no haya respuesta para
+/// preservar la UX original (disabled hasta tap respuesta).
+class _PracticeBottomActions extends StatelessWidget {
+  final bool answered;
+  final bool isLast;
+  final VoidCallback onNext;
+
+  const _PracticeBottomActions({
+    required this.answered,
+    required this.isLast,
+    required this.onNext,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+        child: Row(
+          children: [
+            const Spacer(),
+            FilledButton.icon(
+              onPressed: answered ? onNext : null,
+              icon: Icon(isLast
+                  ? Icons.flag_rounded
+                  : Icons.chevron_right_rounded),
+              label: Text(isLast ? 'Ver resumen' : 'Siguiente'),
+            ),
+          ],
+        ),
       ),
     );
   }
