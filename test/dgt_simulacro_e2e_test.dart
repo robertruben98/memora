@@ -280,4 +280,81 @@ void main() {
       );
     });
   });
+
+  group('Modo examen real estricto (issue #87)', () {
+    test('DgtExamResult almacena strictMode y elapsedSeconds', () {
+      final r = DgtExamResult(
+        total: 30,
+        correct: 28,
+        wrong: const [],
+        elapsedSeconds: 1234,
+        strictMode: true,
+      );
+      expect(r.strictMode, isTrue);
+      expect(r.elapsedSeconds, 1234);
+      expect(r.passed, isTrue);
+    });
+
+    testWidgets('intro muestra CTA "Modo examen real"', (tester) async {
+      await tester.pumpWidget(_buildApp(seed: _seedQuestions(30)));
+      await tester.pump();
+      expect(find.text('Modo examen real'), findsOneWidget);
+    });
+
+    testWidgets(
+        'tap CTA estricto muestra dialog confirmacion y permite cancelar',
+        (tester) async {
+      await tester.pumpWidget(_buildApp(seed: _seedQuestions(30)));
+      await tester.pump();
+      await tester.tap(find.text('Modo examen real'));
+      await tester.pumpAndSettle();
+      // Dialog visible con copy de advertencia.
+      expect(find.textContaining('30 minutos sin pausa'), findsOneWidget);
+      // Cancelar => vuelve al intro, no entra al examen.
+      await tester.tap(find.text('Cancelar'));
+      await tester.pumpAndSettle();
+      expect(find.text('Empezar simulacro'), findsOneWidget);
+      expect(find.text('Pregunta 1 / 30'), findsNothing);
+    });
+
+    testWidgets(
+        'strictMode oculta "Anterior" y muestra "Entregar examen" en la ultima',
+        (tester) async {
+      // Montamos DIRECTO en strict para no depender del confirm dialog
+      // pushReplacement (que requiere Navigator real con rutas).
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            apiClientProvider.overrideWithValue(_FakeApiClient()),
+            dgtRepositoryProvider.overrideWithValue(
+              _FakeDgtRepository(_seedQuestions(2, letter: 'a')),
+            ),
+            dgtPredictionRepositoryProvider
+                .overrideWithValue(_FakePredictionRepo()),
+          ],
+          child: const MaterialApp(
+            home: DgtExamScreen(strictMode: true),
+          ),
+        ),
+      );
+      // En strict el examen arranca solo via postFrameCallback.
+      await tester.pump();
+      await tester.pump();
+      // AppBar refleja modo estricto.
+      expect(find.text('Examen real DGT'), findsOneWidget);
+      // No hay boton "Anterior".
+      expect(find.text('Anterior'), findsNothing);
+      // Pregunta 1.
+      expect(find.text('Pregunta 1 / 2'), findsOneWidget);
+      // Respondemos y vamos a la siguiente.
+      await tester.tap(find.text('A').first);
+      await tester.pump();
+      await tester.tap(find.text('Siguiente'));
+      await tester.pump();
+      // Ultima pregunta: aparece "Entregar examen" (no "Terminar").
+      expect(find.text('Pregunta 2 / 2'), findsOneWidget);
+      expect(find.text('Entregar examen'), findsOneWidget);
+      expect(find.text('Terminar'), findsNothing);
+    });
+  });
 }
