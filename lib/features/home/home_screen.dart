@@ -9,6 +9,8 @@ import '../decks/deck_editor_screen.dart';
 import '../decks/deck_screen.dart';
 import '../dgt/dgt_daily_challenge_card.dart';
 import '../dgt/dgt_exam_screen.dart';
+import '../dgt/dgt_failures_repository.dart';
+import '../dgt/dgt_failures_review_screen.dart';
 import '../dgt/dgt_preparation_provider.dart';
 import '../dgt/dgt_quick_review_screen.dart';
 import '../dgt/dgt_settings.dart';
@@ -41,6 +43,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final dgtSettingsAsync = ref.watch(dgtSettingsProvider);
     final dgtPreparationAsync = ref.watch(dgtPreparationProvider);
     final tourCompletedAsync = ref.watch(dgtTourCompletedProvider);
+    // Issue #95 (dgt-content): card "Repaso de fallos" - solo visible si N>0.
+    final dgtFailuresCountAsync = ref.watch(dgtRecentFailuresCountProvider);
 
     // Issue #84: si la flag esta cargada y es false, mostrar el tour.
     // No-op si ya esta visible o ya completado.
@@ -164,6 +168,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ? const Padding(
                         padding: EdgeInsets.only(bottom: 16),
                         child: DgtDailyChallengeCard(),
+                      )
+                    : const SizedBox.shrink(),
+                orElse: () => const SizedBox.shrink(),
+              ),
+              // Issue #95 (dgt-content): "Repaso de fallos" - solo si hay
+              // fallos recientes (ventana 7 dias). Posicion: debajo del Daily
+              // Challenge, encima del banner de simulacro DGT.
+              dgtFailuresCountAsync.maybeWhen(
+                data: (count) => count > 0
+                    ? Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: _DgtFailuresCard(
+                          count: count,
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const DgtFailuresReviewScreen(),
+                            ),
+                          ),
+                        ),
                       )
                     : const SizedBox.shrink(),
                 orElse: () => const SizedBox.shrink(),
@@ -604,6 +627,70 @@ class _DgtBanner extends StatelessWidget {
                   style: TextStyle(fontWeight: FontWeight.w700),
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Issue #95 (dgt-content): card Home "Repaso de fallos".
+/// Aparece solo si el usuario tiene fallos en los ultimos 7 dias.
+/// Tap navega a [DgtFailuresReviewScreen].
+class _DgtFailuresCard extends StatelessWidget {
+  final int count;
+  final VoidCallback onTap;
+  const _DgtFailuresCard({required this.count, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFF5C5C), Color(0xFFFF8A4F)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+              const Icon(Icons.error_outline_rounded,
+                  color: Colors.white, size: 22),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Repaso de fallos',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '$count pendiente${count == 1 ? '' : 's'} (ultimos 7 dias)',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward_rounded,
+                  color: Colors.white, size: 20),
             ],
           ),
         ),

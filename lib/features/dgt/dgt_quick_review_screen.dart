@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
+import 'dgt_failures_repository.dart';
 
 /// Modo Review Rapido DGT: 10 preguntas, 3 minutos, sin persistencia en
 /// historial de simulacros. Pensado para micro-sesiones (cola del super,
@@ -136,10 +137,25 @@ class _DgtQuickReviewScreenState
     _submitted = true;
     _ticker?.cancel();
     int correct = 0;
+    // Issue #95 (dgt-content): tracking de fallos en ventana 7 dias.
+    final failed = <DgtQuestion>[];
     for (var i = 0; i < _questions.length; i++) {
       final q = _questions[i];
       final picked = _answers[i];
-      if (picked != null && picked == q.correct) correct++;
+      if (picked != null && picked == q.correct) {
+        correct++;
+      } else {
+        failed.add(q);
+      }
+    }
+    if (failed.isNotEmpty) {
+      ref
+          .read(dgtFailuresRepositoryProvider)
+          .recordFailures(failed)
+          .then((_) {
+        ref.invalidate(dgtRecentFailuresCountProvider);
+        ref.invalidate(dgtRecentFailuresProvider);
+      });
     }
     setState(() {
       _finished = true;

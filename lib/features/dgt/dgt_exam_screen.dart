@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
+import 'dgt_failures_repository.dart';
 import 'dgt_favorites_provider.dart';
 import 'dgt_favorites_screen.dart';
 import 'dgt_prediction.dart';
@@ -195,6 +196,19 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
     _submitted = true;
     _ticker?.cancel();
     final result = _buildResult();
+    // Issue #95 (dgt-content): persistir fallos del simulacro para que
+    // aparezcan en el modo "Repaso de fallos" (ventana 7 dias).
+    // Fire-and-forget: si falla SharedPreferences, no rompe el flow del exam.
+    if (result.wrong.isNotEmpty) {
+      final failedQs = result.wrong.map((r) => r.question).toList();
+      ref
+          .read(dgtFailuresRepositoryProvider)
+          .recordFailures(failedQs)
+          .then((_) {
+        ref.invalidate(dgtRecentFailuresCountProvider);
+        ref.invalidate(dgtRecentFailuresProvider);
+      });
+    }
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
