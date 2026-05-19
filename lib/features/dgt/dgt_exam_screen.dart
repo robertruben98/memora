@@ -12,8 +12,15 @@ import 'dgt_video_questions_screen.dart';
 
 /// Pantalla principal del simulacro DGT permiso B.
 /// - 30 preguntas, 30 min, criterio aprobado <=3 fallos.
+///
+/// Modos:
+/// - Estandar: navegacion libre, flag, grid, terminar antes.
+/// - Estricto ([strictMode]=true, issue #87): timer 30min sin pausa,
+///   solo "Siguiente" (no Anterior, no flag, no grid), entrega automatica
+///   al responder la 30 o al agotar tiempo. Sin revision intermedia.
 class DgtExamScreen extends ConsumerStatefulWidget {
-  const DgtExamScreen({super.key});
+  final bool strictMode;
+  const DgtExamScreen({super.key, this.strictMode = false});
 
   @override
   ConsumerState<DgtExamScreen> createState() => _DgtExamScreenState();
@@ -31,6 +38,8 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
   Timer? _ticker;
   bool _submitted = false;
 
+  bool get _strict => widget.strictMode;
+
   /// Modo intro: muestra Card de prediccion antes del simulacro.
   /// Issue #52: usuario ve "tu probabilidad de aprobar" y tema mas debil
   /// antes de empezar. Pulsa "Empezar simulacro" -> _begin().
@@ -42,6 +51,13 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
     // Disparamos el fetch de prediccion al construir; el simulacro se
     // carga solo cuando el usuario pulsa "Empezar".
     ref.read(dgtPredictionProvider);
+    // En modo estricto la confirmacion ya se mostro en la pantalla previa,
+    // arrancamos sin intro post-frame para evitar setState en initState.
+    if (_strict) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _begin();
+      });
+    }
   }
 
   void _begin() {
@@ -55,6 +71,44 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
         return qs;
       });
     });
+  }
+
+  /// Issue #87: confirmacion explicita antes de entrar al modo estricto.
+  /// El usuario debe saber que no podra pausar ni revisar.
+  Future<void> _confirmStartStrict() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Modo examen real'),
+        content: const Text(
+          'Vas a hacer un examen en condiciones reales:\n\n'
+          '- 30 minutos sin pausa\n'
+          '- No podras volver a preguntas anteriores\n'
+          '- No veras explicaciones hasta terminar\n'
+          '- Si se acaba el tiempo, se entrega automaticamente\n\n'
+          'Estas listo?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFFF5C5C),
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Empezar examen'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) => const DgtExamScreen(strictMode: true),
+      ),
+    );
   }
 
   void _startTimer() {
@@ -167,6 +221,8 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
       total: _questions.length,
       correct: correct,
       wrong: wrong,
+      elapsedSeconds: _totalSeconds - _secondsLeft,
+      strictMode: _strict,
     );
   }
 
@@ -337,11 +393,11 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
             ),
             const Spacer(),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
-                  onPressed: _begin,
+                  onPressed: _strict ? null : _begin,
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     backgroundColor: const Color(0xFF7C5CFF),
@@ -351,6 +407,31 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
                     'Empezar simulacro',
                     style: TextStyle(
                       fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Modo examen real estricto (issue #87): sin pausa, sin revisar,
+            // sin volver atras. Timer 30min y entrega automatica.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              child: SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  key: const ValueKey('dgt-strict-mode-cta'),
+                  onPressed: _confirmStartStrict,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    side: const BorderSide(color: Color(0xFFFF5C5C)),
+                    foregroundColor: const Color(0xFFFF5C5C),
+                  ),
+                  icon: const Icon(Icons.timer_outlined),
+                  label: const Text(
+                    'Modo examen real',
+                    style: TextStyle(
+                      fontSize: 15,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -368,19 +449,24 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
     if (!_started) return _buildIntro(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Simulacro DGT'),
+        title: Text(_strict ? 'Examen real DGT' : 'Simulacro DGT'),
+        // En estricto no permitimos abandonar con back del AppBar:
+        // simulamos condiciones reales. El usuario puede cerrar la app,
+        // pero no salir "limpio".
+        automaticallyImplyLeading: !_strict,
         actions: [
-          IconButton(
-            tooltip: 'Practica por tema',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const DgtTopicsScreen(),
-                ),
-              );
-            },
-            icon: const Icon(Icons.category_outlined),
-          ),
+          if (!_strict)
+            IconButton(
+              tooltip: 'Practica por tema',
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const DgtTopicsScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.category_outlined),
+            ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Center(
@@ -440,25 +526,27 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
                             ),
                           ),
                           const Spacer(),
-                          IconButton(
-                            tooltip: _flagged.contains(_current)
-                                ? 'Desmarcar'
-                                : 'Marcar para revisar',
-                            onPressed: _toggleFlag,
-                            icon: Icon(
-                              _flagged.contains(_current)
-                                  ? Icons.flag_rounded
-                                  : Icons.outlined_flag_rounded,
-                              color: _flagged.contains(_current)
-                                  ? const Color(0xFFFFB74F)
-                                  : null,
+                          if (!_strict) ...[
+                            IconButton(
+                              tooltip: _flagged.contains(_current)
+                                  ? 'Desmarcar'
+                                  : 'Marcar para revisar',
+                              onPressed: _toggleFlag,
+                              icon: Icon(
+                                _flagged.contains(_current)
+                                    ? Icons.flag_rounded
+                                    : Icons.outlined_flag_rounded,
+                                color: _flagged.contains(_current)
+                                    ? const Color(0xFFFFB74F)
+                                    : null,
+                              ),
                             ),
-                          ),
-                          IconButton(
-                            tooltip: 'Ver panel de preguntas',
-                            onPressed: _showQuestionGrid,
-                            icon: const Icon(Icons.grid_view_rounded),
-                          ),
+                            IconButton(
+                              tooltip: 'Ver panel de preguntas',
+                              onPressed: _showQuestionGrid,
+                              icon: const Icon(Icons.grid_view_rounded),
+                            ),
+                          ],
                         ],
                       ),
                       const SizedBox(height: 4),
@@ -505,18 +593,38 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
                   padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
                   child: Row(
                     children: [
-                      OutlinedButton.icon(
-                        onPressed:
-                            _current > 0 ? () => _go(_current - 1) : null,
-                        icon: const Icon(Icons.chevron_left_rounded),
-                        label: const Text('Anterior'),
-                      ),
+                      // En estricto no hay "Anterior": el usuario no puede
+                      // volver a preguntas ya respondidas. Mantenemos el
+                      // boton oculto para no romper el layout: usamos
+                      // Spacer().
+                      if (!_strict)
+                        OutlinedButton.icon(
+                          onPressed:
+                              _current > 0 ? () => _go(_current - 1) : null,
+                          icon: const Icon(Icons.chevron_left_rounded),
+                          label: const Text('Anterior'),
+                        ),
                       const Spacer(),
                       if (_current < qs.length - 1)
                         FilledButton.icon(
                           onPressed: () => _go(_current + 1),
                           icon: const Icon(Icons.chevron_right_rounded),
                           label: const Text('Siguiente'),
+                        )
+                      else if (_strict)
+                        // Ultima pregunta en modo estricto: el boton entrega
+                        // directamente sin pedir confirmacion (la confirmacion
+                        // fue al iniciar). Solo permitir si hay respuesta
+                        // seleccionada en la ultima pregunta para evitar
+                        // entregas accidentales.
+                        FilledButton.icon(
+                          onPressed: picked != null ? () => _submit() : null,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFFFF5C5C),
+                            foregroundColor: Colors.white,
+                          ),
+                          icon: const Icon(Icons.flag_rounded),
+                          label: const Text('Entregar examen'),
                         )
                       else
                         FilledButton.icon(

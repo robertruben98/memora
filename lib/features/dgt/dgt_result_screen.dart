@@ -17,10 +17,19 @@ class DgtExamResult {
   final int correct;
   final List<DgtAnswerReview> wrong;
 
+  /// Segundos reales empleados en el examen (issue #87 modo estricto).
+  /// Si null, no se muestra ("tiempo usado") -- modo estandar legacy.
+  final int? elapsedSeconds;
+
+  /// Si el examen se hizo en modo "Examen real" estricto (issue #87).
+  final bool strictMode;
+
   const DgtExamResult({
     required this.total,
     required this.correct,
     required this.wrong,
+    this.elapsedSeconds,
+    this.strictMode = false,
   });
 
   int get wrongCount => total - correct;
@@ -156,6 +165,25 @@ class _DgtResultScreenState extends State<DgtResultScreen> {
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.6),
                           fontSize: 12,
+                        ),
+                      ),
+                    ],
+                    if (result.elapsedSeconds != null) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        () {
+                          final s = result.elapsedSeconds!;
+                          final m = (s ~/ 60).toString().padLeft(2, '0');
+                          final ss = (s % 60).toString().padLeft(2, '0');
+                          final prefix = result.strictMode
+                              ? 'Modo examen real - tiempo usado'
+                              : 'Tiempo usado';
+                          return '$prefix: $m:$ss';
+                        }(),
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
