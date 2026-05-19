@@ -1,10 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/features/dgt/dgt_adaptive_goal_provider.dart';
 import 'package:memora/features/dgt/dgt_settings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-/// Issue #107 (dgt-ux): tests para meta diaria adaptativa.
-/// Cubre el calculo PURO `computeAdaptiveGoal` y el helper de cooldown
-/// `isDgtAdaptiveBannerDismissed`. No toca SharedPreferences directamente.
+/// Issue #107 (dgt-ux) + Issue #114 (dgt-tech): tests para meta diaria adaptativa.
+/// Cubre el calculo PURO `computeAdaptiveGoal`, el helper de cooldown
+/// `isDgtAdaptiveBannerDismissed` y la persistencia best-effort en
+/// SharedPreferences mediante setMockInitialValues.
 void main() {
   group('computeAdaptiveGoal', () {
     DgtSettings buildSettings({DateTime? examDate, int dailyGoal = 20}) {
@@ -129,6 +131,74 @@ void main() {
       );
       expect(r.coverageRatio, 1.0);
     });
+
+    test('examen hoy mismo (days==0) -> sin banner', () {
+      final now = DateTime(2026, 1, 1, 9, 30);
+      final exam = DateTime(2026, 1, 1, 18, 0);
+      final r = computeAdaptiveGoal(
+        settings: buildSettings(examDate: exam, dailyGoal: 20),
+        totalAnswered: 100,
+        now: now,
+      );
+      expect(r.shouldShowBanner, isFalse);
+      expect(r.daysToExam, 0);
+    });
+
+    test('totalAnswered=0 + plazo amplio -> en rango sin banner', () {
+      final now = DateTime(2026, 1, 1);
+      // 60 dias, 0 respondidas, target=600 -> suggested=ceil(600/60)=10
+      // current=20 -> ratio=0.5 (limite inferior, NO < 0.5) -> sin banner.
+      final exam = DateTime(2026, 3, 2);
+      final r = computeAdaptiveGoal(
+        settings: buildSettings(examDate: exam, dailyGoal: 20),
+        totalAnswered: 0,
+        now: now,
+      );
+      expect(r.shouldShowBanner, isFalse);
+      expect(r.suggested, isNull);
+      expect(r.daysToExam, 60);
+    });
+
+    test('targetCoverage custom override afecta calculo', () {
+      final now = DateTime(2026, 1, 1);
+      final exam = DateTime(2026, 1, 11);
+      final r = computeAdaptiveGoal(
+        settings: buildSettings(examDate: exam, dailyGoal: 20),
+        totalAnswered: 0,
+        now: now,
+        targetCoverage: 300,
+      );
+      // remaining=300, days=10 -> suggested=30 (>20*1.25=25) -> banner ON.
+      expect(r.suggested, 30);
+      expect(r.mustAccelerate, isTrue);
+    });
+
+    test('dailyGoal=0 protege contra division (ratio usa max(1,goal))', () {
+      final now = DateTime(2026, 1, 1);
+      final exam = DateTime(2026, 1, 11);
+      final r = computeAdaptiveGoal(
+        settings: buildSettings(examDate: exam, dailyGoal: 0),
+        totalAnswered: 0,
+        now: now,
+      );
+      // current=max(1,0)=1, suggested=60, ratio=60 -> banner accelerar.
+      expect(r.shouldShowBanner, isTrue);
+      expect(r.mustAccelerate, isTrue);
+      expect(r.suggested, 60);
+    });
+
+    test('cobertura justo en target (600) -> suggested=min', () {
+      final now = DateTime(2026, 1, 1);
+      final exam = DateTime(2026, 1, 31);
+      // remaining=0 (>= target). dailyGoal=10 -> 10 > 5*2=10 ? false -> sin banner.
+      final r = computeAdaptiveGoal(
+        settings: buildSettings(examDate: exam, dailyGoal: 10),
+        totalAnswered: kDgtAdaptiveTargetCoverage,
+        now: now,
+      );
+      expect(r.shouldShowBanner, isFalse);
+      expect(r.coverageRatio, 1.0);
+    });
   });
 
   group('isDgtAdaptiveBannerDismissed', () {
@@ -156,6 +226,54 @@ void main() {
         isDgtAdaptiveBannerDismissed(dismissedAt: dismissed, now: now),
         isFalse,
       );
+    });
+
+    test('cooldown custom override (1h) respeta limite', () {
+      final now = DateTime(2026, 1, 1, 2, 0);
+      final dismissed = DateTime(2026, 1, 1, 0, 30);
+      expect(
+        isDgtAdaptiveBannerDismissed(
+          dismissedAt: dismissed,
+          now: now,
+          cooldownHours: 1,
+        ),
+        isFalse,
+      );
+    });
+  });
+
+  group('SharedPreferences persistence (best-effort)', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+    });
+
+    test('readDgtAdaptiveBannerDismissedAt sin clave -> null', () async {
+      final v = await readDgtAdaptiveBannerDismissedAt();
+      expect(v, isNull);
+    });
+
+    test('write + read roundtrip preserva ISO timestamp', () async {
+      final when = DateTime.utc(2026, 5, 19, 12, 34, 56);
+      await writeDgtAdaptiveBannerDismissedAt(when);
+      final v = await readDgtAdaptiveBannerDismissedAt();
+      expect(v, isNotNull);
+      expect(v!.toUtc(), when);
+    });
+
+    test('clave invalida -> null sin throw', () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        kDgtAdaptiveBannerDismissedAtKey: 'not-a-date',
+      });
+      final v = await readDgtAdaptiveBannerDismissedAt();
+      expect(v, isNull);
+    });
+
+    test('clave vacia -> null', () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        kDgtAdaptiveBannerDismissedAtKey: '',
+      });
+      final v = await readDgtAdaptiveBannerDismissedAt();
+      expect(v, isNull);
     });
   });
 }
