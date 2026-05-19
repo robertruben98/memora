@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../dgt/dgt_signals_catalog_screen.dart';
 import '../../dgt/dgt_trick_questions_screen.dart';
 import '../dgt_exam_history.dart';
 import '../dgt_exam_screen.dart';
@@ -54,7 +55,87 @@ class DgtStudySection extends ConsumerWidget {
             ),
           ),
         ),
+        const SizedBox(height: 10),
+        _DgtSignalsCatalogTile(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const DgtSignalsCatalogScreen(),
+            ),
+          ),
+        ),
       ],
+    );
+  }
+}
+
+class _DgtSignalsCatalogTile extends StatelessWidget {
+  final VoidCallback onTap;
+  const _DgtSignalsCatalogTile({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A22),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: const Color(0xFF4FFFB0).withValues(alpha: 0.4),
+            ),
+          ),
+          padding: const EdgeInsets.fromLTRB(16, 12, 14, 12),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4FFFB0).withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.traffic_rounded,
+                  color: Color(0xFF4FFFB0),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Catalogo de senales',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Repasa senales por categoria (peligro, prohibicion...)',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_rounded,
+                color: Colors.white.withValues(alpha: 0.5),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
