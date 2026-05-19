@@ -62,10 +62,13 @@ class DgtFailuresRepository {
   }) : _prefsLoader = prefsLoader ?? SharedPreferences.getInstance;
 
   /// Devuelve TODOS los fallos persistidos (sin filtrar por ventana).
+  ///
+  /// Issue #121: SIEMPRE devuelve lista mutable (nunca `const []`) porque
+  /// los callers hacen `.removeWhere()` / `.add()` sobre el resultado.
   Future<List<DgtFailureEntry>> _readAll() async {
     final prefs = await _prefsLoader();
     final raw = prefs.getString(_key);
-    if (raw == null || raw.isEmpty) return const [];
+    if (raw == null || raw.isEmpty) return <DgtFailureEntry>[];
     try {
       final list = jsonDecode(raw) as List<dynamic>;
       final out = <DgtFailureEntry>[];
@@ -77,7 +80,7 @@ class DgtFailuresRepository {
       }
       return out;
     } catch (_) {
-      return const [];
+      return <DgtFailureEntry>[];
     }
   }
 
