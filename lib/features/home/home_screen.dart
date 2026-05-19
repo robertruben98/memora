@@ -7,6 +7,7 @@ import '../../data/repositories/deck_repository.dart';
 import '../ai_gen/ai_generate_screen.dart';
 import '../decks/deck_editor_screen.dart';
 import '../decks/deck_screen.dart';
+import '../dgt/dgt_daily_challenge_card.dart';
 import '../dgt/dgt_exam_screen.dart';
 import '../dgt/dgt_preparation_provider.dart';
 import '../dgt/dgt_quick_review_screen.dart';
@@ -156,6 +157,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 orElse: () => false,
               ))
                 const SizedBox(height: 16),
+              // Issue #85 (dgt-ux): "Reto de hoy" contextual. Aditivo.
+              // Posicion: debajo del banner urgencia, encima de _DgtExamBanner.
+              dgtSettingsAsync.maybeWhen(
+                data: (s) => s.examDate != null
+                    ? const Padding(
+                        padding: EdgeInsets.only(bottom: 16),
+                        child: DgtDailyChallengeCard(),
+                      )
+                    : const SizedBox.shrink(),
+                orElse: () => const SizedBox.shrink(),
+              ),
               _DgtExamBanner(
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const DgtExamScreen()),
