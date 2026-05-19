@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
+import 'dgt_session_summary_screen.dart';
 import 'widgets/topic_pill_sheet.dart';
 
 /// Modo practica DGT por tema: sin cronometro, feedback inmediato y
@@ -60,6 +61,13 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
   Timer? _pomoTicker;
   int _pomoCyclesToday = 0;
   bool _pomoBadgeShownToday = false;
+
+  // Issue #113 (dgt-ux): tracker simple de la sesion de practica para
+  // alimentar el resumen al cerrar. In-memory, sin persistencia. Las
+  // metricas (# respondidas, # correctas) se derivan al exit usando
+  // [_picked] y [_questions]; aqui solo guardamos el [DateTime] inicial.
+  late final DateTime _sessionStartedAt = DateTime.now();
+  bool _summaryShown = false;
 
   @override
   void initState() {
@@ -380,8 +388,57 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
     return c;
   }
 
+  /// Numero de preguntas con respuesta (independiente de si fue correcta).
+  int _answeredCount() => _picked.length;
+
+  /// Hook al exit: si la sesion tuvo >= 5 preguntas respondidas y aun no
+  /// se mostro el resumen, abre [DgtSessionSummaryScreen] antes de hacer
+  /// pop de la practica. Sesiones cortas salen directo. Si el quiz se
+  /// completo via "Ver resumen" el flujo natural ya mostro el resumen
+  /// inline y este hook se salta para no duplicar UX.
+  Future<void> _handleExitWithSummary() async {
+    if (_summaryShown || _finished) {
+      // _finished: el usuario ya vio el resumen inline al completar el
+      // quiz, no abrimos otro encima.
+      Navigator.of(context).pop();
+      return;
+    }
+    final answered = _answeredCount();
+    if (!DgtSessionSummaryScreen.shouldShowFor(answered)) {
+      Navigator.of(context).pop();
+      return;
+    }
+    _summaryShown = true;
+    final correct = _correctCount();
+    final elapsed = DateTime.now().difference(_sessionStartedAt);
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => DgtSessionSummaryScreen(
+          topicName: widget.topic.name,
+          answeredCount: answered,
+          correctCount: correct,
+          elapsed: elapsed,
+          weakestTopic: correct < answered ? widget.topic.name : null,
+        ),
+      ),
+    );
+    if (!mounted) return;
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _handleExitWithSummary();
+      },
+      child: _buildScaffold(context),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.topic.name),
