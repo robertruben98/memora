@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../dgt/dgt_autotest_screen.dart';
 import '../../dgt/dgt_signals_catalog_screen.dart';
 import '../../dgt/dgt_trick_questions_screen.dart';
 import '../dgt_exam_history.dart';
@@ -44,6 +45,14 @@ class DgtStudySection extends ConsumerWidget {
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute(
               builder: (_) => const DgtTrickQuestionsScreen(),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        _DgtAutotestTile(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const DgtAutotestScreen(),
             ),
           ),
         ),
@@ -120,6 +129,103 @@ class _DgtSignalsCatalogTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       'Repasa senales por categoria (peligro, prohibicion...)',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_rounded,
+                color: Colors.white.withValues(alpha: 0.5),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Issue #127 (dgt-ux): tile para Autotest Mental (active recall puro:
+/// preguntas sin opciones a/b/c, self-report acierto/fallo).
+class _DgtAutotestTile extends StatelessWidget {
+  final VoidCallback onTap;
+  const _DgtAutotestTile({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A22),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: const Color(0xFFB9A6FF).withValues(alpha: 0.45),
+            ),
+          ),
+          padding: const EdgeInsets.fromLTRB(16, 12, 14, 12),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFB9A6FF).withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.psychology_alt_rounded,
+                  color: Color(0xFFB9A6FF),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Text(
+                          'Autotest mental',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFB9A6FF)
+                                .withValues(alpha: 0.20),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            'Active recall',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFFB9A6FF),
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Pregunta sin opciones. Piensa, revela, self-report.',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.white.withValues(alpha: 0.6),
