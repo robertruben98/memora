@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
@@ -33,10 +36,118 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
   int _current = 0;
   bool _finished = false;
 
+  // Modo audio TTS manos libres (issue #92).
+  bool _audioMode = false;
+  bool _audioPaused = false;
+  FlutterTts? _tts;
+  Timer? _audioTimer;
+  int _audioRunId = 0;
+
   @override
   void initState() {
     super.initState();
     _future = _load();
+  }
+
+  @override
+  void dispose() {
+    _audioTimer?.cancel();
+    _tts?.stop();
+    super.dispose();
+  }
+
+  Future<void> _initTtsIfNeeded() async {
+    if (_tts != null) return;
+    final tts = FlutterTts();
+    await tts.setLanguage('es-ES');
+    await tts.setSpeechRate(0.5);
+    await tts.setVolume(1.0);
+    await tts.awaitSpeakCompletion(true);
+    _tts = tts;
+  }
+
+  Future<void> _toggleAudioMode() async {
+    if (_audioMode) {
+      _audioMode = false;
+      _audioPaused = false;
+      _audioRunId++;
+      _audioTimer?.cancel();
+      await _tts?.stop();
+      if (mounted) setState(() {});
+      return;
+    }
+    await _initTtsIfNeeded();
+    setState(() {
+      _audioMode = true;
+      _audioPaused = false;
+    });
+    unawaited(_runAudioLoop());
+  }
+
+  Future<void> _toggleAudioPause() async {
+    if (!_audioMode) return;
+    setState(() => _audioPaused = !_audioPaused);
+    if (_audioPaused) {
+      _audioRunId++;
+      _audioTimer?.cancel();
+      await _tts?.stop();
+    } else {
+      unawaited(_runAudioLoop());
+    }
+  }
+
+  Future<void> _speak(String text) async {
+    final tts = _tts;
+    if (tts == null) return;
+    await tts.speak(text);
+  }
+
+  Future<bool> _wait(Duration d, int runId) async {
+    final c = Completer<bool>();
+    _audioTimer?.cancel();
+    _audioTimer = Timer(d, () {
+      if (!c.isCompleted) c.complete(true);
+    });
+    final ok = await c.future;
+    return ok && runId == _audioRunId && _audioMode && !_audioPaused && mounted;
+  }
+
+  /// Bucle TTS: lee pregunta + opciones, espera, lee respuesta correcta,
+  /// avanza a la siguiente. Se cancela si el usuario pausa, apaga audio o
+  /// cambia manualmente de pregunta.
+  Future<void> _runAudioLoop() async {
+    final runId = ++_audioRunId;
+    while (mounted && _audioMode && !_audioPaused && runId == _audioRunId) {
+      if (_questions.isEmpty || _finished) return;
+      if (_current >= _questions.length) return;
+      final q = _questions[_current];
+      await _speak(
+        'Pregunta ${_current + 1}. ${q.statement}. '
+        'Opcion A: ${q.optionA}. '
+        'Opcion B: ${q.optionB}. '
+        'Opcion C: ${q.optionC}.',
+      );
+      if (!await _wait(const Duration(seconds: 6), runId)) return;
+      if (!_picked.containsKey(_current)) {
+        // Auto-marca correcta para registrar avance.
+        setState(() => _picked[_current] = q.correct);
+      }
+      final picked = _picked[_current];
+      final correct = picked == q.correct;
+      await _speak(
+        correct
+            ? 'Correcto. La respuesta es ${q.correct.toUpperCase()}.'
+            : 'Incorrecto. La respuesta correcta es ${q.correct.toUpperCase()}.',
+      );
+      if (!await _wait(const Duration(seconds: 2), runId)) return;
+      if (_current < _questions.length - 1) {
+        setState(() => _current++);
+      } else {
+        setState(() => _finished = true);
+        await _speak('Practica terminada.');
+        return;
+      }
+    }
   }
 
   Future<List<DgtQuestion>> _load() {
@@ -86,7 +197,26 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.topic.name),
+        actions: [
+          IconButton(
+            tooltip: _audioMode ? 'Salir modo audio' : 'Modo audio',
+            icon: Icon(
+              _audioMode ? Icons.headset_off_rounded : Icons.headset_rounded,
+              color: _audioMode ? const Color(0xFF7C5CFF) : null,
+            ),
+            onPressed: _toggleAudioMode,
+          ),
+        ],
       ),
+      floatingActionButton: _audioMode
+          ? FloatingActionButton(
+              onPressed: _toggleAudioPause,
+              backgroundColor: const Color(0xFF7C5CFF),
+              child: Icon(
+                _audioPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+              ),
+            )
+          : null,
       body: FutureBuilder<List<DgtQuestion>>(
         future: _future,
         builder: (context, snap) {
