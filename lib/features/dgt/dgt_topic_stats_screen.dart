@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_practice_screen.dart';
 import 'dgt_prediction.dart';
+import 'dgt_topic_heatmap_screen.dart';
 
 /// Issue #67 (dgt-ux): pantalla "Estadisticas por tema".
 ///
@@ -77,7 +78,8 @@ class DgtTopicStatsScreen extends ConsumerWidget {
                 final s = sorted[i];
                 return TopicStatTile(
                   stat: s,
-                  onTap: () => _openPractice(context, s),
+                  onTap: () => _openHeatmap(context, s),
+                  onLongPress: () => _openPractice(context, s),
                 );
               },
             ),
@@ -125,6 +127,20 @@ class DgtTopicStatsScreen extends ConsumerWidget {
       ),
     );
   }
+
+  /// Issue #138 (dgt-ux): tap normal abre el drill-down heatmap del tema.
+  /// El long-press conserva el atajo a practica directa para no perder
+  /// el flujo previo (issue #67).
+  void _openHeatmap(BuildContext context, DgtTopicStat stat) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => DgtTopicHeatmapScreen(
+          topicId: stat.topicId,
+          topicName: stat.topicName ?? stat.topicId,
+        ),
+      ),
+    );
+  }
 }
 
 /// Tile visual por tema. Expuesto (no privado) para tests de widget.
@@ -132,10 +148,15 @@ class TopicStatTile extends StatelessWidget {
   final DgtTopicStat stat;
   final VoidCallback onTap;
 
+  /// Issue #138 (dgt-ux): long-press conserva el atajo a practica directa
+  /// (atajo del flujo previo issue #67). Opcional para no romper call sites.
+  final VoidCallback? onLongPress;
+
   const TopicStatTile({
     super.key,
     required this.stat,
     required this.onTap,
+    this.onLongPress,
   });
 
   /// Umbrales de color para la barra de accuracy.
@@ -170,6 +191,7 @@ class TopicStatTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(14),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),

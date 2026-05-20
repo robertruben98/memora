@@ -21,10 +21,18 @@ class DgtPracticeScreen extends ConsumerStatefulWidget {
   /// y se piden todas las del tema.
   final int limit;
 
+  /// Issue #138 (dgt-ux): cuando se entra desde el heatmap "practicar rojos",
+  /// la pantalla recibe la lista de subtopic_ids a filtrar. Es opcional para
+  /// no romper los call sites previos (todos navegan sin filtrar subtemas).
+  /// Cuando el backend exponga filtro por subtopic, esto se pasa al endpoint;
+  /// mientras tanto se conserva como contexto de sesion.
+  final List<String>? subtopicIds;
+
   const DgtPracticeScreen({
     super.key,
     required this.topic,
     required this.limit,
+    this.subtopicIds,
   });
 
   @override
