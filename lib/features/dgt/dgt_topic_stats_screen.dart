@@ -4,7 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_practice_screen.dart';
 import 'dgt_prediction.dart';
+import 'dgt_reminder_service.dart';
+import 'dgt_time_of_day_insight_provider.dart';
 import 'dgt_topic_heatmap_screen.dart';
+import 'widgets/best_hour_card.dart';
 
 /// Issue #67 (dgt-ux): pantalla "Estadisticas por tema".
 ///
@@ -72,10 +75,17 @@ class DgtTopicStatsScreen extends ConsumerWidget {
                 16,
                 24 + MediaQuery.viewPaddingOf(context).bottom,
               ),
-              itemCount: sorted.length,
+              // Issue #137: inyecta card "Tu mejor hora" como primer item.
+              itemCount: sorted.length + 1,
               separatorBuilder: (_, _) => const SizedBox(height: 10),
               itemBuilder: (_, i) {
-                final s = sorted[i];
+                if (i == 0) {
+                  return BestHourCard(
+                    onProgramReminder: (b) =>
+                        _programReminder(context, ref, b),
+                  );
+                }
+                final s = sorted[i - 1];
                 return TopicStatTile(
                   stat: s,
                   onTap: () => _openHeatmap(context, s),
@@ -123,6 +133,39 @@ class DgtTopicStatsScreen extends ConsumerWidget {
         builder: (_) => DgtPracticeScreen(
           topic: topic,
           limit: _defaultPracticeLimit,
+        ),
+      ),
+    );
+  }
+
+  /// Issue #137 (dgt-ux): pre-configura recordatorio con la hora ganadora.
+  /// Usa la hora inicial del bucket; el usuario puede afinar en settings.
+  Future<void> _programReminder(
+    BuildContext context,
+    WidgetRef ref,
+    DgtTimeOfDayBucket bucket,
+  ) async {
+    final service = ref.read(dgtReminderServiceProvider);
+    final current = await ref.read(dgtReminderConfigProvider.future);
+    final next = current.copyWith(
+      enabled: true,
+      hour: bucket.startHour,
+      minute: 0,
+    );
+    try {
+      await service.saveConfig(next);
+      await service.reschedule(next);
+    } catch (_) {
+      // Best-effort: si la persistencia falla seguimos mostrando feedback.
+    }
+    ref.invalidate(dgtReminderConfigProvider);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Recordatorio programado a las ${bucket.startHour
+              .toString()
+              .padLeft(2, '0')}:00',
         ),
       ),
     );

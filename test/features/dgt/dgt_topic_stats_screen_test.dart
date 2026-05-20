@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/features/dgt/dgt_prediction.dart';
+import 'package:memora/features/dgt/dgt_time_of_day_insight_provider.dart';
 import 'package:memora/features/dgt/dgt_topic_stats_screen.dart';
 
 /// Issue #67 (dgt-ux): pantalla "Estadisticas por tema".
@@ -124,6 +125,8 @@ void main() {
         ProviderScope(
           overrides: [
             dgtTopicStatsProvider.overrideWith((ref) async => stats),
+            dgtTimeOfDayInsightProvider
+                .overrideWith((ref) async => DgtTimeOfDayInsight.empty()),
           ],
           child: const MaterialApp(home: DgtTopicStatsScreen()),
         ),
@@ -149,6 +152,8 @@ void main() {
           overrides: [
             dgtTopicStatsProvider
                 .overrideWith((ref) async => const <DgtTopicStat>[]),
+            dgtTimeOfDayInsightProvider
+                .overrideWith((ref) async => DgtTimeOfDayInsight.empty()),
           ],
           child: const MaterialApp(home: DgtTopicStatsScreen()),
         ),
@@ -169,6 +174,8 @@ void main() {
         ProviderScope(
           overrides: [
             dgtTopicStatsProvider.overrideWith((ref) async => stats),
+            dgtTimeOfDayInsightProvider
+                .overrideWith((ref) async => DgtTimeOfDayInsight.empty()),
           ],
           child: const MaterialApp(home: DgtTopicStatsScreen()),
         ),
@@ -191,6 +198,8 @@ void main() {
         ProviderScope(
           overrides: [
             dgtTopicStatsProvider.overrideWith((ref) async => stats),
+            dgtTimeOfDayInsightProvider
+                .overrideWith((ref) async => DgtTimeOfDayInsight.empty()),
           ],
           child: const MaterialApp(home: DgtTopicStatsScreen()),
         ),
@@ -209,6 +218,8 @@ void main() {
         ProviderScope(
           overrides: [
             dgtTopicStatsProvider.overrideWith((ref) async => stats),
+            dgtTimeOfDayInsightProvider
+                .overrideWith((ref) async => DgtTimeOfDayInsight.empty()),
           ],
           child: const MaterialApp(home: DgtTopicStatsScreen()),
         ),
@@ -228,6 +239,8 @@ void main() {
         ProviderScope(
           overrides: [
             dgtTopicStatsProvider.overrideWith((ref) => completer.future),
+            dgtTimeOfDayInsightProvider
+                .overrideWith((ref) async => DgtTimeOfDayInsight.empty()),
           ],
           child: const MaterialApp(home: DgtTopicStatsScreen()),
         ),
