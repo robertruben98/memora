@@ -38,6 +38,11 @@ android/app/*.jks
 /build/
 /coverage/
 
+# Golden test failure artifacts (issue #132): se generan al correr golden
+# tests cuando difieren. NO commitear, son utiles solo localmente para
+# diagnosticar el diff.
+test/golden/failures/
+
 # Symbolication related
 app.*.symbols
 
