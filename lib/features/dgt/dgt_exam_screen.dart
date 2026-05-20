@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
+import 'dgt_exam_snapshot.dart';
 import 'dgt_failures_repository.dart';
 import 'dgt_favorites_provider.dart';
 import 'dgt_favorites_screen.dart';
@@ -24,7 +25,17 @@ import 'widgets/dgt_report_question_sheet.dart';
 ///   al responder la 30 o al agotar tiempo. Sin revision intermedia.
 class DgtExamScreen extends ConsumerStatefulWidget {
   final bool strictMode;
-  const DgtExamScreen({super.key, this.strictMode = false});
+
+  /// Issue #133 (dgt-ux): si se proporciona, el simulacro se inicia desde
+  /// este snapshot persistido (preguntas, respuestas, indice, timer) en
+  /// lugar de pedir uno nuevo. Solo aplica en modo no-estricto.
+  final DgtExamSnapshot? resumeFrom;
+
+  const DgtExamScreen({
+    super.key,
+    this.strictMode = false,
+    this.resumeFrom,
+  });
 
   @override
   ConsumerState<DgtExamScreen> createState() => _DgtExamScreenState();
@@ -44,6 +55,9 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
 
   bool get _strict => widget.strictMode;
 
+  /// Issue #133: instante de inicio del simulacro (para persistir en snapshot).
+  DateTime _startedAt = DateTime.now();
+
   /// Modo intro: muestra Card de prediccion antes del simulacro.
   /// Issue #52: usuario ve "tu probabilidad de aprobar" y tema mas debil
   /// antes de empezar. Pulsa "Empezar simulacro" -> _begin().
@@ -62,16 +76,91 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
         if (mounted) _begin();
       });
     }
+    // Issue #133: si entramos con un snapshot persistido, lo restauramos
+    // sin pasar por intro. Solo aplica a modo no-estricto.
+    if (!_strict && widget.resumeFrom != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _resumeFromSnapshot(widget.resumeFrom!);
+      });
+    }
+  }
+
+  /// Issue #133: restaura el estado del simulacro desde un snapshot.
+  /// Si el tiempo ya expiro (`secondsRemaining <= 0`) salta directo al
+  /// resultado con las respuestas guardadas y limpia el snapshot.
+  void _resumeFromSnapshot(DgtExamSnapshot snap) {
+    if (snap.secondsRemaining <= 0) {
+      setState(() {
+        _started = true;
+        _questions = snap.questions;
+        _answers
+          ..clear()
+          ..addAll(snap.answers);
+        _flagged
+          ..clear()
+          ..addAll(snap.flagged);
+        _current = snap.currentIndex.clamp(0, snap.questions.length - 1);
+        _secondsLeft = 0;
+        _startedAt = snap.startedAt;
+        _future = Future.value(snap.questions);
+      });
+      // Entrega automatica: tiempo expirado mientras la app estaba cerrada.
+      _submit(autoSubmit: true);
+      return;
+    }
+    setState(() {
+      _started = true;
+      _questions = snap.questions;
+      _answers
+        ..clear()
+        ..addAll(snap.answers);
+      _flagged
+        ..clear()
+        ..addAll(snap.flagged);
+      _current = snap.currentIndex.clamp(0, snap.questions.length - 1);
+      _secondsLeft = snap.secondsRemaining;
+      _startedAt = snap.startedAt;
+      _future = Future.value(snap.questions);
+    });
+    _startTimer();
+  }
+
+  /// Issue #133: persiste el snapshot actual best-effort. NO se llama en
+  /// modo estricto (el modo simula condiciones reales: no debe poder
+  /// pausarse cerrando la app).
+  void _persistSnapshot() {
+    if (_strict || _submitted || _questions.isEmpty) return;
+    final repo = ref.read(dgtExamSnapshotRepositoryProvider);
+    repo.save(
+      DgtExamSnapshot(
+        questions: _questions,
+        answers: Map<int, String>.from(_answers),
+        flagged: Set<int>.from(_flagged),
+        currentIndex: _current,
+        secondsRemaining: _secondsLeft,
+        startedAt: _startedAt,
+      ),
+    );
+  }
+
+  /// Issue #133: borra el snapshot persistido (al entregar o descartar).
+  void _clearSnapshot() {
+    final repo = ref.read(dgtExamSnapshotRepositoryProvider);
+    repo.clear();
   }
 
   void _begin() {
     if (_started) return;
     final repo = ref.read(dgtRepositoryProvider);
+    _startedAt = DateTime.now();
     setState(() {
       _started = true;
       _future = repo.fetchExamQuestions(limit: 30).then((qs) {
         _questions = qs;
         _startTimer();
+        // Issue #133: persist snapshot inicial al cargar preguntas para
+        // que un cierre antes de la primera respuesta tambien sea reanudable.
+        _persistSnapshot();
         return qs;
       });
     });
@@ -148,6 +237,9 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
 
   void _selectAnswer(String letter) {
     setState(() => _answers[_current] = letter);
+    // Issue #133: snapshot tras cada respuesta para soportar reanudacion
+    // si la app se cierra.
+    _persistSnapshot();
   }
 
   void _toggleFlag() {
@@ -158,11 +250,13 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
         _flagged.add(_current);
       }
     });
+    _persistSnapshot();
   }
 
   void _go(int index) {
     if (index < 0 || index >= _questions.length) return;
     setState(() => _current = index);
+    _persistSnapshot();
   }
 
   Future<void> _confirmFinish() async {
@@ -196,6 +290,8 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
     if (_submitted) return;
     _submitted = true;
     _ticker?.cancel();
+    // Issue #133: simulacro entregado -> snapshot ya no es valido.
+    _clearSnapshot();
     final result = _buildResult();
     // Issue #95 (dgt-content): persistir fallos del simulacro para que
     // aparezcan en el modo "Repaso de fallos" (ventana 7 dias).

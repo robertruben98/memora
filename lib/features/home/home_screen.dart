@@ -9,7 +9,9 @@ import '../decks/deck_editor_screen.dart';
 import '../decks/deck_screen.dart';
 import '../dgt/dgt_daily_challenge_card.dart';
 import '../dgt/dgt_exam_screen.dart';
+import '../dgt/dgt_exam_snapshot.dart';
 import '../dgt/dgt_failures_repository.dart';
+import '../dgt/widgets/resume_exam_dialog.dart';
 import '../dgt/dgt_failures_review_screen.dart';
 import '../dgt/dgt_preparation_provider.dart';
 import '../dgt/dgt_quick_review_screen.dart';
@@ -205,9 +207,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 orElse: () => const SizedBox.shrink(),
               ),
               _DgtExamBanner(
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const DgtExamScreen()),
-                ),
+                onTap: () => _openExamWithResume(context),
               ),
               const SizedBox(height: 16),
               ...sorted.map(
@@ -243,6 +243,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       floatingActionButton: _HomeFab(),
     );
+  }
+
+  /// Issue #133 (dgt-ux): abre el simulacro DGT. Si hay un snapshot
+  /// persistido (simulacro interrumpido), muestra el dialogo "Reanudar /
+  /// Descartar" antes. Aditivo: si no hay snapshot el flow es identico al
+  /// anterior (push directo a DgtExamScreen).
+  Future<void> _openExamWithResume(BuildContext context) async {
+    final repo = ref.read(dgtExamSnapshotRepositoryProvider);
+    final snap = await repo.read();
+    if (!context.mounted) return;
+    if (snap == null) {
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => const DgtExamScreen()),
+      );
+      return;
+    }
+    final choice = await ResumeExamDialog.show(context, snap);
+    if (!context.mounted) return;
+    if (choice == ResumeExamChoice.discard) {
+      await repo.clear();
+      ref.invalidate(dgtExamPendingSnapshotProvider);
+      if (!context.mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => const DgtExamScreen()),
+      );
+      return;
+    }
+    if (choice == ResumeExamChoice.resume) {
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => DgtExamScreen(resumeFrom: snap),
+        ),
+      );
+      ref.invalidate(dgtExamPendingSnapshotProvider);
+    }
+    // null (back/dismiss) -> no abrir nada.
   }
 }
 
