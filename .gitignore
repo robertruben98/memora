@@ -12,6 +12,9 @@
 .swiftpm/
 migrate_working_dir/
 
+# Golden test failures (issue #132): artefactos de diff locales, no se commitean
+test/golden/failures/
+
 # Signing
 android/key.properties
 android/app/keystore.jks
