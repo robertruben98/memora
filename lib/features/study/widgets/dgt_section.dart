@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../dgt/dgt_autotest_screen.dart';
+import '../../dgt/dgt_prediction.dart';
 import '../../dgt/dgt_signals_catalog_screen.dart';
 import '../../dgt/dgt_trick_questions_screen.dart';
+import '../../dgt/dgt_weak_focus_screen.dart';
 import '../dgt_exam_history.dart';
 import '../dgt_exam_screen.dart';
 import '../dgt_history_screen.dart';
@@ -25,6 +27,15 @@ class DgtStudySection extends ConsumerWidget {
           orElse: () => null,
         );
 
+    // Issue #134 (dgt-ux): tile "Atacar mi punto debil" condicional. Solo
+    // visible cuando la prediccion identifica un weakest_topic (>=10 reviews
+    // totales + algun topic con datos). Si aun no, ocultamos el tile para
+    // no engañar al usuario con un CTA que el backend rechazaria con 400.
+    final weakestTopic = ref.watch(dgtPredictionProvider).maybeWhen(
+          data: (p) => p.weakestTopic,
+          orElse: () => null,
+        );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -33,6 +44,16 @@ class DgtStudySection extends ConsumerWidget {
             MaterialPageRoute(builder: (_) => const DgtExamScreen()),
           ),
         ),
+        if (weakestTopic != null) ...[
+          const SizedBox(height: 10),
+          _DgtWeakFocusTile(
+            topicName: weakestTopic.topicName ?? weakestTopic.topicId,
+            accuracyPct: weakestTopic.accuracyPct,
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const DgtWeakFocusScreen()),
+            ),
+          ),
+        ],
         const SizedBox(height: 10),
         _DgtHistoryTile(
           historyCount: historyCount,
@@ -563,6 +584,115 @@ class _DgtSectionsTile extends StatelessWidget {
               Icon(
                 Icons.arrow_forward_rounded,
                 color: Colors.white.withValues(alpha: 0.55),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Issue #134 (dgt-ux): tile "Atacar mi punto debil" en el Study Hub.
+/// Visible solo cuando la prediccion identifica un weakest_topic con datos.
+class _DgtWeakFocusTile extends StatelessWidget {
+  final String topicName;
+  final double accuracyPct;
+  final VoidCallback onTap;
+
+  const _DgtWeakFocusTile({
+    required this.topicName,
+    required this.accuracyPct,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final pct = accuracyPct.toStringAsFixed(0);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A22),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: const Color(0xFFFF5C5C).withValues(alpha: 0.45),
+            ),
+          ),
+          padding: const EdgeInsets.fromLTRB(16, 12, 14, 12),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF5C5C).withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.gps_fixed_rounded,
+                  color: Color(0xFFFF5C5C),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Flexible(
+                          child: Text(
+                            'Atacar mi punto debil',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.2,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFF5C5C)
+                                .withValues(alpha: 0.20),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            'Adaptativo',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFFFF5C5C),
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Foco: $topicName  ·  $pct% acierto',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.6),
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_rounded,
+                color: Colors.white.withValues(alpha: 0.5),
               ),
             ],
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'dgt_failures_review_screen.dart';
+import 'dgt_weak_focus_screen.dart';
 
 /// Issue #113 (dgt-ux): pantalla de resumen mostrada al cerrar una sesion
 /// de practica DGT con >= [_minQuestions] preguntas respondidas.
@@ -170,6 +171,26 @@ class DgtSessionSummaryScreen extends StatelessWidget {
                   ),
                 ),
               if (_wrong > 0) const SizedBox(height: 10),
+              // Issue #134 (dgt-ux): CTA condicional "Atacar mi punto debil".
+              // Solo aparece si el resumen identifica un tema mas debil
+              // (weakestTopic != null). Reemplaza la pantalla actual con la
+              // weak-focus screen para que el back vuelva al hub, no aqui.
+              if (weakestTopic != null)
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const DgtWeakFocusScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.gps_fixed_rounded),
+                    label: const Text('Atacar mi punto debil'),
+                  ),
+                ),
+              if (weakestTopic != null) const SizedBox(height: 10),
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(

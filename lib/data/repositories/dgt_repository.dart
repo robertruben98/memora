@@ -125,6 +125,42 @@ class DgtQuestion {
   }
 }
 
+/// Resultado de [DgtRepository.fetchWeakFocusQuiz] (issue #134).
+///
+/// Encapsula el shape del endpoint `GET /dgt/quiz/weak-focus` (BE#93) mas
+/// un flag [insufficientData] usado por la UI cuando el backend responde
+/// 400 (historial DGT insuficiente para identificar peor tema).
+class DgtWeakFocusQuizResult {
+  /// Id del peor tema detectado por el backend. Vacio si [insufficientData]
+  /// o si hubo error de red (preguntas vacias).
+  final String worstTopicId;
+
+  /// Accuracy actual del usuario en el peor tema (en escala 0-100). 0 si
+  /// no hay datos.
+  final double worstTopicAccuracyPct;
+
+  /// Total de respuestas registradas en el peor tema en los ultimos 60
+  /// dias (ventana usada por el backend BE#93). 0 si no hay datos.
+  final int worstTopicTotalAnswered;
+
+  /// Preguntas del quiz 50/50 (mitad worst_topic + mitad resto).
+  final List<DgtQuestion> questions;
+
+  /// `true` si el backend respondio 400 (historial DGT < 20 respuestas o
+  /// ningun topic con minimo 5 respuestas). UX: mensaje "necesitas mas
+  /// practica general" en lugar de "error". Otros fallos (offline, 5xx)
+  /// dejan este flag en `false` y la UI muestra "error reintenta".
+  final bool insufficientData;
+
+  const DgtWeakFocusQuizResult({
+    required this.worstTopicId,
+    required this.worstTopicAccuracyPct,
+    required this.worstTopicTotalAnswered,
+    required this.questions,
+    required this.insufficientData,
+  });
+}
+
 class DgtRepository {
   final ApiClient _api;
 
@@ -356,6 +392,69 @@ class DgtRepository {
       return filtered.take(limit).toList();
     }
     return filtered;
+  }
+
+  /// Issue #134 (dgt-ux): quiz intensivo del peor tema. Backend BE#93:
+  /// `GET /dgt/quiz/weak-focus?n={N}`.
+  ///
+  /// Devuelve un quiz 50/50 (mitad worst_topic + mitad resto) junto con el
+  /// `worst_topic_id` y su `accuracy_pct` actual. Si el backend responde 400
+  /// (historial DGT insuficiente: <20 respuestas, o ningun topic con minimo
+  /// 5 respuestas) devolvemos un [DgtWeakFocusQuizResult] con
+  /// `insufficientData = true` y `questions` vacio: la UI muestra empty
+  /// state ("necesitas mas practica general"). Otros fallos (offline, 5xx)
+  /// devuelven el mismo shape vacio con `insufficientData = false` para que
+  /// la UI muestre "error, reintenta". Aditivo: no toca otros endpoints.
+  Future<DgtWeakFocusQuizResult> fetchWeakFocusQuiz({int n = 20}) async {
+    try {
+      final clamped = n.clamp(4, 50);
+      final res = await _api.get(
+        '/dgt/quiz/weak-focus',
+        query: {'n': '$clamped'},
+      );
+      if (res is Map) {
+        final m = Map<String, dynamic>.from(res);
+        final rawQs = m['questions'];
+        final questions = (rawQs is List)
+            ? rawQs
+                .whereType<Map>()
+                .map((e) => DgtQuestion.fromJson(Map<String, dynamic>.from(e)))
+                .toList()
+            : <DgtQuestion>[];
+        return DgtWeakFocusQuizResult(
+          worstTopicId: (m['worst_topic_id'] ?? '').toString(),
+          worstTopicAccuracyPct:
+              (m['worst_topic_accuracy_pct'] as num?)?.toDouble() ?? 0.0,
+          worstTopicTotalAnswered:
+              (m['worst_topic_total_answered'] as num?)?.toInt() ?? 0,
+          questions: questions,
+          insufficientData: false,
+        );
+      }
+    } on ApiException catch (e) {
+      // 400 = backend dice "historial DGT insuficiente para detectar peor
+      // tema". UX-wise no es error; pedimos al usuario practicar mas general.
+      if (e.statusCode == 400) {
+        return const DgtWeakFocusQuizResult(
+          worstTopicId: '',
+          worstTopicAccuracyPct: 0.0,
+          worstTopicTotalAnswered: 0,
+          questions: <DgtQuestion>[],
+          insufficientData: true,
+        );
+      }
+      // 401/403/5xx etc: degrada a "error reintenta" (insufficientData=false,
+      // questions vacio) sin throw para que la screen pueda mostrar empty.
+    } catch (_) {
+      // Offline / backend no expone endpoint / parse fail.
+    }
+    return const DgtWeakFocusQuizResult(
+      worstTopicId: '',
+      worstTopicAccuracyPct: 0.0,
+      worstTopicTotalAnswered: 0,
+      questions: <DgtQuestion>[],
+      insufficientData: false,
+    );
   }
 
   /// Issue #129 (dgt-ux): reportar errata en una pregunta DGT. Backend BE#113:
