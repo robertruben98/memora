@@ -2,6 +2,10 @@
 
 A new Flutter project.
 
+## Arquitectura
+
+Para una vision general del pivot DGT (registry pattern, controllers extraidos, cache schema handshake, backup/restore, CI y deployment) ver [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
