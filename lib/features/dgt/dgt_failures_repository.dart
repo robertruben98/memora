@@ -136,6 +136,13 @@ class DgtFailuresRepository {
     final r = await recentFailures();
     return r.length;
   }
+
+  /// Issue #169 (dgt-ux): borra TODOS los fallos persistidos. Usado por la
+  /// accion "Reset progreso DGT" en `dgt_settings_screen`.
+  Future<void> clearAll() async {
+    final prefs = await _prefsLoader();
+    await prefs.remove(_key);
+  }
 }
 
 final dgtFailuresRepositoryProvider =
