@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../dgt/dgt_achievements_screen.dart';
 import '../../dgt/dgt_autotest_screen.dart';
 import '../../dgt/dgt_cohort_compare_screen.dart';
 import '../../dgt/dgt_conceptual_errors_screen.dart';
@@ -278,6 +279,22 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     routeBuilder: (_) => const DgtExamCalendarScreen(),
     badgeBuilder: (_) => const DgtTileBadge(
       text: 'Plan',
+      color: Color(0xFFFFB74F),
+    ),
+  ),
+
+  // Issue #209 (dgt-ux): pantalla "Mis logros" con grid de insignias
+  // desbloqueadas / pendientes por categoria (constancia, maestria, examen,
+  // estudio). Deriva todo de providers existentes (sin BE nuevo).
+  DgtTileSpec(
+    title: 'Mis logros',
+    subtitleBuilder: (_) =>
+        'Insignias desbloqueadas y progreso por categoria',
+    icon: Icons.emoji_events_rounded,
+    accentColor: const Color(0xFFFFB74F),
+    routeBuilder: (_) => const DgtAchievementsScreen(),
+    badgeBuilder: (_) => const DgtTileBadge(
+      text: 'Logros',
       color: Color(0xFFFFB74F),
     ),
   ),
