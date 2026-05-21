@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../dgt/dgt_autotest_screen.dart';
+import '../../dgt/dgt_cohort_compare_screen.dart';
 import '../../dgt/dgt_prediction.dart';
 import '../../dgt/dgt_recurrent_failures_screen.dart';
 import '../../dgt/dgt_signals_catalog_screen.dart';
@@ -183,6 +184,22 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     variant: DgtTileVariant.primary,
     routeBuilder: (_) => const DgtStudySectionsScreen(),
     spacingBefore: 14,
+  ),
+
+  // Issue #155 (dgt-ux): comparativa cohorte vs media global. Consume
+  // BE#107 GET /dgt/stats/benchmark. Visible siempre; el propio screen
+  // maneja el empty state cuando no hay tracking suficiente.
+  DgtTileSpec(
+    title: 'Comparativa cohorte',
+    subtitleBuilder: (_) =>
+        'Tu acierto vs media global por tema (BE#107)',
+    icon: Icons.people_alt_rounded,
+    accentColor: const Color(0xFF4FA8FF),
+    routeBuilder: (_) => const DgtCohortCompareScreen(),
+    badgeBuilder: (_) => const DgtTileBadge(
+      text: 'Cohorte',
+      color: Color(0xFF4FA8FF),
+    ),
   ),
 
   // Catalogo de senales (repaso visual por categoria).
