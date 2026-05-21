@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../dgt/dgt_autotest_screen.dart';
 import '../../dgt/dgt_prediction.dart';
+import '../../dgt/dgt_recurrent_failures_screen.dart';
 import '../../dgt/dgt_signals_catalog_screen.dart';
 import '../../dgt/dgt_trick_questions_screen.dart';
 import '../../dgt/dgt_warmup_screen.dart';
@@ -82,6 +83,20 @@ final List<DgtTileSpec> kDgtTileRegistry = [
         ),
     badgeBuilder: (_) => const DgtTileBadge(
       text: 'Adaptativo',
+      color: Color(0xFFFF5C5C),
+    ),
+  ),
+
+  // Issue #154 (dgt-ux): erratas personales recurrentes (fallos >= N veces).
+  DgtTileSpec(
+    title: 'Errores recurrentes',
+    subtitleBuilder: (_) =>
+        'Repasa las preguntas que fallas una y otra vez (>= 2 veces)',
+    icon: Icons.repeat_rounded,
+    accentColor: const Color(0xFFFF5C5C),
+    routeBuilder: (_) => const DgtRecurrentFailuresScreen(),
+    badgeBuilder: (_) => const DgtTileBadge(
+      text: 'Erratas',
       color: Color(0xFFFF5C5C),
     ),
   ),
