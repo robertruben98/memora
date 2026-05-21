@@ -17,6 +17,7 @@ import '../dgt/dgt_preparation_provider.dart';
 import '../dgt/dgt_quick_review_screen.dart';
 import '../dgt/dgt_ready_check_screen.dart';
 import '../dgt/dgt_settings.dart';
+import '../dgt/services/dgt_goal_notification_service.dart';
 import '../dgt/widgets/adaptive_goal_banner.dart';
 import '../stats/stats_screen.dart';
 import '../quest/quest_provider.dart';
@@ -49,6 +50,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final tourCompletedAsync = ref.watch(dgtTourCompletedProvider);
     // Issue #95 (dgt-content): card "Repaso de fallos" - solo visible si N>0.
     final dgtFailuresCountAsync = ref.watch(dgtRecentFailuresCountProvider);
+    // Issue #189 (dgt-ux): mantiene vivo el listener de notif de meta diaria.
+    // El provider devuelve void; el side-effect (ref.listen) corre mientras
+    // el arbol este montado. Idempotencia + toggle gating dentro del servicio.
+    ref.watch(dgtGoalNotificationListenerProvider);
 
     // Issue #84: si la flag esta cargada y es false, mostrar el tour.
     // No-op si ya esta visible o ya completado.

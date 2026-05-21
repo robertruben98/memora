@@ -42,6 +42,20 @@ void main() {
       final next = DgtSettings.defaults.copyWith(showPredictions: false);
       expect(next.showPredictions, isFalse);
     });
+
+    // Issue #189 (dgt-ux): toggle de notif al alcanzar meta diaria.
+    test('default goalNotifEnabled = ON (opt-out)', () {
+      expect(DgtSettings.defaults.goalNotifEnabled, isTrue);
+    });
+
+    test('copyWith permite togglear goalNotifEnabled a OFF', () {
+      final next =
+          DgtSettings.defaults.copyWith(goalNotifEnabled: false);
+      expect(next.goalNotifEnabled, isFalse);
+      // No corrompe el resto.
+      expect(next.showPredictions, DgtSettings.defaults.showPredictions);
+      expect(next.streakReminderMode, DgtSettings.defaults.streakReminderMode);
+    });
   });
 
   group('DgtStreakReminderMode.fromCode', () {

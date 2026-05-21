@@ -83,6 +83,11 @@ class DgtSettings {
   /// Mostrar tile predictor de aprobacion en home. Default: ON.
   final bool showPredictions;
 
+  /// Issue #189 (dgt-ux): notificar al alcanzar la meta diaria de
+  /// preguntas DGT. Idempotente por dia (un disparo / fecha).
+  /// Default: ON (refuerzo positivo es opt-out, no opt-in).
+  final bool goalNotifEnabled;
+
   const DgtSettings({
     required this.licenseType,
     required this.examDate,
@@ -93,6 +98,7 @@ class DgtSettings {
     this.streakReminderMode = DgtStreakReminderMode.daily,
     this.strictExamMode = false,
     this.showPredictions = true,
+    this.goalNotifEnabled = true,
   });
 
   static const DgtSettings defaults = DgtSettings(
@@ -105,6 +111,7 @@ class DgtSettings {
     streakReminderMode: DgtStreakReminderMode.daily,
     strictExamMode: false,
     showPredictions: true,
+    goalNotifEnabled: true,
   );
 
   DgtSettings copyWith({
@@ -118,6 +125,7 @@ class DgtSettings {
     DgtStreakReminderMode? streakReminderMode,
     bool? strictExamMode,
     bool? showPredictions,
+    bool? goalNotifEnabled,
   }) {
     return DgtSettings(
       licenseType: licenseType ?? this.licenseType,
@@ -131,6 +139,7 @@ class DgtSettings {
       streakReminderMode: streakReminderMode ?? this.streakReminderMode,
       strictExamMode: strictExamMode ?? this.strictExamMode,
       showPredictions: showPredictions ?? this.showPredictions,
+      goalNotifEnabled: goalNotifEnabled ?? this.goalNotifEnabled,
     );
   }
 
@@ -155,6 +164,8 @@ const kDgtReminderDaysKey = 'dgt_reminder_days';
 const kDgtStreakReminderModeKey = 'dgt_streak_reminder_mode';
 const kDgtStrictExamModeKey = 'dgt_strict_exam_mode';
 const kDgtShowPredictionsKey = 'dgt_show_predictions';
+// Issue #189 key.
+const kDgtGoalNotifEnabledKey = 'dgt_goal_notif_enabled';
 
 /// Repositorio: lee/escribe ajustes DGT en settingsDao.
 class DgtSettingsRepository {
@@ -178,6 +189,8 @@ class DgtSettingsRepository {
     );
     final strict = await _db.settingsDao.getValue(kDgtStrictExamModeKey);
     final showPred = await _db.settingsDao.getValue(kDgtShowPredictionsKey);
+    // Issue #189: default ON para instalaciones previas.
+    final goalNotif = await _db.settingsDao.getValue(kDgtGoalNotifEnabledKey);
     return DgtSettings(
       licenseType: DgtLicenseType.fromCode(license),
       examDate: (exam == null || exam.isEmpty) ? null : DateTime.tryParse(exam),
@@ -197,6 +210,9 @@ class DgtSettingsRepository {
       showPredictions: showPred == null
           ? DgtSettings.defaults.showPredictions
           : showPred == '1',
+      goalNotifEnabled: goalNotif == null
+          ? DgtSettings.defaults.goalNotifEnabled
+          : goalNotif == '1',
     );
   }
 
@@ -254,6 +270,11 @@ class DgtSettingsRepository {
     await _db.settingsDao.setValue(
       kDgtShowPredictionsKey,
       s.showPredictions ? '1' : '0',
+    );
+    // Issue #189.
+    await _db.settingsDao.setValue(
+      kDgtGoalNotifEnabledKey,
+      s.goalNotifEnabled ? '1' : '0',
     );
   }
 }
