@@ -617,6 +617,31 @@ class DgtRepository {
     }
     return const <DgtRecurrentFailureItem>[];
   }
+
+  /// Issue #195 (dgt-ux): preguntas del mismo concepto que una pregunta dada.
+  /// Backend: `GET /dgt/quiz/concept-related/{question_id}?limit={M}`.
+  ///
+  /// Usado por la pantalla "Errores conceptuales" para lanzar un quiz dirigido
+  /// de N preguntas similares (mismo topic/concepto) a partir del primer
+  /// fallo de un grupo. Si el endpoint falla -> lista vacia (UI muestra
+  /// SnackBar y no navega).
+  Future<List<DgtQuestion>> fetchConceptRelated({
+    required String questionId,
+    int limit = 10,
+  }) async {
+    final lim = limit.clamp(1, 50);
+    try {
+      final res = await _api.get(
+        '/dgt/quiz/concept-related/$questionId',
+        query: {'limit': '$lim'},
+      );
+      final parsed = _parseQuestions(res);
+      if (parsed != null) return parsed;
+    } catch (_) {
+      // Backend antiguo / offline / 5xx -> empty.
+    }
+    return const <DgtQuestion>[];
+  }
 }
 
 /// Provider de la cache local (singleton). Tests pueden override.
