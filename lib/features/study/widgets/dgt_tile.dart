@@ -19,14 +19,43 @@ class DgtTile extends ConsumerWidget {
     final subtitle = spec.subtitleBuilder(ref);
     final badge = spec.badgeBuilder?.call(ref);
 
+    final Widget tile;
     switch (spec.variant) {
       case DgtTileVariant.hero:
-        return _buildHero(context, subtitle);
+        tile = _buildHero(context, subtitle);
+        break;
       case DgtTileVariant.primary:
-        return _buildPrimary(context, subtitle);
+        tile = _buildPrimary(context, subtitle);
+        break;
       case DgtTileVariant.standard:
-        return _buildStandard(context, subtitle, badge);
+        tile = _buildStandard(context, subtitle, badge);
+        break;
     }
+
+    // Issue #191 (dgt-tech): a11y. Wrap tile en Semantics con label descriptivo
+    // "titulo. subtitulo. accion" para TalkBack / VoiceOver. Si hay
+    // badge, anunciarlo via `value`. button=true para que screen readers
+    // anuncien "doble toque para activar".
+    final semanticLabel = _buildSemanticLabel(subtitle);
+    final semanticValue = badge?.text;
+    return Semantics(
+      label: semanticLabel,
+      value: semanticValue,
+      button: true,
+      container: true,
+      excludeSemantics: true,
+      child: tile,
+    );
+  }
+
+  /// Construye el label semantico siguiendo formato:
+  /// `titulo. subtitulo. Pulsa para abrir.`
+  /// Issue #191 (dgt-tech): a11y baseline WCAG AA.
+  String _buildSemanticLabel(String subtitle) {
+    final parts = <String>[spec.title];
+    if (subtitle.trim().isNotEmpty) parts.add(subtitle);
+    parts.add('Pulsa para abrir');
+    return parts.join('. ');
   }
 
   void _onTap(BuildContext context) {
@@ -40,7 +69,9 @@ class DgtTile extends ConsumerWidget {
     final gradientEnd = spec.gradientEndColor ?? _lighten(spec.accentColor, 0.15);
     return Material(
       color: Colors.transparent,
-      child: InkWell(
+      child: Tooltip(
+        message: '${spec.title}. $subtitle',
+        child: InkWell(
         onTap: () => _onTap(context),
         borderRadius: BorderRadius.circular(16),
         child: Ink(
@@ -110,6 +141,7 @@ class DgtTile extends ConsumerWidget {
           ),
         ),
       ),
+      ),
     );
   }
 
@@ -117,7 +149,9 @@ class DgtTile extends ConsumerWidget {
   Widget _buildPrimary(BuildContext context, String subtitle) {
     return Material(
       color: Colors.transparent,
-      child: InkWell(
+      child: Tooltip(
+        message: '${spec.title}. $subtitle',
+        child: InkWell(
         onTap: () => _onTap(context),
         borderRadius: BorderRadius.circular(16),
         child: Ink(
@@ -177,6 +211,7 @@ class DgtTile extends ConsumerWidget {
           ),
         ),
       ),
+      ),
     );
   }
 
@@ -189,7 +224,9 @@ class DgtTile extends ConsumerWidget {
   ) {
     return Material(
       color: Colors.transparent,
-      child: InkWell(
+      child: Tooltip(
+        message: '${spec.title}. $subtitle',
+        child: InkWell(
         onTap: () => _onTap(context),
         borderRadius: BorderRadius.circular(14),
         child: Ink(
@@ -286,6 +323,7 @@ class DgtTile extends ConsumerWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }
