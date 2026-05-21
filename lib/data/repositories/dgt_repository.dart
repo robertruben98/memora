@@ -161,6 +161,34 @@ class DgtWeakFocusQuizResult {
   });
 }
 
+/// Item del endpoint `GET /dgt/quiz/recurrent-failures` (BE#149, issue #154).
+///
+/// Extiende [DgtQuestion] con [failCount] = num veces que el usuario ha
+/// fallado esta pregunta en los ultimos 60 dias. Backend ordena DESC por
+/// fallos y por fecha del ultimo fallo.
+class DgtRecurrentFailureItem {
+  final DgtQuestion question;
+  final int failCount;
+
+  const DgtRecurrentFailureItem({
+    required this.question,
+    required this.failCount,
+  });
+
+  factory DgtRecurrentFailureItem.fromJson(Map<String, dynamic> j) {
+    final fc = j['fail_count'];
+    final n = fc is int
+        ? fc
+        : (fc is num
+            ? fc.toInt()
+            : int.tryParse('${fc ?? ''}') ?? 0);
+    return DgtRecurrentFailureItem(
+      question: DgtQuestion.fromJson(j),
+      failCount: n,
+    );
+  }
+}
+
 class DgtRepository {
   final ApiClient _api;
 
@@ -545,6 +573,49 @@ class DgtRepository {
       return filtered.take(limit).toList();
     }
     return filtered;
+  }
+
+  /// Issue #154 (dgt-ux): erratas recurrentes del usuario. Backend BE#149:
+  /// `GET /dgt/quiz/recurrent-failures?min_fails={N}&limit={M}`.
+  ///
+  /// Devuelve preguntas DGT que el usuario ha fallado `>= min_fails` veces
+  /// en los ultimos 60 dias, ordenadas por fallos DESC y luego por fecha del
+  /// ultimo fallo DESC. Cada item incluye un `fail_count` adicional.
+  ///
+  /// Clamps: `minFails` [2, 10], `limit` [1, 50].
+  ///
+  /// Errores (offline / 5xx / backend antiguo / parse fail) -> lista vacia
+  /// y la UI muestra empty state ("Aun no tienes erratas recurrentes").
+  /// Aditivo: no toca otros endpoints ni cache de simulacro.
+  Future<List<DgtRecurrentFailureItem>> fetchRecurrentFailures({
+    int minFails = 2,
+    int limit = 20,
+  }) async {
+    final mf = minFails.clamp(2, 10);
+    final lim = limit.clamp(1, 50);
+    try {
+      final res = await _api.get(
+        '/dgt/quiz/recurrent-failures',
+        query: {'min_fails': '$mf', 'limit': '$lim'},
+      );
+      if (res is List) {
+        return res
+            .whereType<Map>()
+            .map((e) =>
+                DgtRecurrentFailureItem.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+      }
+      if (res is Map && res['questions'] is List) {
+        return (res['questions'] as List)
+            .whereType<Map>()
+            .map((e) =>
+                DgtRecurrentFailureItem.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+      }
+    } catch (_) {
+      // Backend antiguo sin endpoint, offline, 5xx, o parse fail -> empty.
+    }
+    return const <DgtRecurrentFailureItem>[];
   }
 }
 
