@@ -60,6 +60,19 @@ class DgtFavoritesNotifier extends StateNotifier<DgtFavoritesState> {
     await _persist(next);
     return !wasIn;
   }
+
+  /// Issue #202 (dgt-ux): borra TODAS las favoritas. Usado por "Reset
+  /// selectivo" en `dgt_settings_screen`. Aislado: no toca fallos, simulacros
+  /// ni racha. Idempotente.
+  Future<void> clearAll() async {
+    state = DgtFavoritesState.empty;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(kDgtFavoritesPrefsKey);
+    } catch (_) {
+      // El estado in-memory ya quedo vacio; persistencia best-effort.
+    }
+  }
 }
 
 final dgtFavoritesProvider =
