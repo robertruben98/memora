@@ -11,6 +11,7 @@ import '../../dgt/dgt_today_study_screen.dart';
 import '../../dgt/dgt_trick_questions_screen.dart';
 import '../../dgt/dgt_warmup_screen.dart';
 import '../../dgt/dgt_weak_focus_screen.dart';
+import '../../dgt/dgt_weekly_evolution_screen.dart';
 import '../dgt_exam_history.dart';
 import '../dgt_exam_screen.dart';
 import '../dgt_history_screen.dart';
@@ -199,6 +200,20 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     routeBuilder: (_) => const DgtCohortCompareScreen(),
     badgeBuilder: (_) => const DgtTileBadge(
       text: 'Cohorte',
+      color: Color(0xFF4FA8FF),
+    ),
+  ),
+
+  // Issue #183 (dgt-ux): evolucion semanal con chart visual (8 semanas).
+  DgtTileSpec(
+    title: 'Tu evolucion semanal',
+    subtitleBuilder: (_) =>
+        'Chart de tendencia: % acierto, simulacros y streak en 8 semanas',
+    icon: Icons.show_chart_rounded,
+    accentColor: const Color(0xFF4FA8FF),
+    routeBuilder: (_) => const DgtWeeklyEvolutionScreen(),
+    badgeBuilder: (_) => const DgtTileBadge(
+      text: 'Tendencia',
       color: Color(0xFF4FA8FF),
     ),
   ),
