@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repositories/dgt_repository.dart';
+import 'data/dgt_tutorials.dart';
 import 'dgt_hard_challenge_screen.dart';
 import 'dgt_practice_screen.dart';
+import 'dgt_settings.dart';
+import 'dgt_subtopic_tutorial_screen.dart';
 import 'dgt_topic_stats_screen.dart';
+import 'dgt_tutorial_seen_provider.dart';
 
 /// Selector de bloques tematicos DGT para modo "Practica por tema".
 ///
@@ -56,11 +60,52 @@ class _DgtTopicsScreenState extends ConsumerState<DgtTopicsScreen> {
     final limit = await _askQuestionCount(topic);
     if (limit == null) return;
     if (!mounted) return;
+
+    // Issue #153 (dgt-ux): mostrar tarjeta de tutorial breve antes del
+    // quiz si: a) toggle global activo, b) existe tutorial para el
+    // topic, c) el usuario NO marco "no mostrar mas" previamente.
+    // Silent fallback en cualquier otro caso (va directo al quiz).
+    final shouldContinue = await _maybeShowTutorial(topic, limit);
+    if (!shouldContinue) return;
+    if (!mounted) return;
+
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => DgtPracticeScreen(topic: topic, limit: limit),
       ),
     );
+  }
+
+  /// Devuelve `true` si el flujo debe continuar al quiz. Si el usuario
+  /// hace "skip" desde el tutorial, retorna `false` y abortamos el push
+  /// al quiz (interpretacion: "no me apetece practicar ahora").
+  Future<bool> _maybeShowTutorial(DgtTopic topic, int limit) async {
+    final settingsAsync = ref.read(dgtSettingsProvider);
+    final settings = settingsAsync.maybeWhen(
+      data: (s) => s,
+      orElse: () => DgtSettings.defaults,
+    );
+    if (!settings.showSubtopicTutorial) return true;
+
+    final tutorial = lookupDgtTutorial(topic.id);
+    if (tutorial == null) return true;
+
+    final seen = ref.read(dgtTutorialSeenProvider);
+    if (seen.contains(topic.id)) return true;
+
+    if (!mounted) return true;
+    final qCount = limit > 0 ? limit : null;
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (_) => DgtSubtopicTutorialScreen(
+          topicId: topic.id,
+          topicName: topic.name,
+          tutorial: tutorial,
+          questionCount: qCount,
+        ),
+      ),
+    );
+    return result == true;
   }
 
   Future<int?> _askQuestionCount(DgtTopic topic) {

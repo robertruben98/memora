@@ -727,6 +727,29 @@ class _DgtSection extends StatelessWidget {
             ),
             activeThumbColor: const Color(0xFF7C5CFF),
           ),
+          const SizedBox(height: 4),
+          // DGT issue #153: toggle del mini-tutorial pre-quiz por subtopic.
+          SwitchListTile.adaptive(
+            contentPadding: EdgeInsets.zero,
+            value: settings.showSubtopicTutorial,
+            onChanged: (v) =>
+                onChanged(settings.copyWith(showSubtopicTutorial: v)),
+            title: const Text(
+              'Tutorial breve antes del quiz',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              'Al iniciar un quiz por tema te muestra una tarjeta con el '
+              'concepto clave y un ejemplo. Skippeable desde la propia '
+              'pantalla.',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.white.withValues(alpha: 0.6),
+                height: 1.35,
+              ),
+            ),
+            activeThumbColor: const Color(0xFF7C5CFF),
+          ),
           const SizedBox(height: 16),
           const Divider(height: 1, thickness: 0.4),
           const SizedBox(height: 12),

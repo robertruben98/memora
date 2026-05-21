@@ -32,12 +32,17 @@ class DgtSettings {
   // DGT issue #42: mostrar modal explicativo al fallar una card.
   // Aditivo, opcional, default ON. No rompe llamadas existentes.
   final bool showExplanationOnFail;
+  // DGT issue #153: mostrar tarjeta de tutorial breve antes del quiz
+  // por subtopic (concepto + ejemplo). Aditivo, opt-in via toggle,
+  // default ON. Silent fallback si no hay tutorial para el topic.
+  final bool showSubtopicTutorial;
 
   const DgtSettings({
     required this.licenseType,
     required this.examDate,
     required this.dailyGoal,
     this.showExplanationOnFail = true,
+    this.showSubtopicTutorial = true,
   });
 
   static const DgtSettings defaults = DgtSettings(
@@ -45,6 +50,7 @@ class DgtSettings {
     examDate: null,
     dailyGoal: 20,
     showExplanationOnFail: true,
+    showSubtopicTutorial: true,
   );
 
   DgtSettings copyWith({
@@ -53,6 +59,7 @@ class DgtSettings {
     bool clearExamDate = false,
     int? dailyGoal,
     bool? showExplanationOnFail,
+    bool? showSubtopicTutorial,
   }) {
     return DgtSettings(
       licenseType: licenseType ?? this.licenseType,
@@ -60,6 +67,8 @@ class DgtSettings {
       dailyGoal: dailyGoal ?? this.dailyGoal,
       showExplanationOnFail:
           showExplanationOnFail ?? this.showExplanationOnFail,
+      showSubtopicTutorial:
+          showSubtopicTutorial ?? this.showSubtopicTutorial,
     );
   }
 
@@ -78,6 +87,7 @@ const kDgtExamDateKey = 'dgt_exam_date';
 const kDgtDailyGoalKey = 'dgt_daily_goal';
 const kDgtOnboardedKey = 'dgt_onboarded';
 const kDgtShowExplanationOnFailKey = 'dgt_show_explanation_on_fail';
+const kDgtShowSubtopicTutorialKey = 'dgt_show_subtopic_tutorial';
 
 /// Repositorio: lee/escribe ajustes DGT en settingsDao.
 class DgtSettingsRepository {
@@ -91,6 +101,9 @@ class DgtSettingsRepository {
     final showExp = await _db.settingsDao.getValue(
       kDgtShowExplanationOnFailKey,
     );
+    final showTut = await _db.settingsDao.getValue(
+      kDgtShowSubtopicTutorialKey,
+    );
     return DgtSettings(
       licenseType: DgtLicenseType.fromCode(license),
       examDate: (exam == null || exam.isEmpty) ? null : DateTime.tryParse(exam),
@@ -100,6 +113,10 @@ class DgtSettingsRepository {
       showExplanationOnFail: showExp == null
           ? DgtSettings.defaults.showExplanationOnFail
           : showExp == '1',
+      // issue #153: instalaciones previas mantienen el default ON.
+      showSubtopicTutorial: showTut == null
+          ? DgtSettings.defaults.showSubtopicTutorial
+          : showTut == '1',
     );
   }
 
@@ -118,6 +135,10 @@ class DgtSettingsRepository {
     await _db.settingsDao.setValue(
       kDgtShowExplanationOnFailKey,
       s.showExplanationOnFail ? '1' : '0',
+    );
+    await _db.settingsDao.setValue(
+      kDgtShowSubtopicTutorialKey,
+      s.showSubtopicTutorial ? '1' : '0',
     );
   }
 }
