@@ -45,3 +45,142 @@ jobs:
 
       - name: Test
         run: flutter test
+
+  apk-size-budget:
+    # Solo en PR. En push a develop/main no nos interesa fallar por delta de tamano.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      # Tolerancia (en MB) por encima del baseline declarado en .github/apk-size-budget.txt.
+      APK_SIZE_TOLERANCE_MB: '2'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Cache pub dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build release APK (arm64-v8a)
+        run: flutter build apk --release --target-platform android-arm64
+
+      - name: Measure APK size and compare to baseline
+        id: measure
+        run: |
+          set -euo pipefail
+          APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
+          if [ ! -f "$APK_PATH" ]; then
+            APK_PATH="build/app/outputs/flutter-apk/app-arm64-v8a-release.apk"
+          fi
+          if [ ! -f "$APK_PATH" ]; then
+            echo "::error::No se encontro el APK release esperado en build/app/outputs/flutter-apk/"
+            ls -la build/app/outputs/flutter-apk/ || true
+            exit 1
+          fi
+
+          BUDGET_FILE=".github/apk-size-budget.txt"
+          if [ ! -f "$BUDGET_FILE" ]; then
+            echo "::error::Falta $BUDGET_FILE (numero MB baseline)"
+            exit 1
+          fi
+
+          BASELINE_MB=$(tr -d '[:space:]' < "$BUDGET_FILE")
+          TOLERANCE_MB="${APK_SIZE_TOLERANCE_MB:-2}"
+
+          APK_BYTES=$(stat -c%s "$APK_PATH")
+          # Pasamos a MB con 2 decimales sin depender de bc/python.
+          APK_MB=$(awk -v b="$APK_BYTES" 'BEGIN{printf "%.2f", b/1024/1024}')
+          DELTA_MB=$(awk -v a="$APK_MB" -v base="$BASELINE_MB" 'BEGIN{printf "%+.2f", a-base}')
+          LIMIT_MB=$(awk -v base="$BASELINE_MB" -v tol="$TOLERANCE_MB" 'BEGIN{printf "%.2f", base+tol}')
+
+          echo "APK path:       $APK_PATH"
+          echo "APK size:       ${APK_MB} MB (${APK_BYTES} bytes)"
+          echo "Baseline:       ${BASELINE_MB} MB (de $BUDGET_FILE)"
+          echo "Tolerancia:     ${TOLERANCE_MB} MB"
+          echo "Limite duro:    ${LIMIT_MB} MB"
+          echo "Delta vs base:  ${DELTA_MB} MB"
+
+          {
+            echo "apk_mb=${APK_MB}"
+            echo "baseline_mb=${BASELINE_MB}"
+            echo "tolerance_mb=${TOLERANCE_MB}"
+            echo "limit_mb=${LIMIT_MB}"
+            echo "delta_mb=${DELTA_MB}"
+            echo "apk_path=${APK_PATH}"
+          } >> "$GITHUB_OUTPUT"
+
+          OVER=$(awk -v a="$APK_MB" -v lim="$LIMIT_MB" 'BEGIN{print (a>lim)?"1":"0"}')
+          echo "over=${OVER}" >> "$GITHUB_OUTPUT"
+
+          if [ "$OVER" = "1" ]; then
+            echo "::error::APK ${APK_MB} MB supera el limite ${LIMIT_MB} MB (baseline ${BASELINE_MB} + ${TOLERANCE_MB})."
+            echo "::error::Si el crecimiento es legitimo, actualiza .github/apk-size-budget.txt en el mismo PR."
+            exit 1
+          fi
+
+      - name: Comment APK size delta on PR
+        if: always() && github.event_name == 'pull_request' && steps.measure.outputs.apk_mb != ''
+        uses: actions/github-script@v7
+        env:
+          APK_MB: ${{ steps.measure.outputs.apk_mb }}
+          BASELINE_MB: ${{ steps.measure.outputs.baseline_mb }}
+          TOLERANCE_MB: ${{ steps.measure.outputs.tolerance_mb }}
+          LIMIT_MB: ${{ steps.measure.outputs.limit_mb }}
+          DELTA_MB: ${{ steps.measure.outputs.delta_mb }}
+          OVER: ${{ steps.measure.outputs.over }}
+        with:
+          script: |
+            const marker = '<!-- apk-size-budget -->';
+            const { APK_MB, BASELINE_MB, TOLERANCE_MB, LIMIT_MB, DELTA_MB, OVER } = process.env;
+            const status = OVER === '1' ? ':red_circle: **FUERA DE BUDGET**' : ':white_check_mark: dentro de budget';
+            const body = [
+              marker,
+              `### APK size budget`,
+              ``,
+              `${status}`,
+              ``,
+              `| Metrica | Valor |`,
+              `| --- | --- |`,
+              `| Tamano APK (arm64-v8a release) | **${APK_MB} MB** |`,
+              `| Baseline (.github/apk-size-budget.txt) | ${BASELINE_MB} MB |`,
+              `| Tolerancia | +${TOLERANCE_MB} MB |`,
+              `| Limite duro | ${LIMIT_MB} MB |`,
+              `| Delta vs baseline | **${DELTA_MB} MB** |`,
+              ``,
+              `Si el crecimiento es legitimo, actualiza \`.github/apk-size-budget.txt\` (numero en MB) en este mismo PR.`,
+            ].join('\n');
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+
+            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number, per_page: 100 });
+            const existing = comments.find(c => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
