@@ -4,7 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_hard_challenge_screen.dart';
 import 'dgt_practice_screen.dart';
+import 'dgt_settings.dart';
+import 'dgt_subtopic_tutorial_screen.dart';
 import 'dgt_topic_stats_screen.dart';
+import 'dgt_tutorial_seen_provider.dart';
+import 'dgt_tutorials_catalog.dart';
 
 /// Selector de bloques tematicos DGT para modo "Practica por tema".
 ///
@@ -56,11 +60,48 @@ class _DgtTopicsScreenState extends ConsumerState<DgtTopicsScreen> {
     final limit = await _askQuestionCount(topic);
     if (limit == null) return;
     if (!mounted) return;
+
+    // Issue #153 (dgt-ux): intercept para mostrar tutorial pre-quiz.
+    // Reglas (silent fallback en cualquier "false"):
+    //   - toggle global desactivado -> saltar
+    //   - topic ya marcado "no mostrar mas" -> saltar
+    //   - sin entrada en catalogo -> saltar
+    // Cualquier error en SharedPreferences/settings degrada a "saltar"
+    // — no bloqueamos el quiz por fallos del tutorial.
+    await _maybeShowTutorial(topic);
+    if (!mounted) return;
+
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => DgtPracticeScreen(topic: topic, limit: limit),
       ),
     );
+  }
+
+  Future<void> _maybeShowTutorial(DgtTopic topic) async {
+    final tutorial = lookupDgtTutorial(topic.id);
+    if (tutorial == null) return;
+
+    final settingsAsync = ref.read(dgtSettingsProvider);
+    final settings = settingsAsync.asData?.value ?? DgtSettings.defaults;
+    if (!settings.showSubtopicTutorial) return;
+
+    final store = ref.read(dgtTutorialSeenStoreProvider);
+    final seen = await store.hasSeen(topic.id);
+    if (seen) return;
+    if (!mounted) return;
+
+    await Navigator.of(context).push(
+      MaterialPageRoute<DgtTutorialResult>(
+        builder: (_) => DgtSubtopicTutorialScreen(
+          topicId: topic.id,
+          topicName: topic.name,
+          tutorial: tutorial,
+        ),
+      ),
+    );
+    // No miramos el result: cualquier camino lleva al quiz. `suppress` ya
+    // persistio via DgtTutorialSeenStore dentro de la screen.
   }
 
   Future<int?> _askQuestionCount(DgtTopic topic) {
