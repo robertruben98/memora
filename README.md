@@ -15,6 +15,30 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
+## Setup local hooks
+
+El repo incluye un `pre-commit` compartido en `tool/hooks/pre-commit` que corre
+`dart format --set-exit-if-changed` y `flutter analyze --fatal-infos` **solo sobre
+los archivos `.dart` staged** (objetivo <3s en una laptop tipica). Esto evita gastar
+minutos de CI por errores de formato detectables en local.
+
+Instalacion (una sola vez por clone):
+
+```bash
+./tool/install-hooks.sh
+```
+
+El script crea symlinks desde `.git/hooks/` hacia `tool/hooks/` (no copia, asi cualquier
+actualizacion del hook llega via `git pull` sin reinstalar). Si ya tienes un hook custom
+instalado te avisa y NO sobreescribe; usa `./tool/install-hooks.sh --force` si quieres
+reemplazarlo.
+
+Bypass de emergencia (no abusar):
+
+```bash
+SKIP_HOOKS=1 git commit -m "wip: ..."
+```
+
 ## Testing
 
 Run the full test suite locally:
