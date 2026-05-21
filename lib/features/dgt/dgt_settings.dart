@@ -24,6 +24,35 @@ enum DgtLicenseType {
   }
 }
 
+/// Issue #169 (dgt-ux): frecuencia con la que el recordatorio de racha
+/// avisa al estudiante.
+///
+/// - [daily]: aviso diario (compatible con flujo issue #102).
+/// - [onlyIfBroken]: solo si rompi racha (no estudie ayer).
+/// - [never]: nunca enviar recordatorio de racha (silencio total).
+enum DgtStreakReminderMode {
+  daily('daily', 'Diario', 'Aviso todos los dias para mantener la racha'),
+  onlyIfBroken(
+    'only_if_broken',
+    'Solo si rompo racha',
+    'Avisa unicamente cuando hayas perdido la racha',
+  ),
+  never('never', 'Nunca', 'Sin recordatorio de racha');
+
+  final String code;
+  final String label;
+  final String description;
+  const DgtStreakReminderMode(this.code, this.label, this.description);
+
+  static DgtStreakReminderMode fromCode(String? code) {
+    if (code == null) return DgtStreakReminderMode.daily;
+    return DgtStreakReminderMode.values.firstWhere(
+      (m) => m.code == code,
+      orElse: () => DgtStreakReminderMode.daily,
+    );
+  }
+}
+
 /// Estado inmutable de los ajustes DGT.
 class DgtSettings {
   final DgtLicenseType licenseType;
@@ -37,12 +66,33 @@ class DgtSettings {
   // "no mostrar mas" por-topic en SharedPreferences.
   final bool showSubtopicTutorial;
 
+  // Issue #169 (dgt-ux): pantalla Ajustes DGT dedicada.
+  // Aditivo, defaults preservan comportamiento previo.
+
+  /// Dias de la semana activos para el recordatorio (ISO: 1=Lun..7=Dom).
+  /// Default: todos los dias.
+  final List<int> reminderDays;
+
+  /// Modo de recordatorio de racha. Default: diario.
+  final DgtStreakReminderMode streakReminderMode;
+
+  /// Modo simulacro estricto: sin pausa, sin revision intermedia, sin volver
+  /// atras. Default: OFF (modo libre).
+  final bool strictExamMode;
+
+  /// Mostrar tile predictor de aprobacion en home. Default: ON.
+  final bool showPredictions;
+
   const DgtSettings({
     required this.licenseType,
     required this.examDate,
     required this.dailyGoal,
     this.showExplanationOnFail = true,
     this.showSubtopicTutorial = true,
+    this.reminderDays = const [1, 2, 3, 4, 5, 6, 7],
+    this.streakReminderMode = DgtStreakReminderMode.daily,
+    this.strictExamMode = false,
+    this.showPredictions = true,
   });
 
   static const DgtSettings defaults = DgtSettings(
@@ -51,6 +101,10 @@ class DgtSettings {
     dailyGoal: 20,
     showExplanationOnFail: true,
     showSubtopicTutorial: true,
+    reminderDays: [1, 2, 3, 4, 5, 6, 7],
+    streakReminderMode: DgtStreakReminderMode.daily,
+    strictExamMode: false,
+    showPredictions: true,
   );
 
   DgtSettings copyWith({
@@ -60,6 +114,10 @@ class DgtSettings {
     int? dailyGoal,
     bool? showExplanationOnFail,
     bool? showSubtopicTutorial,
+    List<int>? reminderDays,
+    DgtStreakReminderMode? streakReminderMode,
+    bool? strictExamMode,
+    bool? showPredictions,
   }) {
     return DgtSettings(
       licenseType: licenseType ?? this.licenseType,
@@ -69,6 +127,10 @@ class DgtSettings {
           showExplanationOnFail ?? this.showExplanationOnFail,
       showSubtopicTutorial:
           showSubtopicTutorial ?? this.showSubtopicTutorial,
+      reminderDays: reminderDays ?? this.reminderDays,
+      streakReminderMode: streakReminderMode ?? this.streakReminderMode,
+      strictExamMode: strictExamMode ?? this.strictExamMode,
+      showPredictions: showPredictions ?? this.showPredictions,
     );
   }
 
@@ -88,6 +150,11 @@ const kDgtDailyGoalKey = 'dgt_daily_goal';
 const kDgtOnboardedKey = 'dgt_onboarded';
 const kDgtShowExplanationOnFailKey = 'dgt_show_explanation_on_fail';
 const kDgtShowSubtopicTutorialKey = 'dgt_show_subtopic_tutorial';
+// Issue #169 keys.
+const kDgtReminderDaysKey = 'dgt_reminder_days';
+const kDgtStreakReminderModeKey = 'dgt_streak_reminder_mode';
+const kDgtStrictExamModeKey = 'dgt_strict_exam_mode';
+const kDgtShowPredictionsKey = 'dgt_show_predictions';
 
 /// Repositorio: lee/escribe ajustes DGT en settingsDao.
 class DgtSettingsRepository {
@@ -104,6 +171,13 @@ class DgtSettingsRepository {
     final showTut = await _db.settingsDao.getValue(
       kDgtShowSubtopicTutorialKey,
     );
+    // Issue #169: nuevos campos (defaults para instalaciones previas).
+    final daysRaw = await _db.settingsDao.getValue(kDgtReminderDaysKey);
+    final streakMode = await _db.settingsDao.getValue(
+      kDgtStreakReminderModeKey,
+    );
+    final strict = await _db.settingsDao.getValue(kDgtStrictExamModeKey);
+    final showPred = await _db.settingsDao.getValue(kDgtShowPredictionsKey);
     return DgtSettings(
       licenseType: DgtLicenseType.fromCode(license),
       examDate: (exam == null || exam.isEmpty) ? null : DateTime.tryParse(exam),
@@ -117,7 +191,31 @@ class DgtSettingsRepository {
       showSubtopicTutorial: showTut == null
           ? DgtSettings.defaults.showSubtopicTutorial
           : showTut == '1',
+      reminderDays: _parseReminderDays(daysRaw),
+      streakReminderMode: DgtStreakReminderMode.fromCode(streakMode),
+      strictExamMode: strict == '1',
+      showPredictions: showPred == null
+          ? DgtSettings.defaults.showPredictions
+          : showPred == '1',
     );
+  }
+
+  /// Parsea CSV "1,2,3" en `List` de enteros. Default todos los dias.
+  static List<int> _parseReminderDays(String? raw) {
+    if (raw == null || raw.isEmpty) {
+      return DgtSettings.defaults.reminderDays;
+    }
+    final parts = raw.split(',');
+    final out = <int>[];
+    for (final p in parts) {
+      final n = int.tryParse(p.trim());
+      if (n != null && n >= 1 && n <= 7 && !out.contains(n)) {
+        out.add(n);
+      }
+    }
+    if (out.isEmpty) return DgtSettings.defaults.reminderDays;
+    out.sort();
+    return out;
   }
 
   Future<void> save(DgtSettings s) async {
@@ -139,6 +237,23 @@ class DgtSettingsRepository {
     await _db.settingsDao.setValue(
       kDgtShowSubtopicTutorialKey,
       s.showSubtopicTutorial ? '1' : '0',
+    );
+    // Issue #169.
+    await _db.settingsDao.setValue(
+      kDgtReminderDaysKey,
+      s.reminderDays.join(','),
+    );
+    await _db.settingsDao.setValue(
+      kDgtStreakReminderModeKey,
+      s.streakReminderMode.code,
+    );
+    await _db.settingsDao.setValue(
+      kDgtStrictExamModeKey,
+      s.strictExamMode ? '1' : '0',
+    );
+    await _db.settingsDao.setValue(
+      kDgtShowPredictionsKey,
+      s.showPredictions ? '1' : '0',
     );
   }
 }

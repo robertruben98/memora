@@ -5,6 +5,7 @@ import '../../dgt/dgt_autotest_screen.dart';
 import '../../dgt/dgt_cohort_compare_screen.dart';
 import '../../dgt/dgt_prediction.dart';
 import '../../dgt/dgt_recurrent_failures_screen.dart';
+import '../../dgt/dgt_settings_screen.dart';
 import '../../dgt/dgt_signals_catalog_screen.dart';
 import '../../dgt/dgt_today_study_screen.dart';
 import '../../dgt/dgt_trick_questions_screen.dart';
@@ -210,5 +211,18 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     icon: Icons.traffic_rounded,
     accentColor: const Color(0xFF4FFFB0),
     routeBuilder: (_) => const DgtSignalsCatalogScreen(),
+  ),
+
+  // Issue #169 (dgt-ux): pantalla dedicada de Ajustes DGT (recordatorios,
+  // modo simulacro estricto, reset progreso, export stats). Spacing extra
+  // para separar visualmente del bloque de estudio.
+  DgtTileSpec(
+    title: 'Ajustes DGT',
+    subtitleBuilder: (_) =>
+        'Recordatorios, modo estricto, reset progreso, exportar stats',
+    icon: Icons.tune_rounded,
+    accentColor: const Color(0xFF9FA6BC),
+    routeBuilder: (_) => const DgtSettingsScreen(),
+    spacingBefore: 14,
   ),
 ];
