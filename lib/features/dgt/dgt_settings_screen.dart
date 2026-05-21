@@ -9,6 +9,7 @@ import '../study/dgt_exam_history.dart';
 import 'dgt_failures_repository.dart';
 import 'dgt_reminder_service.dart';
 import 'dgt_settings.dart';
+import 'screens/dgt_share_autoescuela_screen.dart';
 
 /// Issue #169 (dgt-ux): pantalla dedicada de Ajustes DGT.
 ///
@@ -85,6 +86,25 @@ class _Body extends ConsumerWidget {
           subtitle: const Text(
             'Muestra el tile predictor de aprobacion en el inicio.',
           ),
+        ),
+        const Divider(height: 32),
+        _SectionTitle('Compartir'),
+        ListTile(
+          key: const Key('dgt-settings-share-autoescuela'),
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.qr_code_2_rounded),
+          title: const Text('Compartir con autoescuela'),
+          subtitle: const Text(
+            'Genera QR + deeplink con resumen de progreso (sin datos sensibles).',
+          ),
+          trailing: const Icon(Icons.chevron_right_rounded),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const DgtShareAutoescuelaScreen(),
+              ),
+            );
+          },
         ),
         const Divider(height: 32),
         _SectionTitle('Datos'),
