@@ -10,10 +10,12 @@ import 'data/storage/image_storage.dart';
 import 'data/sync/sync_service.dart';
 import 'features/auth/auth_state.dart';
 import 'features/auth/login_screen.dart';
+import 'features/dgt/dgt_recurrent_failures_screen.dart';
 import 'features/dgt/dgt_reminder_service.dart';
 import 'features/dgt/dgt_settings.dart';
 import 'features/dgt/dgt_weekly_report_scheduler.dart';
 import 'features/dgt/dgt_weekly_report_screen.dart';
+import 'features/dgt/services/dgt_streak_alert_service.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'features/settings/settings_repository.dart';
 import 'features/shell/root_shell.dart';
@@ -84,6 +86,21 @@ Future<void> main() async {
           final nav = appNavigatorKey.currentState;
           if (nav != null) {
             nav.popUntil((r) => r.isFirst);
+          }
+        } else if (payload == kDgtStreakRescueDeeplink) {
+          // Issue #212 (dgt-ux): tap en alarma anti-perdida -> quiz
+          // rapido de 5 preguntas (recurrent-failures).
+          final nav = appNavigatorKey.currentState;
+          if (nav != null) {
+            nav.popUntil((r) => r.isFirst);
+            nav.push(
+              MaterialPageRoute<void>(
+                builder: (_) => const DgtRecurrentFailuresScreen(
+                  initialMinFails: 2,
+                  initialLimit: kDgtStreakRescueQuizSize,
+                ),
+              ),
+            );
           }
         } else if (payload == kDgtWeeklyReportDeeplink) {
           // Issue #174: tap en notificacion del domingo 20:00 -> abre

@@ -56,6 +56,20 @@ void main() {
       expect(next.showPredictions, DgtSettings.defaults.showPredictions);
       expect(next.streakReminderMode, DgtSettings.defaults.streakReminderMode);
     });
+
+    // Issue #212 (dgt-ux): alarma anti-perdida de racha.
+    test('default streakAlertEnabled = ON (opt-out por loss aversion)', () {
+      expect(DgtSettings.defaults.streakAlertEnabled, isTrue);
+    });
+
+    test('copyWith permite togglear streakAlertEnabled a OFF', () {
+      final next =
+          DgtSettings.defaults.copyWith(streakAlertEnabled: false);
+      expect(next.streakAlertEnabled, isFalse);
+      // No corrompe el resto.
+      expect(next.goalNotifEnabled, DgtSettings.defaults.goalNotifEnabled);
+      expect(next.showPredictions, DgtSettings.defaults.showPredictions);
+    });
   });
 
   group('DgtStreakReminderMode.fromCode', () {

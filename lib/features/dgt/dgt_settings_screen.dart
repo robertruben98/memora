@@ -80,6 +80,20 @@ class _Body extends ConsumerWidget {
             'Aviso unico al cruzar el umbral. Idempotente por dia.',
           ),
         ),
+        const SizedBox(height: 8),
+        // Issue #212 (dgt-ux): toggle de alarma anti-perdida de racha.
+        SwitchListTile.adaptive(
+          key: const ValueKey('dgt-streak-alert-toggle'),
+          contentPadding: EdgeInsets.zero,
+          value: settings.streakAlertEnabled,
+          onChanged: (v) =>
+              _save(ref, settings.copyWith(streakAlertEnabled: v)),
+          title: const Text('Alarma anti-perdida de racha'),
+          subtitle: const Text(
+            'Aviso ~1h antes de perder la racha (solo si racha >=3 dias). '
+            'Tap = quiz rapido de 5 preguntas.',
+          ),
+        ),
         const Divider(height: 32),
         _SectionTitle('Simulacro'),
         SwitchListTile.adaptive(

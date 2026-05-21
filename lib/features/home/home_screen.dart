@@ -18,6 +18,7 @@ import '../dgt/dgt_quick_review_screen.dart';
 import '../dgt/dgt_ready_check_screen.dart';
 import '../dgt/dgt_settings.dart';
 import '../dgt/services/dgt_goal_notification_service.dart';
+import '../dgt/services/dgt_streak_alert_service.dart';
 import '../dgt/widgets/adaptive_goal_banner.dart';
 import '../stats/stats_screen.dart';
 import '../quest/quest_provider.dart';
@@ -54,6 +55,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // El provider devuelve void; el side-effect (ref.listen) corre mientras
     // el arbol este montado. Idempotencia + toggle gating dentro del servicio.
     ref.watch(dgtGoalNotificationListenerProvider);
+    // Issue #212 (dgt-ux): mantiene vivo el listener de alarma anti-perdida
+    // de racha. Cada nueva review reprograma la notif (23h offset).
+    ref.watch(dgtStreakAlertListenerProvider);
 
     // Issue #84: si la flag esta cargada y es false, mostrar el tour.
     // No-op si ya esta visible o ya completado.
