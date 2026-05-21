@@ -50,6 +50,9 @@ jobs:
     # Solo en PR. En push a develop/main no nos interesa fallar por delta de tamano.
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     env:
       # Tolerancia (en MB) por encima del baseline declarado en .github/apk-size-budget.txt.
       APK_SIZE_TOLERANCE_MB: '2'
