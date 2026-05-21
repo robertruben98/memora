@@ -9,6 +9,7 @@ import '../../data/repositories/card_repository.dart';
 import '../../data/repositories/deck_repository.dart';
 import '../../data/repositories/dgt_repository.dart';
 import '../dgt/dgt_reminder_service.dart';
+import '../dgt/dgt_weekly_report_scheduler.dart';
 import '../dgt/dgt_settings.dart';
 import '../dgt/services/dgt_backup_service.dart';
 import '../home/welcome_tour.dart';
@@ -734,6 +735,9 @@ class _DgtSection extends StatelessWidget {
           // DGT issue #102 (dgt-ux): recordatorio diario meta DGT.
           _DgtReminderTile(examDate: settings.examDate, dailyGoal: settings.dailyGoal),
           const SizedBox(height: 12),
+          // DGT issue #174 (dgt-ux): toggle resumen semanal (domingo 20h).
+          const _DgtWeeklyReportTile(),
+          const SizedBox(height: 12),
           const Divider(height: 1, thickness: 0.4),
           const SizedBox(height: 12),
           // DGT issue #45: boton para sincronizar/invalidar cache del banco DGT.
@@ -1021,6 +1025,7 @@ class _DgtReminderTile extends ConsumerWidget {
   }
 }
 
+
 /// Issue #175 (dgt-ux): export/import del progreso DGT (favoritas, fallos,
 /// historiales, settings) como JSON local. Compartible via share_plus,
 /// restorable via file_picker. Merge: union para favoritas/fallos, max(streak),
@@ -1174,6 +1179,51 @@ class _DgtBackupTileState extends ConsumerState<_DgtBackupTile> {
           ],
         ),
       ],
+    );
+  }
+}
+
+/// Issue #174 (dgt-ux): toggle on/off del resumen semanal (domingo 20:00).
+/// Default ON. Reusa permiso ya concedido al recordatorio diario.
+class _DgtWeeklyReportTile extends ConsumerWidget {
+  const _DgtWeeklyReportTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(dgtWeeklyReportEnabledProvider);
+    return async.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 8),
+        child: LinearProgressIndicator(minHeight: 2),
+      ),
+      error: (e, _) => Text('Resumen semanal: error ($e)'),
+      data: (enabled) {
+        return SwitchListTile.adaptive(
+          contentPadding: EdgeInsets.zero,
+          value: enabled,
+          onChanged: (v) async {
+            final scheduler = ref.read(dgtWeeklyReportSchedulerProvider);
+            await scheduler.saveEnabled(v);
+            await scheduler.reschedule(enabled: v);
+            ref.invalidate(dgtWeeklyReportEnabledProvider);
+          },
+          title: const Text(
+            'Resumen semanal (domingo 20:00)',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+          subtitle: Text(
+            enabled
+                ? 'Cada domingo a las 20:00 recibiras un resumen de tu progreso semanal.'
+                : 'Sin notificacion semanal de progreso DGT.',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.white.withValues(alpha: 0.6),
+              height: 1.35,
+            ),
+          ),
+          activeThumbColor: const Color(0xFF7C5CFF),
+        );
+      },
     );
   }
 }
