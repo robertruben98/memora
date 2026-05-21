@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../dgt/dgt_autotest_screen.dart';
 import '../../dgt/dgt_prediction.dart';
 import '../../dgt/dgt_signals_catalog_screen.dart';
+import '../../dgt/dgt_today_study_screen.dart';
 import '../../dgt/dgt_trick_questions_screen.dart';
 import '../../dgt/dgt_warmup_screen.dart';
 import '../../dgt/dgt_weak_focus_screen.dart';
@@ -57,6 +58,23 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     gradientEndColor: const Color(0xFFFFA552),
     variant: DgtTileVariant.hero,
     routeBuilder: (_) => const DgtExamScreen(),
+  ),
+
+  // Issue #167 (dgt-ux): "Estudio de hoy" auto-curated. Sesion mixta de 15
+  // preguntas (5 weak + 5 recurrentes + 5 nuevas). Tile visible siempre,
+  // sobre fold y debajo del simulacro principal.
+  DgtTileSpec(
+    title: 'Estudio de hoy',
+    subtitleBuilder: (_) => '15 preguntas, ~12 min · auto-curada',
+    icon: Icons.today_rounded,
+    accentColor: const Color(0xFF4FA8FF),
+    primaryIconColor: const Color(0xFF9FCBFF),
+    variant: DgtTileVariant.primary,
+    routeBuilder: (_) => const DgtTodayStudyScreen(),
+    badgeBuilder: (_) => const DgtTileBadge(
+      text: 'Recomendado',
+      color: Color(0xFF4FA8FF),
+    ),
   ),
 
   // Issue #134 (dgt-ux): "Atacar mi punto debil" condicional. Solo visible si
