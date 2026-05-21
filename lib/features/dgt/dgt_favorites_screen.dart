@@ -14,46 +14,106 @@ import 'dgt_favorites_provider.dart';
 ///
 /// Aditivo: no toca el simulacro oficial, no envia nada al backend, persiste
 /// solo IDs locales via [dgtFavoritesProvider].
-class DgtFavoritesScreen extends ConsumerWidget {
+///
+/// Issue #188: incluye fila de ChoiceChip arriba del listado para filtrar
+/// favoritas por topic. Chip "Todos" default. Topics se computan en memoria
+/// desde la lista de favoritas (ordenados alfa). Estado se preserva al
+/// pull-to-refresh y se resetea al salir de la pantalla.
+class DgtFavoritesScreen extends ConsumerStatefulWidget {
   /// Minimo requerido por el issue para habilitar el quiz dedicado.
   static const int minForQuiz = 5;
+
+  /// Sentinel para la chip "Todos" (sin filtro).
+  static const String allTopicsSentinel = '__all__';
 
   const DgtFavoritesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DgtFavoritesScreen> createState() =>
+      _DgtFavoritesScreenState();
+}
+
+class _DgtFavoritesScreenState extends ConsumerState<DgtFavoritesScreen> {
+  /// Topic seleccionado actualmente. `allTopicsSentinel` = sin filtro.
+  String _selectedTopic = DgtFavoritesScreen.allTopicsSentinel;
+
+  /// Future cacheado para evitar refetch en cada rebuild por cambio de chip.
+  Future<List<DgtQuestion>>? _favoritesFuture;
+  Set<String> _lastIds = const <String>{};
+
+  @override
+  Widget build(BuildContext context) {
     final favs = ref.watch(dgtFavoritesProvider);
+    // Si cambian los IDs (toggle), re-fetch. Cambiar chip NO refetch.
+    if (_favoritesFuture == null || _lastIds != favs.ids) {
+      _lastIds = favs.ids;
+      _favoritesFuture = _loadFavoriteQuestions(ref, favs.ids);
+    }
     return Scaffold(
       appBar: AppBar(title: const Text('Preguntas favoritas')),
       body: FutureBuilder<List<DgtQuestion>>(
-        future: _loadFavoriteQuestions(ref, favs.ids),
+        future: _favoritesFuture,
         builder: (context, snap) {
           if (snap.connectionState != ConnectionState.done) {
             return const Center(child: CircularProgressIndicator());
           }
-          final list = snap.data ?? const <DgtQuestion>[];
-          if (list.isEmpty) {
+          final all = snap.data ?? const <DgtQuestion>[];
+          if (all.isEmpty) {
             return const _EmptyFavorites();
           }
+          final topics = _computeTopics(all);
+          final filtered = _applyTopicFilter(all);
           return Column(
             children: [
-              if (list.length < minForQuiz)
-                _MinHintBanner(current: list.length, min: minForQuiz)
+              if (all.length < DgtFavoritesScreen.minForQuiz)
+                _MinHintBanner(
+                  current: all.length,
+                  min: DgtFavoritesScreen.minForQuiz,
+                )
               else
-                _StartQuizCta(questions: list),
-              Expanded(
-                child: ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
-                  itemCount: list.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 8),
-                  itemBuilder: (_, i) => _FavoriteTile(question: list[i]),
+                _StartQuizCta(questions: filtered),
+              if (topics.isNotEmpty)
+                _TopicChipsRow(
+                  topics: topics,
+                  selected: _selectedTopic,
+                  onSelected: (t) => setState(() => _selectedTopic = t),
                 ),
+              _ResultsCounter(count: filtered.length),
+              Expanded(
+                child: filtered.isEmpty
+                    ? const _EmptyTopicFilter()
+                    : ListView.separated(
+                        padding:
+                            const EdgeInsets.fromLTRB(12, 4, 12, 16),
+                        itemCount: filtered.length,
+                        separatorBuilder: (_, _) =>
+                            const SizedBox(height: 8),
+                        itemBuilder: (_, i) =>
+                            _FavoriteTile(question: filtered[i]),
+                      ),
               ),
             ],
           );
         },
       ),
     );
+  }
+
+  /// Topics distintos presentes en favoritas (excluye null/empty), ordenados
+  /// alfabeticamente. La chip "Todos" se agrega aparte en la UI.
+  static List<String> _computeTopics(List<DgtQuestion> qs) {
+    final set = <String>{};
+    for (final q in qs) {
+      final t = q.topic;
+      if (t != null && t.trim().isNotEmpty) set.add(t.trim());
+    }
+    final list = set.toList()..sort();
+    return list;
+  }
+
+  List<DgtQuestion> _applyTopicFilter(List<DgtQuestion> all) {
+    if (_selectedTopic == DgtFavoritesScreen.allTopicsSentinel) return all;
+    return all.where((q) => (q.topic ?? '').trim() == _selectedTopic).toList();
   }
 
   /// Filtra el banco DGT por los IDs guardados como favoritos. Hace 1 fetch
@@ -67,6 +127,107 @@ class DgtFavoritesScreen extends ConsumerWidget {
     final repo = ref.read(dgtRepositoryProvider);
     final all = await repo.fetchExamQuestions(limit: 200);
     return all.where((q) => ids.contains(q.id)).toList();
+  }
+}
+
+/// Fila horizontal scrollable de ChoiceChips para filtrar por topic.
+/// Issue #188.
+class _TopicChipsRow extends StatelessWidget {
+  /// Topics ordenados alfabeticamente (no incluye "Todos").
+  final List<String> topics;
+
+  /// Topic seleccionado actual (sentinel `__all__` o un topic concreto).
+  final String selected;
+
+  final ValueChanged<String> onSelected;
+
+  const _TopicChipsRow({
+    required this.topics,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final all = [DgtFavoritesScreen.allTopicsSentinel, ...topics];
+    return SizedBox(
+      height: 48,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        itemCount: all.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (_, i) {
+          final t = all[i];
+          final isAll = t == DgtFavoritesScreen.allTopicsSentinel;
+          final label = isAll ? 'Todos' : t;
+          final isSel = t == selected;
+          return Center(
+            child: ChoiceChip(
+              key: ValueKey('topic-chip-$t'),
+              label: Text(label),
+              selected: isSel,
+              onSelected: (_) => onSelected(t),
+              selectedColor: const Color(0xFF7C5CFF),
+              labelStyle: TextStyle(
+                color: isSel ? Colors.white : null,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Contador "N preguntas" debajo de los chips.
+class _ResultsCounter extends StatelessWidget {
+  final int count;
+  const _ResultsCounter({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          '$count pregunta${count == 1 ? '' : 's'}',
+          key: const ValueKey('favorites-counter'),
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.65),
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Empty state cuando el filtro de topic deja 0 resultados (issue #188).
+class _EmptyTopicFilter extends StatelessWidget {
+  const _EmptyTopicFilter();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.filter_alt_off_rounded, size: 44),
+            const SizedBox(height: 10),
+            Text(
+              'No tienes favoritas en este tema',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
