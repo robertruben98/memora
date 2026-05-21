@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../study/dgt_exam_history.dart';
 import 'dgt_failures_repository.dart';
+import 'dgt_favorites_provider.dart';
 import 'dgt_reminder_service.dart';
 import 'dgt_settings.dart';
 import 'screens/dgt_share_autoescuela_screen.dart';
@@ -121,11 +122,220 @@ class _Body extends ConsumerWidget {
         const Divider(height: 32),
         _SectionTitle('Datos'),
         const _ExportStatsButton(),
-        const SizedBox(height: 8),
+        const Divider(height: 32),
+        _SectionTitle('Reset selectivo'),
+        const _SelectiveResetTile(
+          kind: _SelectiveResetKind.failures,
+        ),
+        const SizedBox(height: 4),
+        const _SelectiveResetTile(
+          kind: _SelectiveResetKind.favorites,
+        ),
+        const SizedBox(height: 4),
+        const _SelectiveResetTile(
+          kind: _SelectiveResetKind.examHistory,
+        ),
+        const SizedBox(height: 4),
+        const _SelectiveResetTile(
+          kind: _SelectiveResetKind.streak,
+        ),
+        const SizedBox(height: 16),
         const _ResetProgressButton(),
         const SizedBox(height: 32),
       ],
     );
+  }
+}
+
+/// Issue #202 (dgt-ux): tipos de reset selectivo. Cada uno aisla un store
+/// distinto para que el usuario no pierda TODO al limpiar solo una parte.
+enum _SelectiveResetKind {
+  failures,
+  favorites,
+  examHistory,
+  streak,
+}
+
+extension _SelectiveResetKindX on _SelectiveResetKind {
+  String get title {
+    switch (this) {
+      case _SelectiveResetKind.failures:
+        return 'Borrar fallos registrados';
+      case _SelectiveResetKind.favorites:
+        return 'Borrar favoritas';
+      case _SelectiveResetKind.examHistory:
+        return 'Borrar historial de simulacros';
+      case _SelectiveResetKind.streak:
+        return 'Reiniciar racha';
+    }
+  }
+
+  String get subtitle {
+    switch (this) {
+      case _SelectiveResetKind.failures:
+        return 'Limpia cola de fallos recientes. NO afecta favoritas, '
+            'simulacros ni racha.';
+      case _SelectiveResetKind.favorites:
+        return 'Limpia tu set de preguntas marcadas. NO afecta fallos, '
+            'simulacros ni racha.';
+      case _SelectiveResetKind.examHistory:
+        return 'Borra historial de simulacros. NO afecta fallos, favoritas '
+            'ni racha.';
+      case _SelectiveResetKind.streak:
+        return 'Resetea contador diario (racha = 0). NO borra respuestas, '
+            'favoritas ni simulacros.';
+    }
+  }
+
+  String get confirmBody {
+    switch (this) {
+      case _SelectiveResetKind.failures:
+        return 'Se borrara la cola de fallos recientes.\n\n'
+            'Se conservan: favoritas, historial de simulacros, racha, '
+            'ajustes.';
+      case _SelectiveResetKind.favorites:
+        return 'Se borrara tu set de preguntas favoritas.\n\n'
+            'Se conservan: fallos, historial de simulacros, racha, ajustes.';
+      case _SelectiveResetKind.examHistory:
+        return 'Se borrara el historial de simulacros.\n\n'
+            'Se conservan: fallos, favoritas, racha, ajustes.';
+      case _SelectiveResetKind.streak:
+        return 'Se resetea el contador de respuestas de hoy (la racha '
+            'vuelve a 0).\n\nSe conservan: fallos, favoritas, historial '
+            'de simulacros, ajustes.';
+    }
+  }
+
+  String get keySuffix {
+    switch (this) {
+      case _SelectiveResetKind.failures:
+        return 'failures';
+      case _SelectiveResetKind.favorites:
+        return 'favorites';
+      case _SelectiveResetKind.examHistory:
+        return 'exam-history';
+      case _SelectiveResetKind.streak:
+        return 'streak';
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case _SelectiveResetKind.failures:
+        return Icons.error_outline_rounded;
+      case _SelectiveResetKind.favorites:
+        return Icons.star_border_rounded;
+      case _SelectiveResetKind.examHistory:
+        return Icons.history_rounded;
+      case _SelectiveResetKind.streak:
+        return Icons.local_fire_department_outlined;
+    }
+  }
+
+  String get successMsg {
+    switch (this) {
+      case _SelectiveResetKind.failures:
+        return 'Fallos borrados';
+      case _SelectiveResetKind.favorites:
+        return 'Favoritas borradas';
+      case _SelectiveResetKind.examHistory:
+        return 'Historial de simulacros borrado';
+      case _SelectiveResetKind.streak:
+        return 'Racha reiniciada';
+    }
+  }
+}
+
+/// Tile generico de reset selectivo. UI consistente entre las 4 acciones.
+class _SelectiveResetTile extends ConsumerWidget {
+  final _SelectiveResetKind kind;
+  const _SelectiveResetTile({required this.kind});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListTile(
+      key: ValueKey('dgt-selective-reset-${kind.keySuffix}'),
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(kind.icon, color: const Color(0xFFFF9F43)),
+      title: Text(kind.title),
+      subtitle: Text(
+        kind.subtitle,
+        style: const TextStyle(fontSize: 12),
+      ),
+      trailing: const Icon(Icons.chevron_right_rounded),
+      onTap: () => _confirmAndRun(context, ref),
+    );
+  }
+
+  Future<void> _confirmAndRun(BuildContext context, WidgetRef ref) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(kind.title),
+        content: Text(kind.confirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            key: ValueKey('selective-reset-confirm-${kind.keySuffix}'),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFFFF5C5C),
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Borrar'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    try {
+      await _runSelectiveReset(ref, kind);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(kind.successMsg)),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+}
+
+/// Issue #202 (dgt-ux): logica pura de reset selectivo. Extraida del widget
+/// para permitir tests sin levantar UI. Cada branch toca un unico store:
+/// GARANTIZA aislamiento (criterio del acceptance).
+Future<void> _runSelectiveReset(
+  WidgetRef ref,
+  _SelectiveResetKind kind,
+) async {
+  switch (kind) {
+    case _SelectiveResetKind.failures:
+      await ref.read(dgtFailuresRepositoryProvider).clearAll();
+      ref.invalidate(dgtRecentFailuresProvider);
+      ref.invalidate(dgtRecentFailuresCountProvider);
+      break;
+    case _SelectiveResetKind.favorites:
+      await ref.read(dgtFavoritesProvider.notifier).clearAll();
+      break;
+    case _SelectiveResetKind.examHistory:
+      await ref.read(dgtExamHistoryRepositoryProvider).clear();
+      ref.invalidate(dgtExamHistoryProvider);
+      break;
+    case _SelectiveResetKind.streak:
+      // Racha se computa desde answered-today + failures. Para reiniciar SIN
+      // tocar fallos, limpiamos solo los contadores diarios persistidos.
+      final prefs = await SharedPreferences.getInstance();
+      final keys = prefs.getKeys().where(
+            (k) => k.startsWith(kDgtAnsweredTodayPrefix),
+          );
+      for (final k in keys) {
+        await prefs.remove(k);
+      }
+      break;
   }
 }
 
