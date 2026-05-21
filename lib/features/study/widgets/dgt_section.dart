@@ -12,6 +12,7 @@ import '../../dgt/dgt_top_failures_screen.dart';
 import '../../dgt/dgt_signals_catalog_screen.dart';
 import '../../dgt/dgt_today_study_screen.dart';
 import '../../dgt/dgt_trick_questions_screen.dart';
+import '../../dgt/dgt_true_false_screen.dart';
 import '../../dgt/dgt_warmup_screen.dart';
 import '../../dgt/dgt_weak_focus_screen.dart';
 import '../../dgt/dgt_weekly_evolution_screen.dart';
@@ -217,6 +218,23 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     badgeBuilder: (_) => const DgtTileBadge(
       text: 'Active recall',
       color: Color(0xFFB9A6FF),
+    ),
+  ),
+
+  // Issue #201 (dgt-ux): "V/F rapido" - afirmaciones binarias DGT para
+  // entrenar el reflejo logico siempre/nunca/permitido/prohibido. 10
+  // afirmaciones por ronda derivadas del banco DGT (cache local), sin
+  // timer.
+  DgtTileSpec(
+    title: 'V/F rapido',
+    subtitleBuilder: (_) =>
+        '10 afirmaciones binarias. Entrena el reflejo si/no.',
+    icon: Icons.rule_rounded,
+    accentColor: const Color(0xFF4FFFB0),
+    routeBuilder: (_) => const DgtTrueFalseScreen(),
+    badgeBuilder: (_) => const DgtTileBadge(
+      text: 'V/F',
+      color: Color(0xFF4FFFB0),
     ),
   ),
 
