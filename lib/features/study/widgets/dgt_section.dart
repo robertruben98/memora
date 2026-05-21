@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../dgt/dgt_autotest_screen.dart';
 import '../../dgt/dgt_cohort_compare_screen.dart';
+import '../../dgt/dgt_exam_calendar_screen.dart';
 import '../../dgt/dgt_prediction.dart';
 import '../../dgt/dgt_recurrent_failures_screen.dart';
 import '../../dgt/dgt_settings_screen.dart';
@@ -201,6 +202,22 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     badgeBuilder: (_) => const DgtTileBadge(
       text: 'Cohorte',
       color: Color(0xFF4FA8FF),
+    ),
+  ),
+
+  // Issue #187 (dgt-ux): "Mi calendario examen" con countdown D-N y ramp-up
+  // por fases. Visible siempre; el propio screen maneja el empty state cuando
+  // no hay examDate configurada.
+  DgtTileSpec(
+    title: 'Mi calendario examen',
+    subtitleBuilder: (_) =>
+        'Countdown D-N + plan de ramp-up por fases',
+    icon: Icons.event_rounded,
+    accentColor: const Color(0xFFFFB74F),
+    routeBuilder: (_) => const DgtExamCalendarScreen(),
+    badgeBuilder: (_) => const DgtTileBadge(
+      text: 'Plan',
+      color: Color(0xFFFFB74F),
     ),
   ),
 
