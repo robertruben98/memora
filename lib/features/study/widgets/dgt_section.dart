@@ -11,775 +11,154 @@ import '../dgt_exam_history.dart';
 import '../dgt_exam_screen.dart';
 import '../dgt_history_screen.dart';
 import '../dgt_sections_screen.dart';
+import 'dgt_tile.dart';
+import 'dgt_tile_spec.dart';
+
+/// Registry inmutable de tiles DGT en el orden visual del Study Hub.
+///
+/// Issue #148: tile registry pattern. Antes habia 8 widgets `_DgtXxxTile`
+/// inline (~80 LOC cada uno) y un `build()` que los componia con `SizedBox`s
+/// intermedios. Cada feature DGT nueva forzaba a editar este archivo en dos
+/// sitios -> cascade DIRTY/merge-conflicts (mismo patron que sufria
+/// `app.seed_dgt` antes del registry auto-discovery ITER 39 en backend).
+///
+/// Ahora basta con anadir un `DgtTileSpec` aqui. La construccion del Column
+/// se hace generica en `DgtStudySection.build`.
+List<DgtTileSpec> buildDgtTileRegistry() {
+  return <DgtTileSpec>[
+    // 1. Simulacro DGT (hero). Issue original del modulo: tile principal con
+    //    gradiente naranja oficial.
+    DgtTileSpec(
+      title: 'Simulacro DGT',
+      subtitle: '30 preguntas, 30 minutos, criterio examen oficial',
+      icon: Icons.directions_car_rounded,
+      accentColor: const Color(0xFFFF6B35),
+      variant: DgtTileVariant.hero,
+      routeBuilder: (_, _) => const DgtExamScreen(),
+    ),
+
+    // 2. Atacar mi punto debil (condicional). Issue #134 (dgt-ux).
+    //    Visible solo cuando dgtPredictionProvider tiene weakestTopic.
+    DgtTileSpec(
+      title: 'Atacar mi punto debil',
+      subtitleBuilder: (ref) {
+        final weakest = ref.watch(dgtPredictionProvider).maybeWhen(
+              data: (p) => p.weakestTopic,
+              orElse: () => null,
+            );
+        if (weakest == null) return '';
+        final pct = weakest.accuracyPct.toStringAsFixed(0);
+        final topicName = weakest.topicName ?? weakest.topicId;
+        return 'Foco: $topicName  ·  $pct% acierto';
+      },
+      icon: Icons.gps_fixed_rounded,
+      accentColor: const Color(0xFFFF5C5C),
+      badgeText: 'Adaptativo',
+      visibleWhen: (ref) {
+        return ref.watch(dgtPredictionProvider).maybeWhen(
+              data: (p) => p.weakestTopic != null,
+              orElse: () => false,
+            );
+      },
+      routeBuilder: (_, _) => const DgtWeakFocusScreen(),
+    ),
+
+    // 3. Calentar 5 min. Issue #135 (dgt-ux). Cerca del CTA principal para
+    //    que el estudiante elija warmup ligero vs simulacro completo.
+    DgtTileSpec(
+      title: 'Calentar 5 min',
+      subtitle: '10 preguntas variadas, sin timer. No cuenta historial',
+      icon: Icons.local_fire_department_rounded,
+      accentColor: const Color(0xFF7C5CFF),
+      routeBuilder: (_, _) => const DgtWarmupScreen(),
+    ),
+
+    // 4. Historial de simulacros (subtitulo dinamico segun count).
+    DgtTileSpec(
+      title: 'Historial de simulacros',
+      subtitleBuilder: (ref) {
+        final count = ref.watch(dgtExamHistoryProvider).maybeWhen(
+                  data: (entries) => entries.length,
+                  orElse: () => null,
+                ) ??
+            0;
+        if (count <= 0) return 'Aun sin simulacros completados';
+        final plural = count == 1 ? '' : 's';
+        return '$count simulacro$plural guardado$plural';
+      },
+      icon: Icons.history_rounded,
+      accentColor: const Color(0xFFFF6B35),
+      routeBuilder: (_, _) => const DgtHistoryScreen(),
+    ),
+
+    // 5. Trampas frecuentes. Issue dgt-ux trick questions.
+    DgtTileSpec(
+      title: 'Trampas frecuentes',
+      subtitle: 'Practica las palabras siempre / nunca / excepto / solo',
+      icon: Icons.warning_amber_rounded,
+      accentColor: const Color(0xFFFFB74F),
+      badgeText: 'Anti-trampa',
+      routeBuilder: (_, _) => const DgtTrickQuestionsScreen(),
+    ),
+
+    // 6. Autotest mental. Issue #127 (dgt-ux). Active recall sin opciones.
+    DgtTileSpec(
+      title: 'Autotest mental',
+      subtitle: 'Pregunta sin opciones. Piensa, revela, self-report.',
+      icon: Icons.psychology_alt_rounded,
+      accentColor: const Color(0xFFB9A6FF),
+      badgeText: 'Active recall',
+      routeBuilder: (_, _) => const DgtAutotestScreen(),
+    ),
+
+    // 7. Estudiar por Secciones (variante section, gap mayor previo).
+    DgtTileSpec(
+      title: 'Estudiar por Secciones',
+      subtitle: 'Clases teoricas DGT por bloque tematico (lectura)',
+      icon: Icons.menu_book_rounded,
+      accentColor: const Color(0xFF7C5CFF),
+      variant: DgtTileVariant.section,
+      leadingGap: 14,
+      routeBuilder: (_, _) => const DgtStudySectionsScreen(),
+    ),
+
+    // 8. Catalogo de senales.
+    DgtTileSpec(
+      title: 'Catalogo de senales',
+      subtitle: 'Repasa senales por categoria (peligro, prohibicion...)',
+      icon: Icons.traffic_rounded,
+      accentColor: const Color(0xFF4FFFB0),
+      routeBuilder: (_, _) => const DgtSignalsCatalogScreen(),
+    ),
+  ];
+}
 
 /// DGT-specific study modes section.
 ///
-/// Encapsula los 3 tiles DGT (Simulacro, Historial, Estudio por Secciones)
-/// que originalmente vivian inline en `study_hub_screen.dart`. Cualquier
-/// feature DGT futura (cache offline #45, nuevos modos) edita ESTE archivo
-/// en vez del hub general, evitando merge conflicts.
+/// Renderiza el registry `buildDgtTileRegistry()` filtrando por
+/// `visibleWhen` y respetando el `leadingGap` declarado en cada spec.
+/// Para anadir un tile nuevo: agregar un `DgtTileSpec` al registry. NO editar
+/// este `build()`.
 class DgtStudySection extends ConsumerWidget {
   const DgtStudySection({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final historyCount = ref.watch(dgtExamHistoryProvider).maybeWhen(
-          data: (entries) => entries.length,
-          orElse: () => null,
-        );
+    final registry = buildDgtTileRegistry();
+    final visible =
+        registry.where((spec) => spec.isVisible(ref)).toList(growable: false);
 
-    // Issue #134 (dgt-ux): tile "Atacar mi punto debil" condicional. Solo
-    // visible cuando la prediccion identifica un weakest_topic (>=10 reviews
-    // totales + algun topic con datos). Si aun no, ocultamos el tile para
-    // no engañar al usuario con un CTA que el backend rechazaria con 400.
-    final weakestTopic = ref.watch(dgtPredictionProvider).maybeWhen(
-          data: (p) => p.weakestTopic,
-          orElse: () => null,
-        );
+    final children = <Widget>[];
+    for (var i = 0; i < visible.length; i++) {
+      if (i > 0) {
+        children.add(SizedBox(height: visible[i].leadingGap));
+      }
+      children.add(DgtTile(spec: visible[i]));
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _DgtExamTile(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const DgtExamScreen()),
-          ),
-        ),
-        if (weakestTopic != null) ...[
-          const SizedBox(height: 10),
-          _DgtWeakFocusTile(
-            topicName: weakestTopic.topicName ?? weakestTopic.topicId,
-            accuracyPct: weakestTopic.accuracyPct,
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const DgtWeakFocusScreen()),
-            ),
-          ),
-        ],
-        const SizedBox(height: 10),
-        _DgtWarmupTile(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const DgtWarmupScreen()),
-          ),
-        ),
-        const SizedBox(height: 10),
-        _DgtHistoryTile(
-          historyCount: historyCount,
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const DgtHistoryScreen()),
-          ),
-        ),
-        const SizedBox(height: 10),
-        _DgtTrickQuestionsTile(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => const DgtTrickQuestionsScreen(),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        _DgtAutotestTile(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => const DgtAutotestScreen(),
-            ),
-          ),
-        ),
-        const SizedBox(height: 14),
-        _DgtSectionsTile(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => const DgtStudySectionsScreen(),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        _DgtSignalsCatalogTile(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => const DgtSignalsCatalogScreen(),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _DgtSignalsCatalogTile extends StatelessWidget {
-  final VoidCallback onTap;
-  const _DgtSignalsCatalogTile({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A1A22),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: const Color(0xFF4FFFB0).withValues(alpha: 0.4),
-            ),
-          ),
-          padding: const EdgeInsets.fromLTRB(16, 12, 14, 12),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF4FFFB0).withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.traffic_rounded,
-                  color: Color(0xFF4FFFB0),
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Catalogo de senales',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Repasa senales por categoria (peligro, prohibicion...)',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_rounded,
-                color: Colors.white.withValues(alpha: 0.5),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Issue #127 (dgt-ux): tile para Autotest Mental (active recall puro:
-/// preguntas sin opciones a/b/c, self-report acierto/fallo).
-class _DgtAutotestTile extends StatelessWidget {
-  final VoidCallback onTap;
-  const _DgtAutotestTile({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A1A22),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: const Color(0xFFB9A6FF).withValues(alpha: 0.45),
-            ),
-          ),
-          padding: const EdgeInsets.fromLTRB(16, 12, 14, 12),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFB9A6FF).withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.psychology_alt_rounded,
-                  color: Color(0xFFB9A6FF),
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Text(
-                          'Autotest mental',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.2,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFB9A6FF)
-                                .withValues(alpha: 0.20),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            'Active recall',
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFFB9A6FF),
-                              letterSpacing: 0.4,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Pregunta sin opciones. Piensa, revela, self-report.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_rounded,
-                color: Colors.white.withValues(alpha: 0.5),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DgtTrickQuestionsTile extends StatelessWidget {
-  final VoidCallback onTap;
-  const _DgtTrickQuestionsTile({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A1A22),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: const Color(0xFFFFB74F).withValues(alpha: 0.45),
-            ),
-          ),
-          padding: const EdgeInsets.fromLTRB(16, 12, 14, 12),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFB74F).withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.warning_amber_rounded,
-                  color: Color(0xFFFFB74F),
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Text(
-                          'Trampas frecuentes',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.2,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFB74F)
-                                .withValues(alpha: 0.20),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            'Anti-trampa',
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFFFFB74F),
-                              letterSpacing: 0.4,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Practica las palabras siempre / nunca / excepto / solo',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_rounded,
-                color: Colors.white.withValues(alpha: 0.5),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DgtExamTile extends StatelessWidget {
-  final VoidCallback onTap;
-  const _DgtExamTile({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Ink(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFFFF6B35), Color(0xFFFFA552)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFFFF6B35).withValues(alpha: 0.3),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.22),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.directions_car_rounded,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Simulacro DGT',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.2,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      '30 preguntas, 30 minutos, criterio examen oficial',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(
-                Icons.play_arrow_rounded,
-                color: Colors.white,
-                size: 26,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DgtHistoryTile extends StatelessWidget {
-  final VoidCallback onTap;
-  final int? historyCount;
-  const _DgtHistoryTile({required this.onTap, required this.historyCount});
-
-  @override
-  Widget build(BuildContext context) {
-    final count = historyCount ?? 0;
-    final hasHistory = count > 0;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A1A22),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: const Color(0xFFFF6B35).withValues(alpha: 0.35),
-            ),
-          ),
-          padding: const EdgeInsets.fromLTRB(16, 12, 14, 12),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFF6B35).withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.history_rounded,
-                  color: Color(0xFFFF6B35),
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Historial de simulacros',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      hasHistory
-                          ? '$count simulacro${count == 1 ? '' : 's'} guardado${count == 1 ? '' : 's'}'
-                          : 'Aun sin simulacros completados',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_rounded,
-                color: Colors.white.withValues(alpha: 0.5),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DgtSectionsTile extends StatelessWidget {
-  final VoidCallback onTap;
-  const _DgtSectionsTile({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A1A22),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: const Color(0xFF7C5CFF).withValues(alpha: 0.45),
-            ),
-          ),
-          padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF7C5CFF).withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.menu_book_rounded,
-                  color: Color(0xFFB9A6FF),
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Estudiar por Secciones',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Clases teoricas DGT por bloque tematico (lectura)',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_rounded,
-                color: Colors.white.withValues(alpha: 0.55),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Issue #134 (dgt-ux): tile "Atacar mi punto debil" en el Study Hub.
-/// Visible solo cuando la prediccion identifica un weakest_topic con datos.
-class _DgtWeakFocusTile extends StatelessWidget {
-  final String topicName;
-  final double accuracyPct;
-  final VoidCallback onTap;
-
-  const _DgtWeakFocusTile({
-    required this.topicName,
-    required this.accuracyPct,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final pct = accuracyPct.toStringAsFixed(0);
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A1A22),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: const Color(0xFFFF5C5C).withValues(alpha: 0.45),
-            ),
-          ),
-          padding: const EdgeInsets.fromLTRB(16, 12, 14, 12),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFF5C5C).withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.gps_fixed_rounded,
-                  color: Color(0xFFFF5C5C),
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Flexible(
-                          child: Text(
-                            'Atacar mi punto debil',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.2,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFF5C5C)
-                                .withValues(alpha: 0.20),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            'Adaptativo',
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFFFF5C5C),
-                              letterSpacing: 0.4,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Foco: $topicName  ·  $pct% acierto',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_rounded,
-                color: Colors.white.withValues(alpha: 0.5),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Issue #135 (dgt-ux): tile "Calentamiento DGT" justo debajo del simulacro
-/// principal. Posicion intencionada: cerca del CTA del simulacro real para que
-/// el estudiante pueda elegir warmup ligero vs simulacro completo.
-class _DgtWarmupTile extends StatelessWidget {
-  final VoidCallback onTap;
-  const _DgtWarmupTile({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A1A22),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: const Color(0xFF7C5CFF).withValues(alpha: 0.4),
-            ),
-          ),
-          padding: const EdgeInsets.fromLTRB(16, 12, 14, 12),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF7C5CFF).withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.local_fire_department_rounded,
-                  color: Color(0xFFB9A6FF),
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Calentar 5 min',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '10 preguntas variadas, sin timer. No cuenta historial',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_rounded,
-                color: Colors.white.withValues(alpha: 0.5),
-              ),
-            ],
-          ),
-        ),
-      ),
+      children: children,
     );
   }
 }
