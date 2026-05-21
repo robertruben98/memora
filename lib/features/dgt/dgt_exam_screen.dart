@@ -9,6 +9,7 @@ import 'dgt_favorites_provider.dart';
 import 'dgt_favorites_screen.dart';
 import 'dgt_prediction.dart';
 import 'dgt_result_screen.dart';
+import 'dgt_sprint_screen.dart';
 import 'dgt_topics_screen.dart';
 import 'dgt_video_questions_screen.dart';
 import 'widgets/dgt_exam_body.dart';
@@ -292,6 +293,13 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
         Navigator.of(context).push(
           MaterialPageRoute<void>(
             builder: (_) => const DgtVideoQuestionsScreen(),
+          ),
+        );
+      },
+      onOpenSprint: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => const DgtSprintScreen(),
           ),
         );
       },

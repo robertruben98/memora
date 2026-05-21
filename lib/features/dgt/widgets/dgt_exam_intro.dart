@@ -24,6 +24,10 @@ class DgtExamIntro extends StatelessWidget {
   /// Callback al pedir practica del peor tema desde la Card de prediccion.
   final void Function(String topicId) onPracticeWeakest;
 
+  /// Callback al pulsar el card "Sprint diario" (issue #152).
+  /// Puede ser `null` si el feature esta deshabilitado.
+  final VoidCallback? onOpenSprint;
+
   /// Si `true`, el simulacro arranca en modo estricto y el boton "Empezar"
   /// queda deshabilitado (caso edge: usuario llega a intro en strict). En
   /// el flow normal este intro solo se muestra en modo libre.
@@ -36,6 +40,7 @@ class DgtExamIntro extends StatelessWidget {
     required this.onOpenFavorites,
     required this.onOpenVideos,
     required this.onPracticeWeakest,
+    this.onOpenSprint,
     this.strictMode = false,
   });
 
@@ -86,8 +91,26 @@ class DgtExamIntro extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
               child: _Examen2026Section(onOpenVideos: onOpenVideos),
             ),
-            DgtPredictionCard(onPracticeWeakest: onPracticeWeakest),
-            const Spacer(),
+            // Issue #152 (dgt-ux): tile "Sprint diario". Si esta presente,
+            // el contenido puede pasarse del alto disponible en pantallas
+            // pequenas, asi que metemos a partir de aqui dentro de un
+            // [Expanded] con scroll para no provocar overflow.
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    DgtPredictionCard(
+                      onPracticeWeakest: onPracticeWeakest,
+                    ),
+                    if (onOpenSprint != null)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                        child: _SprintDiarioTile(onTap: onOpenSprint!),
+                      ),
+                  ],
+                ),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: SizedBox(
@@ -247,6 +270,88 @@ class _Examen2026Section extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Tile de entrada al modo "Sprint diario" (issue #152). Vive dentro del
+/// intro del simulacro porque ESE es el "dgt screen" canonico segun el issue
+/// (la otra opcion `dgt_section.dart` esta bloqueada por refactor #148).
+class _SprintDiarioTile extends StatelessWidget {
+  final VoidCallback onTap;
+  const _SprintDiarioTile({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          key: const ValueKey('dgt-sprint-diario-cta'),
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Ink(
+            decoration: BoxDecoration(
+              color: const Color(0xFF4FFFB0).withValues(alpha: 0.12),
+              border: Border.all(
+                color: const Color(0xFF4FFFB0).withValues(alpha: 0.45),
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4FFFB0).withValues(alpha: 0.25),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.bolt_rounded,
+                    color: Color(0xFF4FFFB0),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Sprint diario',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '10 preguntas en 2 min - histograma de tus ultimos sprints',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: Colors.white.withValues(alpha: 0.7),
+                  size: 22,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
