@@ -15,6 +15,7 @@ import '../dgt/widgets/resume_exam_dialog.dart';
 import '../dgt/dgt_failures_review_screen.dart';
 import '../dgt/dgt_preparation_provider.dart';
 import '../dgt/dgt_quick_review_screen.dart';
+import '../dgt/dgt_ready_check_screen.dart';
 import '../dgt/dgt_settings.dart';
 import '../dgt/widgets/adaptive_goal_banner.dart';
 import '../stats/stats_screen.dart';
@@ -150,6 +151,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: DgtAdaptiveGoalBanner(),
                       )
                     : const SizedBox.shrink(),
+                orElse: () => const SizedBox.shrink(),
+              ),
+              // Issue #136 (dgt-ux): banner "Listo para examen?" cuando
+              // faltan <=7 dias. Aditivo, condicional, no rompe nada.
+              dgtSettingsAsync.maybeWhen(
+                data: (s) {
+                  final days = s.daysUntilExam;
+                  if (days == null || days < 0 || days > 7) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _DgtReadyCheckBanner(daysUntilExam: days),
+                  );
+                },
                 orElse: () => const SizedBox.shrink(),
               ),
               questAsync.maybeWhen(
@@ -930,6 +946,75 @@ class _StreakBadgeState extends State<StreakBadge>
                   fontWeight: FontWeight.w700,
                   color: Color(0xFFFF8A4F),
                 ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Issue #136 (dgt-ux): banner accionable cuando faltan <=7 dias para el
+/// examen. Compacto, tappable, lleva a [DgtReadyCheckScreen]. Aditivo.
+class _DgtReadyCheckBanner extends StatelessWidget {
+  final int daysUntilExam;
+  const _DgtReadyCheckBanner({required this.daysUntilExam});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const DgtReadyCheckScreen()),
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFF5C5C).withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: const Color(0xFFFF5C5C).withValues(alpha: 0.4),
+            ),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.fact_check_rounded,
+                color: Color(0xFFFF5C5C),
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      daysUntilExam == 0
+                          ? 'Examen hoy: estas listo?'
+                          : 'Faltan $daysUntilExam dia(s): estas listo?',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFFFF5C5C),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Revisa 5 criterios antes de presentarte',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: Colors.white.withValues(alpha: 0.5),
               ),
             ],
           ),
