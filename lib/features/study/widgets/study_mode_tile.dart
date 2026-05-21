@@ -44,9 +44,22 @@ class StudyModeTile extends StatelessWidget {
         ? accentColor.withValues(alpha: 0.45)
         : Colors.white.withValues(alpha: 0.08);
 
-    return Material(
+    // Issue #191 (dgt-tech): a11y. Label descriptivo para TalkBack / VoiceOver.
+    // Si hay badge con count, anunciarlo via `value`.
+    final semanticLabel = '$title. $subtitle. Pulsa para abrir';
+    final semanticValue = hasBadge ? '$badgeCount pendientes' : null;
+
+    return Semantics(
+      label: semanticLabel,
+      value: semanticValue,
+      button: true,
+      container: true,
+      excludeSemantics: true,
+      child: Material(
       color: Colors.transparent,
-      child: InkWell(
+      child: Tooltip(
+        message: '$title. $subtitle',
+        child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Ink(
@@ -121,6 +134,8 @@ class StudyModeTile extends StatelessWidget {
             ],
           ),
         ),
+      ),
+      ),
       ),
     );
   }

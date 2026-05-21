@@ -42,9 +42,17 @@ class DgtStudySection extends ConsumerWidget {
       tiles.add(DgtTile(spec: spec));
       first = false;
     }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: tiles,
+    // Issue #191 (dgt-tech): wrap la seccion en Semantics(header: true) para
+    // screen readers (TalkBack / VoiceOver). El label anuncia la region como
+    // "Seccion DGT" antes de leer los tiles individuales.
+    return Semantics(
+      header: true,
+      label: 'Seccion DGT. Modos de estudio para el examen teorico.',
+      explicitChildNodes: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: tiles,
+      ),
     );
   }
 }
