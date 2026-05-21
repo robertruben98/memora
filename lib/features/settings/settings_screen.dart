@@ -10,6 +10,7 @@ import '../../data/repositories/deck_repository.dart';
 import '../../data/repositories/dgt_repository.dart';
 import '../dgt/dgt_reminder_service.dart';
 import '../dgt/dgt_settings.dart';
+import '../dgt/services/dgt_backup_service.dart';
 import '../home/welcome_tour.dart';
 import '../review/study_queue.dart';
 import '../stats/stats_repository.dart';
@@ -737,6 +738,11 @@ class _DgtSection extends StatelessWidget {
           const SizedBox(height: 12),
           // DGT issue #45: boton para sincronizar/invalidar cache del banco DGT.
           const _DgtSyncButton(),
+          const SizedBox(height: 12),
+          const Divider(height: 1, thickness: 0.4),
+          const SizedBox(height: 12),
+          // DGT issue #175: export/import progreso DGT (JSON local).
+          const _DgtBackupTile(),
         ],
       ),
     );
@@ -1011,6 +1017,163 @@ class _DgtReminderTile extends ConsumerWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// Issue #175 (dgt-ux): export/import del progreso DGT (favoritas, fallos,
+/// historiales, settings) como JSON local. Compartible via share_plus,
+/// restorable via file_picker. Merge: union para favoritas/fallos, max(streak),
+/// keep newest para examDate/settings (ver `mergePayloads`).
+class _DgtBackupTile extends ConsumerStatefulWidget {
+  const _DgtBackupTile();
+
+  @override
+  ConsumerState<_DgtBackupTile> createState() => _DgtBackupTileState();
+}
+
+class _DgtBackupTileState extends ConsumerState<_DgtBackupTile> {
+  bool _busy = false;
+
+  Future<void> _export() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final svc = ref.read(dgtBackupServiceProvider);
+      await svc.exportAndShare();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Progreso exportado'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No se pudo exportar el progreso'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _import() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final svc = ref.read(dgtBackupServiceProvider);
+      final result = await svc.pickAndRead();
+      if (!mounted) return;
+      if (result.cancelled) return;
+      if (!result.isOk) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result.errorMessage ?? 'Archivo invalido'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        return;
+      }
+      final payload = result.payload!;
+      // Confirmacion pre-merge.
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Restaurar progreso DGT'),
+          content: Text(
+            'Se va a mezclar con tu progreso actual:\n\n'
+            '${payload.summaryLabel}\n\n'
+            'Estrategia: favoritas y fallos se unifican, racha gana la mayor, '
+            'fecha de examen y meta usan los del backup mas reciente. '
+            'No se borra nada de lo que ya tienes.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Restaurar'),
+            ),
+          ],
+        ),
+      );
+      if (ok != true) return;
+      final merged = await svc.applyMerge(payload);
+      if (!mounted) return;
+      // Refrescar providers afectados.
+      ref.invalidate(dgtSettingsProvider);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Progreso restaurado: ${merged.summaryLabel}'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No se pudo restaurar el progreso'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Copia de seguridad del progreso DGT',
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Exporta tus favoritas, fallos, racha y simulacros a un JSON '
+          'que puedes guardar en Drive/email/WhatsApp y restaurar en otro '
+          'movil o tras reinstalar.',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.white.withValues(alpha: 0.6),
+            height: 1.35,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _busy ? null : _export,
+                icon: _busy
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.upload_rounded, size: 18),
+                label: const Text('Exportar'),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _busy ? null : _import,
+                icon: const Icon(Icons.download_rounded, size: 18),
+                label: const Text('Importar'),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
