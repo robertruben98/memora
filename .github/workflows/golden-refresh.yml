@@ -1,0 +1,70 @@
+name: Golden refresh
+# Regenera goldens Flutter en ubuntu-latest y abre PR auto contra develop. Issue #211.
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Motivo de la regeneracion (aparece en el body del PR)'
+        required: false
+        default: 'Manual golden refresh'
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: ${{ runner.os }}-pub-
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Install deps
+        run: flutter pub get
+      - name: Regenerate goldens
+        run: flutter test --update-goldens
+        continue-on-error: true
+      - name: Detect golden diff
+        id: diff
+        run: |
+          set -euo pipefail
+          if [ ! -d test/goldens ] || git diff --quiet -- test/goldens; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git status --short -- test/goldens
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Create PR
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REASON: ${{ github.event.inputs.reason }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          BRANCH="ci/golden-refresh-${RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add test/goldens
+          git commit -m "chore(test): regenerate Flutter goldens (run ${RUN_ID})"
+          git push origin "$BRANCH"
+          gh pr create \
+            --base develop --head "$BRANCH" \
+            --title "chore(test): refresh goldens (run ${RUN_ID})" \
+            --body "Regenerated goldens. Reason: ${REASON}. Review screenshots before merge. Run: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" \
+            --label auto-generated --label golden-update
