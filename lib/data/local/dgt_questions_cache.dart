@@ -4,6 +4,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../repositories/dgt_repository.dart';
 
+/// Constante a bumpear cuando el shape de `DgtQuestion.fromJson` agregue
+/// campos nuevos populados por el backend (e.g. `difficulty`, `subtopic_id`,
+/// `tags`, `image_url` poblado). Issue #156 (dgt-tech): si bump esta constante,
+/// los clientes con cache antigua la invalidan automaticamente al proximo
+/// `read()` sin esperar al TTL de 7 dias.
+///
+/// Historia:
+///   * v1 -> shape original (id/statement/options/correct/explanation/topic
+///     /image_url). Vigente hasta 2026-05.
+///   * v2 -> aniade soporte para campos opcionales `difficulty` y
+///     `subtopic_id` que algunos batches DGT 2026 ya emiten (issue #156).
+const int kDgtCacheSchemaVersion = 2;
+
 /// Cache local de preguntas DGT.
 ///
 /// Issue #45 (dgt-tech): los simulacros hacen `GET /dgt/questions` en cada
@@ -19,9 +32,14 @@ import '../repositories/dgt_repository.dart';
 ///   - `dgt.cache.questions.v1.json` -> JSON list de [DgtQuestion.toJson]
 ///   - `dgt.cache.questions.v1.ts_ms` -> int (timestamp unix ms al guardar)
 ///   - `dgt.cache.questions.v1.limit` -> int (limit con el que se fetcho)
+///   - `dgt.cache.questions.schema_version` -> int (schema version persistida,
+///     issue #156). Si difiere de [kDgtCacheSchemaVersion] al leer, la cache
+///     se descarta como stale aunque el TTL no haya vencido.
 ///
-/// TTL configurable por constructor (default 7 dias). Cambiar la sufijo de
-/// version (`.v1`) si en el futuro se rompe el schema.
+/// TTL configurable por constructor (default 7 dias). Si solo cambia el
+/// schema (no el storage key) basta con bumpear [kDgtCacheSchemaVersion] para
+/// auto-invalidar todos los clientes. Si cambia el storage key, mantener el
+/// patron `.v1` actual y crear `.v2`.
 class DgtQuestionsCache {
   /// Default TTL: 7 dias.
   static const Duration defaultTtl = Duration(days: 7);
@@ -29,6 +47,11 @@ class DgtQuestionsCache {
   static const String keyJson = 'dgt.cache.questions.v1.json';
   static const String keyTimestampMs = 'dgt.cache.questions.v1.ts_ms';
   static const String keyLimit = 'dgt.cache.questions.v1.limit';
+
+  /// Key de la version del schema persistida con el blob. Issue #156:
+  /// permite auto-invalidar la cache cuando el contrato de
+  /// `DgtQuestion.fromJson` cambia (campos nuevos del backend).
+  static const String keySchemaVersion = 'dgt.cache.questions.schema_version';
 
   final Duration ttl;
   final Future<SharedPreferences> Function() _prefsLoader;
@@ -46,6 +69,8 @@ class DgtQuestionsCache {
   /// - El JSON esta corrupto.
   /// - El timestamp esta fuera de TTL ([forceFresh] true reemplaza chequeo
   ///   de TTL por "siempre stale", util para forzar refetch).
+  /// - La version del schema persistida difiere de [kDgtCacheSchemaVersion]
+  ///   (issue #156: handshake auto-invalidate al cambiar shape backend).
   ///
   /// Si [requireLimit] se da, devuelve null si el limit guardado no
   /// coincide (p.ej. cache de 30 no sirve para limit=50). Esto evita
@@ -60,6 +85,10 @@ class DgtQuestionsCache {
       final raw = prefs.getString(keyJson);
       if (ts == null || raw == null) return null;
       if (forceFresh) return null;
+      // Issue #156: handshake de version. Si el cliente actual espera un shape
+      // distinto al persistido (incluye legacy "sin version" = 1), invalida.
+      final savedVersion = prefs.getInt(keySchemaVersion) ?? 1;
+      if (savedVersion != kDgtCacheSchemaVersion) return null;
       final age = DateTime.now().millisecondsSinceEpoch - ts;
       if (age > ttl.inMilliseconds) return null;
       if (requireLimit != null) {
@@ -77,7 +106,9 @@ class DgtQuestionsCache {
     }
   }
 
-  /// Escribe la cache (best-effort: silencioso si falla).
+  /// Escribe la cache (best-effort: silencioso si falla). Persiste tambien
+  /// la version actual del schema ([kDgtCacheSchemaVersion]) para que un
+  /// futuro bump invalide automaticamente este blob.
   Future<void> write(List<DgtQuestion> questions, {required int limit}) async {
     try {
       final prefs = await _prefsLoader();
@@ -88,6 +119,7 @@ class DgtQuestionsCache {
         DateTime.now().millisecondsSinceEpoch,
       );
       await prefs.setInt(keyLimit, limit);
+      await prefs.setInt(keySchemaVersion, kDgtCacheSchemaVersion);
     } catch (_) {
       // Persist best-effort.
     }
@@ -100,6 +132,7 @@ class DgtQuestionsCache {
       await prefs.remove(keyJson);
       await prefs.remove(keyTimestampMs);
       await prefs.remove(keyLimit);
+      await prefs.remove(keySchemaVersion);
     } catch (_) {
       // Best-effort.
     }
