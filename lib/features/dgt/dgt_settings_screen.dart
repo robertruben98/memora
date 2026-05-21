@@ -67,6 +67,18 @@ class _Body extends ConsumerWidget {
           onChanged: (m) =>
               _save(ref, settings.copyWith(streakReminderMode: m)),
         ),
+        const SizedBox(height: 8),
+        // Issue #189 (dgt-ux): toggle de notif al alcanzar meta diaria.
+        SwitchListTile.adaptive(
+          key: const ValueKey('dgt-goal-notif-toggle'),
+          contentPadding: EdgeInsets.zero,
+          value: settings.goalNotifEnabled,
+          onChanged: (v) => _save(ref, settings.copyWith(goalNotifEnabled: v)),
+          title: const Text('Notificarme al lograr la meta diaria'),
+          subtitle: const Text(
+            'Aviso unico al cruzar el umbral. Idempotente por dia.',
+          ),
+        ),
         const Divider(height: 32),
         _SectionTitle('Simulacro'),
         SwitchListTile.adaptive(
