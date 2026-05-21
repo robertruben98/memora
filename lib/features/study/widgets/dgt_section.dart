@@ -5,6 +5,7 @@ import '../../dgt/dgt_autotest_screen.dart';
 import '../../dgt/dgt_prediction.dart';
 import '../../dgt/dgt_signals_catalog_screen.dart';
 import '../../dgt/dgt_trick_questions_screen.dart';
+import '../../dgt/dgt_warmup_screen.dart';
 import '../../dgt/dgt_weak_focus_screen.dart';
 import '../dgt_exam_history.dart';
 import '../dgt_exam_screen.dart';
@@ -54,6 +55,12 @@ class DgtStudySection extends ConsumerWidget {
             ),
           ),
         ],
+        const SizedBox(height: 10),
+        _DgtWarmupTile(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const DgtWarmupScreen()),
+          ),
+        ),
         const SizedBox(height: 10),
         _DgtHistoryTile(
           historyCount: historyCount,
@@ -686,6 +693,81 @@ class _DgtWeakFocusTile extends StatelessWidget {
                         color: Colors.white.withValues(alpha: 0.6),
                       ),
                       overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_rounded,
+                color: Colors.white.withValues(alpha: 0.5),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Issue #135 (dgt-ux): tile "Calentamiento DGT" justo debajo del simulacro
+/// principal. Posicion intencionada: cerca del CTA del simulacro real para que
+/// el estudiante pueda elegir warmup ligero vs simulacro completo.
+class _DgtWarmupTile extends StatelessWidget {
+  final VoidCallback onTap;
+  const _DgtWarmupTile({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A22),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: const Color(0xFF7C5CFF).withValues(alpha: 0.4),
+            ),
+          ),
+          padding: const EdgeInsets.fromLTRB(16, 12, 14, 12),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7C5CFF).withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.local_fire_department_rounded,
+                  color: Color(0xFFB9A6FF),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Calentar 5 min',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '10 preguntas variadas, sin timer. No cuenta historial',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.6),
+                      ),
                     ),
                   ],
                 ),

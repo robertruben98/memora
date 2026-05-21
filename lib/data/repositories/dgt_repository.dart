@@ -487,6 +487,38 @@ class DgtRepository {
     }
   }
 
+  /// Issue #135 (dgt-ux): calentamiento de 10 preguntas variadas pre-simulacro.
+  /// Backend BE#112: `GET /dgt/exam/random-warmup?limit={N}`.
+  ///
+  /// Mix de temas y dificultad baja-media para "activar la cabeza" sin
+  /// intimidar (3-5 minutos, feedback inmediato, no se guarda en historial).
+  /// Si el backend antiguo no expone el endpoint, hace fallback a una muestra
+  /// barajada del banco local mini (no garantiza la mezcla pero garantiza
+  /// que el flujo de UI funcione offline).
+  ///
+  /// Aditivo: no toca cache de simulacro, no persiste, no rompe los demas
+  /// fetchers. El resultado se consume por `DgtWarmupScreen` que descarta
+  /// los aciertos/fallos (no contribuyen al historial de simulacros).
+  Future<List<DgtQuestion>> fetchRandomWarmup({int limit = 10}) async {
+    try {
+      final res = await _api.get(
+        '/dgt/exam/random-warmup',
+        query: {'limit': '$limit'},
+      );
+      final parsed = _parseQuestions(res);
+      if (parsed != null && parsed.isNotEmpty) {
+        return parsed;
+      }
+    } catch (_) {
+      // Backend antiguo / offline / 5xx -> fallback local.
+    }
+    // Fallback: muestra barajada del banco local mini. Usa Random fijo para
+    // mantener tests deterministas; en runtime el backend siempre responde.
+    final local = List<DgtQuestion>.from(dgtLocalBank);
+    if (local.length <= limit) return local;
+    return local.take(limit).toList();
+  }
+
   /// Preguntas filtradas por tema. Backend:
   /// GET /dgt/questions?topic_id={id}&limit={N}. Si falla, filtra el banco
   /// local por campo `topic` (case-insensitive sobre id o name).

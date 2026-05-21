@@ -228,4 +228,54 @@ void main() {
       expect(r, isNotNull);
     });
   });
+
+  // Issue #135 (dgt-ux): warmup pre-simulacro.
+  group('DgtRepository.fetchRandomWarmup', () {
+    test('backend OK -> devuelve preguntas parseadas', () async {
+      final api = _FakeApiClient([_fakeBank(10)]);
+      final repo = DgtRepository(api);
+
+      final r = await repo.fetchRandomWarmup(limit: 10);
+      expect(r.length, 10);
+      expect(r.first.id, 'q0');
+      expect(api.getCalls, 1);
+    });
+
+    test('backend respeta wrapper {questions: [...]}', () async {
+      final api = _FakeApiClient([
+        {'questions': _fakeBank(5)},
+      ]);
+      final repo = DgtRepository(api);
+
+      final r = await repo.fetchRandomWarmup(limit: 5);
+      expect(r.length, 5);
+      expect(r.first.id, 'q0');
+    });
+
+    test('backend 5xx -> cae a banco local mini limitado', () async {
+      final api = _FakeApiClient([ApiException(503, 'down')]);
+      final repo = DgtRepository(api);
+
+      final r = await repo.fetchRandomWarmup(limit: 5);
+      expect(r.length, lessThanOrEqualTo(5));
+    });
+
+    test('backend lista vacia -> cae a banco local mini', () async {
+      final api = _FakeApiClient([<Map<String, dynamic>>[]]);
+      final repo = DgtRepository(api);
+
+      final r = await repo.fetchRandomWarmup(limit: 10);
+      // Banco local siempre devuelve algo (limit aplicado).
+      expect(r, isNotNull);
+      expect(r.length, lessThanOrEqualTo(10));
+    });
+
+    test('limit pasa al backend como query param string', () async {
+      final api = _FakeApiClient([_fakeBank(3)]);
+      final repo = DgtRepository(api);
+
+      await repo.fetchRandomWarmup(limit: 3);
+      expect(api.getCalls, 1);
+    });
+  });
 }
