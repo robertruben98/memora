@@ -32,3 +32,26 @@ Layout de tests:
 - `test/widget_test.dart`: smoke test ligero del `ProviderScope`.
 
 Los tests no requieren conexion a internet ni al backend: el `SyncService` se sustituye por un fake.
+
+## APK size budget
+
+El workflow `Flutter CI` incluye un job `apk-size-budget` que **solo se ejecuta en pull requests** y vigila que el APK release no crezca silenciosamente.
+
+Como funciona:
+
+1. Compila `flutter build apk --release --target-platform android-arm64`.
+2. Lee `.github/apk-size-budget.txt` (un numero en MB, ej. `60`).
+3. Lee la env var `APK_SIZE_TOLERANCE_MB` (por defecto `2`).
+4. Falla si el tamano real supera `baseline + tolerancia`.
+5. Comenta en el PR el delta vs baseline (`+0.30 MB` / `-0.15 MB`).
+
+### Como actualizar el baseline
+
+Si una PR introduce un crecimiento **legitimo** (nuevo feature, asset necesario, dependencia justificada):
+
+1. Mira el delta reportado en el comentario del bot en el PR (`+X.XX MB`).
+2. Actualiza `.github/apk-size-budget.txt` con el nuevo numero en MB (entero o decimal).
+3. Commitea en el mismo PR.
+4. Explica brevemente en la descripcion del PR el motivo del crecimiento.
+
+Asi mantenemos un numero de referencia para futuras optimizaciones y evitamos regresiones silenciosas de tamano.
