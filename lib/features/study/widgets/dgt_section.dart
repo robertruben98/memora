@@ -9,6 +9,7 @@ import '../../dgt/dgt_exam_calendar_screen.dart';
 import '../../dgt/dgt_prediction.dart';
 import '../../dgt/dgt_recurrent_failures_screen.dart';
 import '../../dgt/dgt_settings_screen.dart';
+import '../../dgt/dgt_sprint_extreme_screen.dart';
 import '../../dgt/dgt_top_failures_screen.dart';
 import '../../dgt/dgt_signals_catalog_screen.dart';
 import '../../dgt/dgt_today_study_screen.dart';
@@ -176,6 +177,21 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     icon: Icons.local_fire_department_rounded,
     accentColor: const Color(0xFF7C5CFF),
     routeBuilder: (_) => const DgtWarmupScreen(),
+  ),
+
+  // Issue #210 (dgt-ux): "Sprint extremo" - 30 preguntas en 5 minutos, sin
+  // pausa, auto-skip 12s/preg. Entrena velocidad de decision bajo presion.
+  DgtTileSpec(
+    title: 'Sprint extremo',
+    subtitleBuilder: (_) =>
+        '30 preguntas en 5 min, sin pausa, auto-skip 12s',
+    icon: Icons.bolt_rounded,
+    accentColor: const Color(0xFFFF5C5C),
+    routeBuilder: (_) => const DgtSprintExtremeScreen(),
+    badgeBuilder: (_) => const DgtTileBadge(
+      text: 'Velocidad',
+      color: Color(0xFFFF5C5C),
+    ),
   ),
 
   // Historial de simulacros (subtitle dinamico segun count).
