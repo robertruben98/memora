@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/memora_card.dart';
 import '../../core/theme/deck_visuals.dart';
 import '../../data/repositories/deck_repository.dart';
+import '../dgt/dgt_ready_check_screen.dart';
 import '../learn/learn_methods_screen.dart';
 import '../review/feed_screen.dart';
 import '../review/study_queue.dart';
@@ -72,6 +73,18 @@ class StudyHubScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 14),
           const DgtStudySection(),
+          const SizedBox(height: 14),
+          // Issue #136 (dgt-ux): entrada permanente al checklist "Listo para
+          // examen?". Aditivo, no toca dgt_section.dart.
+          StudyModeTile(
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const DgtReadyCheckScreen()),
+            ),
+            accentColor: const Color(0xFF4FFFB0),
+            leadingIcon: Icons.fact_check_rounded,
+            title: 'Listo para el examen?',
+            subtitle: 'Revisa 5 criterios antes de presentarte al DGT',
+          ),
           const SizedBox(height: 14),
           StudyModeTile(
             onTap: () => Navigator.of(context).push(
