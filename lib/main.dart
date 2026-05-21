@@ -12,6 +12,8 @@ import 'features/auth/auth_state.dart';
 import 'features/auth/login_screen.dart';
 import 'features/dgt/dgt_reminder_service.dart';
 import 'features/dgt/dgt_settings.dart';
+import 'features/dgt/dgt_weekly_report_scheduler.dart';
+import 'features/dgt/dgt_weekly_report_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'features/settings/settings_repository.dart';
 import 'features/shell/root_shell.dart';
@@ -83,6 +85,22 @@ Future<void> main() async {
           if (nav != null) {
             nav.popUntil((r) => r.isFirst);
           }
+        } else if (payload == kDgtWeeklyReportDeeplink) {
+          // Issue #174: tap en notificacion del domingo 20:00 -> abre
+          // el resumen semanal por encima del shell. popUntil para no
+          // apilar varias instancias si el usuario abre la app dos veces.
+          final nav = appNavigatorKey.currentState;
+          if (nav != null) {
+            nav.popUntil((r) => r.isFirst);
+            nav.push(
+              MaterialPageRoute(
+                builder: (_) => const DgtWeeklyReportScreen(),
+                settings: const RouteSettings(
+                  name: DgtWeeklyReportScreen.routeName,
+                ),
+              ),
+            );
+          }
         }
       },
     );
@@ -115,6 +133,21 @@ Future<void> main() async {
     appLogger.warn(
       'dgt-reminder',
       'init failed (notifications disabled)',
+      error: e,
+      stackTrace: st,
+    );
+  }
+
+  // Issue #174 (dgt-ux): reaplica el scheduler del resumen semanal.
+  // Default ON (criterio). El plugin ya fue inicializado por el bloque
+  // del recordatorio diario; aqui solo reprogramamos.
+  try {
+    final weekly = container.read(dgtWeeklyReportSchedulerProvider);
+    await weekly.reschedule();
+  } catch (e, st) {
+    appLogger.warn(
+      'dgt-weekly-report',
+      'weekly reschedule on boot failed',
       error: e,
       stackTrace: st,
     );
