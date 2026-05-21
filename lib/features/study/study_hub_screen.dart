@@ -5,6 +5,7 @@ import '../../core/models/memora_card.dart';
 import '../../core/theme/deck_visuals.dart';
 import '../../data/repositories/deck_repository.dart';
 import '../dgt/dgt_ready_check_screen.dart';
+import '../dgt/widgets/dgt_level_gauge.dart';
 import '../learn/learn_methods_screen.dart';
 import '../review/feed_screen.dart';
 import '../review/study_queue.dart';
@@ -71,6 +72,11 @@ class StudyHubScreen extends ConsumerWidget {
               MaterialPageRoute(builder: (_) => const FeedScreen()),
             ),
           ),
+          const SizedBox(height: 14),
+          // Issue #204 (dgt-ux): widget "Mi nivel" tipo gauge visual, glance
+          // rapido del nivel actual basado en predictor v2. Tap navega al
+          // ready-check (predictor v2). Cache 30min via dgtLevelGaugeProvider.
+          const DgtLevelGauge(),
           const SizedBox(height: 14),
           const DgtStudySection(),
           const SizedBox(height: 14),
