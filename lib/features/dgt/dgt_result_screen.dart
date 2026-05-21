@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../data/repositories/dgt_repository.dart';
+import 'dgt_simulacro_review_screen.dart';
 
 class DgtAnswerReview {
   final DgtQuestion question;
@@ -235,6 +236,28 @@ class _DgtResultScreenState extends State<DgtResultScreen> {
                 ),
               ),
               const SizedBox(height: 20),
+              // Issue #181 (dgt-ux): boton "Revisar fallos (N)" que abre
+              // pantalla PageView dedicada con explicacion + favorita.
+              // Solo visible si hay fallos (si pleno 100%, se oculta).
+              if (result.wrong.isNotEmpty) ...[
+                FilledButton.tonalIcon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => DgtSimulacroReviewScreen(
+                          failed: result.wrong,
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.menu_book_rounded),
+                  label: Text('Revisar fallos (${result.wrong.length})'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
               if (result.wrong.isNotEmpty)
                 const Text(
                   'Repaso de falladas',
