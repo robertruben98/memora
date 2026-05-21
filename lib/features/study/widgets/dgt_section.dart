@@ -7,6 +7,7 @@ import '../../dgt/dgt_exam_calendar_screen.dart';
 import '../../dgt/dgt_prediction.dart';
 import '../../dgt/dgt_recurrent_failures_screen.dart';
 import '../../dgt/dgt_settings_screen.dart';
+import '../../dgt/dgt_top_failures_screen.dart';
 import '../../dgt/dgt_signals_catalog_screen.dart';
 import '../../dgt/dgt_today_study_screen.dart';
 import '../../dgt/dgt_trick_questions_screen.dart';
@@ -120,6 +121,22 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     badgeBuilder: (_) => const DgtTileBadge(
       text: 'Erratas',
       color: Color(0xFFFF5C5C),
+    ),
+  ),
+
+  // Issue #190 (dgt-ux): "Top 5 fallos del mes" con insight de palabras
+  // trampa (siempre/nunca/excepto/solo). Vista compacta y predictiva basada
+  // en feedback de autoescuelas (autoescuelago, Velasco, Dribo).
+  DgtTileSpec(
+    title: 'Top 5 fallos del mes',
+    subtitleBuilder: (_) =>
+        'Tus 5 preguntas peor llevadas + insight de palabras trampa',
+    icon: Icons.trending_down_rounded,
+    accentColor: const Color(0xFFFFB74F),
+    routeBuilder: (_) => const DgtTopFailuresScreen(),
+    badgeBuilder: (_) => const DgtTileBadge(
+      text: 'Predictivo',
+      color: Color(0xFFFFB74F),
     ),
   ),
 
