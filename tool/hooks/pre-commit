@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# memora pre-commit hook (shared)
+# Runs dart format check + flutter analyze sobre archivos .dart staged.
+# Bypass: SKIP_HOOKS=1 git commit -m "..."
+
+set -euo pipefail
+
+if [[ "${SKIP_HOOKS:-0}" == "1" ]]; then
+  echo "[pre-commit] SKIP_HOOKS=1 -> skipping checks"
+  exit 0
+fi
+
+# Lista de archivos .dart staged (Added/Copied/Modified/Renamed)
+mapfile -t STAGED_DART < <(git diff --cached --name-only --diff-filter=ACMR -- '*.dart' 2>/dev/null || true)
+
+if [[ ${#STAGED_DART[@]} -eq 0 ]]; then
+  echo "[pre-commit] no .dart files staged -> skipping"
+  exit 0
+fi
+
+# Filtrar archivos que existen (rename con destino, evitar deletes ya gestionados por filter)
+EXISTING=()
+for f in "${STAGED_DART[@]}"; do
+  [[ -f "$f" ]] && EXISTING+=("$f")
+done
+
+if [[ ${#EXISTING[@]} -eq 0 ]]; then
+  echo "[pre-commit] no existing .dart files -> skipping"
+  exit 0
+fi
+
+echo "[pre-commit] checking ${#EXISTING[@]} .dart file(s)..."
+
+START_TS=$(date +%s)
+
+# 1) dart format --set-exit-if-changed (no escribe, solo verifica)
+if ! command -v dart >/dev/null 2>&1; then
+  echo "[pre-commit] ERROR: 'dart' no esta en PATH. Instala Flutter/Dart SDK."
+  exit 1
+fi
+
+if ! dart format --set-exit-if-changed --output=none "${EXISTING[@]}" >/dev/null; then
+  echo ""
+  echo "[pre-commit] FAIL: archivos mal formateados."
+  echo "  Fix: dart format ${EXISTING[*]}"
+  echo "  Bypass emergencia: SKIP_HOOKS=1 git commit ..."
+  exit 1
+fi
+
+# 2) flutter analyze --fatal-infos sobre los paths staged
+if ! command -v flutter >/dev/null 2>&1; then
+  echo "[pre-commit] WARN: 'flutter' no esta en PATH, skipping analyze."
+else
+  if ! flutter analyze --fatal-infos "${EXISTING[@]}" >/tmp/.memora-analyze.log 2>&1; then
+    echo ""
+    echo "[pre-commit] FAIL: flutter analyze reporto issues."
+    cat /tmp/.memora-analyze.log
+    echo ""
+    echo "  Bypass emergencia: SKIP_HOOKS=1 git commit ..."
+    exit 1
+  fi
+fi
+
+END_TS=$(date +%s)
+ELAPSED=$((END_TS - START_TS))
+echo "[pre-commit] OK (${ELAPSED}s)"
+exit 0
