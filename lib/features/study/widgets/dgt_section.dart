@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../dgt/dgt_autotest_screen.dart';
 import '../../dgt/dgt_cohort_compare_screen.dart';
+import '../../dgt/dgt_conceptual_errors_screen.dart';
 import '../../dgt/dgt_exam_calendar_screen.dart';
 import '../../dgt/dgt_prediction.dart';
 import '../../dgt/dgt_recurrent_failures_screen.dart';
@@ -145,6 +146,23 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     badgeBuilder: (_) => const DgtTileBadge(
       text: 'Predictivo',
       color: Color(0xFFFFB74F),
+    ),
+  ),
+
+  // Issue #195 (dgt-ux): fallos agrupados por concepto + practica similares.
+  // Visualiza errores recurrentes agrupados por topic (prioridades,
+  // adelantamiento, ADAS, etc.) y permite lanzar quiz `concept-related`
+  // para estudio dirigido.
+  DgtTileSpec(
+    title: 'Errores conceptuales',
+    subtitleBuilder: (_) =>
+        'Tus fallos agrupados por concepto. Estudio dirigido.',
+    icon: Icons.psychology_alt_rounded,
+    accentColor: const Color(0xFFB9A6FF),
+    routeBuilder: (_) => const DgtConceptualErrorsScreen(),
+    badgeBuilder: (_) => const DgtTileBadge(
+      text: 'Conceptos',
+      color: Color(0xFFB9A6FF),
     ),
   ),
 
