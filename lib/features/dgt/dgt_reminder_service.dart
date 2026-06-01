@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -107,9 +106,7 @@ class DgtReminderService {
   /// [onDeeplink] se invoca cuando el usuario toca la notificacion. El
   /// payload sera [kDailyChallengeDeeplink] (o null si la notif fue creada
   /// sin payload).
-  Future<void> init({
-    void Function(String? payload)? onDeeplink,
-  }) async {
+  Future<void> init({void Function(String? payload)? onDeeplink}) async {
     if (!_isSupported) return;
     if (_initialized) return;
     tz_data.initializeTimeZones();
@@ -135,7 +132,8 @@ class DgtReminderService {
     // Crear canal Android (idempotente).
     final android = _plugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     await android?.createNotificationChannel(
       const AndroidNotificationChannel(
         kDgtReminderChannelId,
@@ -155,14 +153,16 @@ class DgtReminderService {
     if (Platform.isAndroid) {
       final android = _plugin
           .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
+            AndroidFlutterLocalNotificationsPlugin
+          >();
       final granted = await android?.requestNotificationsPermission();
       return granted ?? true;
     }
     if (Platform.isIOS) {
       final ios = _plugin
           .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>();
+            IOSFlutterLocalNotificationsPlugin
+          >();
       final granted = await ios?.requestPermissions(
         alert: true,
         badge: true,
@@ -218,35 +218,21 @@ class DgtReminderService {
       iOS: iosDetails,
     );
 
-    try {
-      await _plugin.zonedSchedule(
-        kDgtReminderNotifId,
-        'Memora DGT',
-        body,
-        scheduled,
-        details,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time,
-        payload: kDailyChallengeDeeplink,
-      );
-    } on PlatformException {
-      // Fallback si el dispositivo no permite alarmas exactas (Android 12+
-      // sin permiso SCHEDULE_EXACT_ALARM). Usar modo inexact.
-      await _plugin.zonedSchedule(
-        kDgtReminderNotifId,
-        'Memora DGT',
-        body,
-        scheduled,
-        details,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time,
-        payload: kDailyChallengeDeeplink,
-      );
-    }
+    // Alarma inexacta: no requiere el permiso sensible SCHEDULE_EXACT_ALARM
+    // (politica Play). El sistema puede aplazar el aviso unos minutos, lo
+    // cual es aceptable para un recordatorio diario.
+    await _plugin.zonedSchedule(
+      kDgtReminderNotifId,
+      'Memora DGT',
+      body,
+      scheduled,
+      details,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time,
+      payload: kDailyChallengeDeeplink,
+    );
   }
 
   /// Cancela la notificacion diaria.
@@ -324,14 +310,12 @@ class DgtReminderService {
 /// Provider del plugin (singleton).
 final flutterLocalNotificationsPluginProvider =
     Provider<FlutterLocalNotificationsPlugin>((ref) {
-  return FlutterLocalNotificationsPlugin();
-});
+      return FlutterLocalNotificationsPlugin();
+    });
 
 /// Provider del servicio.
 final dgtReminderServiceProvider = Provider<DgtReminderService>((ref) {
-  return DgtReminderService(
-    ref.watch(flutterLocalNotificationsPluginProvider),
-  );
+  return DgtReminderService(ref.watch(flutterLocalNotificationsPluginProvider));
 });
 
 /// FutureProvider que expone la config persistida (solo lectura).

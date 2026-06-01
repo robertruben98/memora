@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -67,8 +66,10 @@ class DgtWeeklyReportScheduler {
       _channelCreated = true;
       return;
     }
-    final android = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+    final android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     await android?.createNotificationChannel(
       const AndroidNotificationChannel(
         kDgtWeeklyReportChannelId,
@@ -135,34 +136,21 @@ class DgtWeeklyReportScheduler {
       iOS: iosDetails,
     );
 
-    try {
-      await _plugin.zonedSchedule(
-        kDgtWeeklyReportNotifId,
-        'Memora DGT - resumen semanal',
-        'Toca para ver tu progreso de la semana.',
-        scheduled,
-        details,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-        payload: kDgtWeeklyReportDeeplink,
-      );
-    } on PlatformException {
-      // Fallback Android 12+ sin SCHEDULE_EXACT_ALARM.
-      await _plugin.zonedSchedule(
-        kDgtWeeklyReportNotifId,
-        'Memora DGT - resumen semanal',
-        'Toca para ver tu progreso de la semana.',
-        scheduled,
-        details,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-        payload: kDgtWeeklyReportDeeplink,
-      );
-    }
+    // Alarma inexacta: no requiere SCHEDULE_EXACT_ALARM (politica Play).
+    // El sistema puede agrupar el aviso, pero para un recordatorio semanal
+    // unos minutos de holgura son aceptables.
+    await _plugin.zonedSchedule(
+      kDgtWeeklyReportNotifId,
+      'Memora DGT - resumen semanal',
+      'Toca para ver tu progreso de la semana.',
+      scheduled,
+      details,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+      payload: kDgtWeeklyReportDeeplink,
+    );
   }
 }
 
@@ -192,8 +180,9 @@ tz.TZDateTime nextSundayAt({
 }
 
 /// Provider del scheduler. Reusa el plugin singleton (issue #102).
-final dgtWeeklyReportSchedulerProvider =
-    Provider<DgtWeeklyReportScheduler>((ref) {
+final dgtWeeklyReportSchedulerProvider = Provider<DgtWeeklyReportScheduler>((
+  ref,
+) {
   return DgtWeeklyReportScheduler(
     ref.watch(flutterLocalNotificationsPluginProvider),
   );

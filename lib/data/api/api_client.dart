@@ -19,21 +19,16 @@ class ApiClient {
   final String token;
   final http.Client _http;
 
-  ApiClient({
-    required this.baseUrl,
-    required this.token,
-    http.Client? client,
-  }) : _http = client ?? http.Client();
+  ApiClient({required this.baseUrl, required this.token, http.Client? client})
+    : _http = client ?? http.Client();
 
   Map<String, String> get _headers => {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      };
+    'Authorization': 'Bearer $token',
+    'Content-Type': 'application/json',
+  };
 
   Uri _uri(String path, [Map<String, String>? query]) {
-    return Uri.parse('$baseUrl$path').replace(
-      queryParameters: query,
-    );
+    return Uri.parse('$baseUrl$path').replace(queryParameters: query);
   }
 
   Future<dynamic> get(String path, {Map<String, String>? query}) async {
@@ -64,15 +59,23 @@ class ApiClient {
     return _decode(res);
   }
 
+  /// Borra la cuenta del usuario autenticado y todos sus datos en el servidor.
+  /// Operacion irreversible. Requiere token valido (cliente autenticado).
+  Future<void> deleteAccount() async {
+    await delete('/account');
+  }
+
   /// Sube una imagen via multipart/form-data. Devuelve `{path: "/images/..."}`.
   Future<Map<String, dynamic>> uploadImage(File file) async {
     final req = http.MultipartRequest('POST', _uri('/images'))
       ..headers['Authorization'] = 'Bearer $token'
-      ..files.add(await http.MultipartFile.fromPath(
-        'file',
-        file.path,
-        filename: p.basename(file.path),
-      ));
+      ..files.add(
+        await http.MultipartFile.fromPath(
+          'file',
+          file.path,
+          filename: p.basename(file.path),
+        ),
+      );
     final streamed = await req.send();
     final res = await http.Response.fromStream(streamed);
     final body = _decode(res);

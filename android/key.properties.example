@@ -1,0 +1,7 @@
+# Copia este archivo a android/key.properties y rellena con tus datos.
+# android/key.properties está en .gitignore — NUNCA lo subas.
+storePassword=CAMBIA_ESTO
+keyPassword=CAMBIA_ESTO
+keyAlias=upload
+# Ruta absoluta al keystore generado con keytool (ver docs/PLAY_STORE_RELEASE.md)
+storeFile=/home/arobertdev/keys/memora-upload-keystore.jks

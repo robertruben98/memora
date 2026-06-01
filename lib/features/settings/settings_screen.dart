@@ -4,10 +4,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/srs/study_settings.dart';
 import '../../core/theme/theme_provider.dart';
+import '../../data/api/api_client.dart';
 import '../../data/backup/backup_service.dart';
 import '../../data/repositories/card_repository.dart';
 import '../../data/repositories/deck_repository.dart';
 import '../../data/repositories/dgt_repository.dart';
+import '../auth/auth_state.dart';
 import '../dgt/dgt_reminder_service.dart';
 import '../dgt/dgt_weekly_report_scheduler.dart';
 import '../dgt/dgt_settings.dart';
@@ -53,8 +55,7 @@ class SettingsScreen extends ConsumerWidget {
             divisions: 29,
             valueLabel: '${study.newCardsPerDay}',
             onChanged: (v) async {
-              final newSettings =
-                  study.copyWith(newCardsPerDay: v.round());
+              final newSettings = study.copyWith(newCardsPerDay: v.round());
               ref.read(studySettingsProvider.notifier).state = newSettings;
               await ref
                   .read(settingsRepositoryProvider)
@@ -143,9 +144,129 @@ class SettingsScreen extends ConsumerWidget {
           const _SectionTitle('Acerca de'),
           const SizedBox(height: 8),
           const _AboutCard(),
+          // Workstream C2: borrado de cuenta. Solo visible con sesion iniciada.
+          if (ref.watch(authProvider).isLoggedIn) ...[
+            const SizedBox(height: 24),
+            const _SectionTitle('Cuenta'),
+            const SizedBox(height: 8),
+            Material(
+              color: const Color(0xFF1A1A22),
+              borderRadius: BorderRadius.circular(14),
+              child: ListTile(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  side: BorderSide(
+                    color: const Color(0xFFFF4F6B).withValues(alpha: 0.4),
+                  ),
+                ),
+                leading: const Icon(
+                  Icons.delete_forever_rounded,
+                  color: Color(0xFFFF4F6B),
+                ),
+                title: const Text(
+                  'Eliminar cuenta',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFFFF4F6B),
+                  ),
+                ),
+                subtitle: Text(
+                  'Borra tu cuenta y todos tus datos del servidor. '
+                  'Irreversible.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white.withValues(alpha: 0.6),
+                    height: 1.4,
+                  ),
+                ),
+                onTap: () => _confirmDeleteAccount(context, ref),
+              ),
+            ),
+          ],
         ],
       ),
     );
+  }
+
+  /// Workstream C2: borra la cuenta del usuario con doble confirmacion.
+  ///
+  /// Llama al cliente autenticado [apiClientProvider] (`DELETE /account`),
+  /// cierra la sesion via [authProvider] y muestra feedback. Operacion
+  /// irreversible: elimina cuenta, mazos, tarjetas, progreso y estadisticas
+  /// del servidor.
+  Future<void> _confirmDeleteAccount(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final ok1 = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A22),
+        title: const Text('¿Eliminar tu cuenta?'),
+        content: const Text(
+          'Se borrarán permanentemente tu cuenta, mazos, tarjetas, '
+          'progreso y estadísticas del servidor. Esta acción no se '
+          'puede deshacer.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFFFF4F6B),
+            ),
+            child: const Text('Continuar'),
+          ),
+        ],
+      ),
+    );
+    if (ok1 != true || !context.mounted) return;
+
+    final ok2 = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A22),
+        title: const Text('¿Estás seguro?'),
+        content: const Text(
+          'Última confirmación. Toca "Sí, eliminar" para borrar tu '
+          'cuenta de forma definitiva.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('No'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFFF4F6B),
+            ),
+            child: const Text('Sí, eliminar'),
+          ),
+        ],
+      ),
+    );
+    if (ok2 != true || !context.mounted) return;
+
+    try {
+      await ref.read(apiClientProvider).deleteAccount();
+      await ref.read(authProvider.notifier).logout();
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cuenta eliminada'),
+          backgroundColor: Color(0xFF4FFFB0),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No se pudo eliminar la cuenta: $e')),
+      );
+    }
   }
 
   Future<void> _exportBackup(BuildContext context, WidgetRef ref) async {
@@ -153,9 +274,9 @@ class SettingsScreen extends ConsumerWidget {
       await ref.read(backupServiceProvider).exportAndShare();
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error exportando: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error exportando: $e')));
     }
   }
 
@@ -210,9 +331,9 @@ class SettingsScreen extends ConsumerWidget {
       );
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error importando: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error importando: $e')));
     }
   }
 
@@ -350,8 +471,10 @@ class _SliderSetting extends StatelessWidget {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 3,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF7C5CFF).withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(8),
@@ -656,7 +779,8 @@ class _DgtSection extends StatelessWidget {
                     final now = DateTime.now();
                     final picked = await showDatePicker(
                       context: context,
-                      initialDate: settings.examDate ??
+                      initialDate:
+                          settings.examDate ??
                           now.add(const Duration(days: 30)),
                       firstDate: now,
                       lastDate: now.add(const Duration(days: 365 * 2)),
@@ -670,8 +794,8 @@ class _DgtSection extends StatelessWidget {
                     settings.examDate == null
                         ? 'Elegir fecha'
                         : '${settings.examDate!.day}/'
-                            '${settings.examDate!.month}/'
-                            '${settings.examDate!.year}',
+                              '${settings.examDate!.month}/'
+                              '${settings.examDate!.year}',
                   ),
                 ),
               ),
@@ -733,7 +857,10 @@ class _DgtSection extends StatelessWidget {
           const Divider(height: 1, thickness: 0.4),
           const SizedBox(height: 12),
           // DGT issue #102 (dgt-ux): recordatorio diario meta DGT.
-          _DgtReminderTile(examDate: settings.examDate, dailyGoal: settings.dailyGoal),
+          _DgtReminderTile(
+            examDate: settings.examDate,
+            dailyGoal: settings.dailyGoal,
+          ),
           const SizedBox(height: 12),
           // DGT issue #174 (dgt-ux): toggle resumen semanal (domingo 20h).
           const _DgtWeeklyReportTile(),
@@ -858,10 +985,7 @@ class _AboutCard extends StatelessWidget {
                 children: [
                   const Text(
                     'Memora',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                   ),
                   Text(
                     'v0.10.0',
@@ -1024,7 +1148,6 @@ class _DgtReminderTile extends ConsumerWidget {
     );
   }
 }
-
 
 /// Issue #175 (dgt-ux): export/import del progreso DGT (favoritas, fallos,
 /// historiales, settings) como JSON local. Compartible via share_plus,
