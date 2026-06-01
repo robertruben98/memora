@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<!--
+  Feature graphic de Google Play para Memora — 1024 x 500 px.
+
+  Cómo exportar a PNG (Chromium-family disponible en el entorno: google-chrome-stable):
+
+    google-chrome-stable --headless --disable-gpu --hide-scrollbars \
+      --screenshot=feature-graphic.png --window-size=1024,500 \
+      file:///home/arobertdev/code/apps/memora/docs/store/feature-graphic.html
+
+  Equivalente con chromium (si se instala):
+
+    chromium --headless --screenshot --window-size=1024,500 docs/store/feature-graphic.html
+
+  Play exige PNG/JPG sin canal alfa. Si hace falta aplanar contra el fondo de marca:
+
+    convert feature-graphic.png -background "#0E0E12" -flatten feature-graphic-final.png
+-->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Memora — Feature graphic</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1024px;
+    height: 500px;
+    overflow: hidden;
+  }
+  body {
+    background: #0E0E12;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  /* Resplandor sutil de marca para que no quede totalmente plano */
+  .glow {
+    position: absolute;
+    width: 760px;
+    height: 760px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center,
+        rgba(124, 92, 255, 0.22) 0%,
+        rgba(124, 92, 255, 0.0) 62%);
+    top: -180px;
+    right: -160px;
+    pointer-events: none;
+  }
+  .glow.two {
+    width: 620px;
+    height: 620px;
+    top: auto;
+    bottom: -240px;
+    left: -180px;
+    right: auto;
+    background: radial-gradient(circle at center,
+        rgba(46, 196, 182, 0.16) 0%,
+        rgba(46, 196, 182, 0.0) 64%);
+  }
+  .content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0 64px;
+  }
+  .brand {
+    font-size: 116px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1;
+    background: linear-gradient(92deg, #FFFFFF 0%, #C9BEFF 55%, #7C5CFF 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .claim {
+    margin-top: 26px;
+    font-size: 34px;
+    font-weight: 600;
+    color: #E7E3FF;
+    letter-spacing: 0.2px;
+  }
+  .claim .dot {
+    color: #7C5CFF;
+    margin: 0 12px;
+    font-weight: 800;
+  }
+  .rule {
+    margin-top: 28px;
+    width: 220px;
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #7C5CFF 0%, #2EC4B6 100%);
+  }
+</style>
+</head>
+<body>
+  <div class="glow"></div>
+  <div class="glow two"></div>
+  <div class="content">
+    <div class="brand">Memora</div>
+    <div class="claim">Test DGT 2026 <span class="dot">·</span> Repaso inteligente</div>
+    <div class="rule"></div>
+  </div>
+</body>
+</html>
