@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_recurrent_failures_screen.dart' show DgtFailCountBadge;
@@ -64,7 +65,11 @@ class _DgtTopFailuresScreenState extends ConsumerState<DgtTopFailuresScreen> {
           }
           final items = snap.data ?? const <DgtRecurrentFailureItem>[];
           if (items.isEmpty) {
-            return const _EmptyState();
+            return AppStateView.empty(
+              icon: Icons.celebration_rounded,
+              title: 'Sin fallos en los ultimos 30 dias',
+              message: 'Sigue asi!',
+            );
           }
           final trickCount = countTrickKeywords(items);
           return RefreshIndicator(
@@ -269,41 +274,6 @@ class _LoadingSkeleton extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.c.surfaceMuted,
           borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.celebration_rounded,
-                color: Color(0xFF4FFFB0), size: 64),
-            const SizedBox(height: 16),
-            const Text(
-              'Sin fallos en los ultimos 30 dias',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Sigue asi!',
-              style: TextStyle(
-                fontSize: 13,
-                color: context.c.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
         ),
       ),
     );

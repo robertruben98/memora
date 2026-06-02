@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
@@ -74,7 +75,15 @@ class _DgtVideoQuestionsScreenState
           }
           final items = snap.data ?? const <DgtVideoQuestion>[];
           if (items.isEmpty) {
-            return _EmptyView(onRetry: _refresh);
+            return AppStateView.empty(
+              icon: Icons.movie_filter_outlined,
+              title: 'Proximamente: videos oficiales DGT 2026',
+              message:
+                  'La DGT incorpora videos de percepcion de riesgo al examen '
+                  'teorico en 2026. En cuanto el banco oficial se publique, las '
+                  'preguntas apareceran aqui.',
+              onRetry: _refresh,
+            );
           }
           return RefreshIndicator(
             onRefresh: _refresh,
@@ -280,53 +289,6 @@ class _LoadingSkeleton extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.c.surfaceMuted,
           borderRadius: BorderRadius.circular(14),
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyView extends StatelessWidget {
-  final Future<void> Function() onRetry;
-  const _EmptyView({required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.movie_filter_outlined,
-              size: 56,
-              color: context.c.textMuted,
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'Proximamente: videos oficiales DGT 2026',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'La DGT incorpora videos de percepcion de riesgo al examen '
-              'teorico en 2026. En cuanto el banco oficial se publique, las '
-              'preguntas apareceran aqui.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                color: context.c.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Reintentar'),
-            ),
-          ],
         ),
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/api/api_client.dart';
 
@@ -165,7 +166,11 @@ class _DgtCohortCompareScreenState
         ),
         data: (bench) {
           if (bench.isEmpty) {
-            return _EmptyView(
+            return AppStateView.empty(
+              icon: Icons.insights_rounded,
+              title: 'Aun no hay datos suficientes para comparar.',
+              message: 'Responde algunas preguntas DGT y vuelve cuando la '
+                  'cohorte tenga muestras suficientes.',
               onRetry: () => ref.invalidate(dgtBenchmarkProvider),
             );
           }
@@ -483,49 +488,6 @@ class _BenchmarkSkeleton extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.c.surfaceElevated,
           borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyView extends StatelessWidget {
-  final VoidCallback onRetry;
-  const _EmptyView({required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.insights_rounded,
-              color: context.c.textMuted,
-              size: 48,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Aun no hay datos suficientes para comparar.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: context.c.textPrimary, fontSize: 15),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Responde algunas preguntas DGT y vuelve cuando la cohorte '
-              'tenga muestras suficientes.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: context.c.textSecondary, fontSize: 13),
-            ),
-            const SizedBox(height: 16),
-            FilledButton.tonalIcon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Reintentar'),
-            ),
-          ],
         ),
       ),
     );

@@ -92,7 +92,13 @@ class _DgtFailuresReviewScreenState
         error: (e, _) => AppStateView.error(e),
         data: (entries) {
           if (entries.isEmpty) {
-            return const _EmptyState();
+            return AppStateView.empty(
+              icon: Icons.celebration_rounded,
+              title: 'No tienes fallos recientes',
+              message:
+                  'Sigue practicando. Si fallas alguna pregunta en los proximos '
+                  '7 dias, aparecera aqui para repasarla.',
+            );
           }
           if (_finished) {
             return _SummaryView(
@@ -113,41 +119,6 @@ class _DgtFailuresReviewScreenState
             onNext: () => _next(entries.length),
           );
         },
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.celebration_rounded,
-                size: 64, color: Color(0xFF4FFFB0)),
-            const SizedBox(height: 16),
-            const Text(
-              'No tienes fallos recientes',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Sigue practicando. Si fallas alguna pregunta en los proximos '
-              '7 dias, aparecera aqui para repasarla.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                color: context.c.textSecondary,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

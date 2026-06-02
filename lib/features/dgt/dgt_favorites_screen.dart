@@ -61,7 +61,13 @@ class _DgtFavoritesScreenState extends ConsumerState<DgtFavoritesScreen> {
           }
           final all = snap.data ?? const <DgtQuestion>[];
           if (all.isEmpty) {
-            return const _EmptyFavorites();
+            return AppStateView.empty(
+              icon: Icons.star_outline_rounded,
+              title: 'Aun no has marcado preguntas',
+              message:
+                  'Marca preguntas con la estrella durante simulacros y '
+                  'practica para repasarlas aqui antes del examen.',
+            );
           }
           final topics = _computeTopics(all);
           final filtered = _applyTopicFilter(all);
@@ -83,7 +89,10 @@ class _DgtFavoritesScreenState extends ConsumerState<DgtFavoritesScreen> {
               _ResultsCounter(count: filtered.length),
               Expanded(
                 child: filtered.isEmpty
-                    ? const _EmptyTopicFilter()
+                    ? AppStateView.empty(
+                        icon: Icons.filter_alt_off_rounded,
+                        title: 'No tienes favoritas en este tema',
+                      )
                     : ListView.separated(
                         padding:
                             const EdgeInsets.fromLTRB(12, 4, 12, 16),
@@ -202,65 +211,6 @@ class _ResultsCounter extends StatelessWidget {
             fontSize: 12,
             fontWeight: FontWeight.w600,
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Empty state cuando el filtro de topic deja 0 resultados (issue #188).
-class _EmptyTopicFilter extends StatelessWidget {
-  const _EmptyTopicFilter();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.filter_alt_off_rounded, size: 44),
-            const SizedBox(height: 10),
-            Text(
-              'No tienes favoritas en este tema',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyFavorites extends StatelessWidget {
-  const _EmptyFavorites();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.star_outline_rounded, size: 48),
-            const SizedBox(height: 10),
-            Text(
-              'Aun no has marcado preguntas',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Marca preguntas con la estrella durante simulacros y practica '
-              'para repasarlas aqui antes del examen.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: context.c.textSecondary,
-                height: 1.4,
-              ),
-            ),
-          ],
         ),
       ),
     );

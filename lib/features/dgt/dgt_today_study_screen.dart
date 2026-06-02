@@ -114,9 +114,9 @@ class _DgtTodayStudyScreenState extends ConsumerState<DgtTodayStudyScreen> {
         ),
         data: (result) {
           if (result.isEmpty) {
-            return _Empty(
+            return AppStateView.empty(
               icon: Icons.psychology_outlined,
-              message:
+              title:
                   'Aun no tenemos suficientes datos para armar la sesion. '
                   'Practica un poco mas (simulacro libre o por tema) y '
                   'vuelve manana.',
