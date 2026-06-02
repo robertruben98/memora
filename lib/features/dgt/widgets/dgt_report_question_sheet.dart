@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../../data/repositories/dgt_repository.dart';
 
@@ -50,7 +51,7 @@ class DgtReportQuestionSheet {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF1B1B22),
+      backgroundColor: context.c.surfaceElevated,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -167,7 +168,7 @@ class _DgtReportQuestionSheetBodyState
             Text(
               'Ayudanos a mejorar el banco. Tu reporte se revisa manualmente.',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
+                color: context.c.textSecondary,
                 fontSize: 13,
               ),
             ),
@@ -188,7 +189,7 @@ class _DgtReportQuestionSheetBodyState
                   onSelected: _submitting
                       ? null
                       : (_) => setState(() => _reason = r.value),
-                  selectedColor: const Color(0xFF7C5CFF),
+                  selectedColor: AppColors.brand,
                   labelStyle: TextStyle(
                     color: selected ? Colors.white : null,
                     fontWeight: selected ? FontWeight.w700 : FontWeight.w500,

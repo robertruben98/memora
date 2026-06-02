@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_sprint_history_provider.dart';
@@ -220,9 +221,9 @@ class _DgtSprintScreenState extends ConsumerState<DgtSprintScreen> {
             LinearProgressIndicator(
               value: progress,
               minHeight: 6,
-              backgroundColor: Colors.white.withValues(alpha: 0.08),
+              backgroundColor: context.c.surfaceMuted,
               valueColor: const AlwaysStoppedAnimation<Color>(
-                Color(0xFF7C5CFF),
+                AppColors.brand,
               ),
             ),
             const SizedBox(height: 8),
@@ -230,7 +231,7 @@ class _DgtSprintScreenState extends ConsumerState<DgtSprintScreen> {
               'Pregunta ${_current + 1} de ${_questions.length}',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.white.withValues(alpha: 0.6),
+                color: context.c.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -298,7 +299,7 @@ class _TimerBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color =
-        urgent ? const Color(0xFFFF5C5C) : const Color(0xFF7C5CFF);
+        urgent ? const Color(0xFFFF5C5C) : AppColors.brand;
     return Row(
       children: [
         Icon(Icons.timer_outlined, color: color, size: 20),
@@ -320,7 +321,7 @@ class _TimerBar extends StatelessWidget {
             child: LinearProgressIndicator(
               value: fraction.clamp(0.0, 1.0),
               minHeight: 6,
-              backgroundColor: Colors.white.withValues(alpha: 0.08),
+              backgroundColor: context.c.surfaceMuted,
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),
@@ -347,11 +348,11 @@ class _SprintAnswerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color bg = Colors.white.withValues(alpha: 0.08);
-    Color iconBg = Colors.white.withValues(alpha: 0.12);
+    Color bg = context.c.surfaceMuted;
+    Color iconBg = context.c.border;
     if (selected) {
-      bg = const Color(0xFF7C5CFF).withValues(alpha: 0.28);
-      iconBg = const Color(0xFF7C5CFF);
+      bg = AppColors.brand.withValues(alpha: 0.28);
+      iconBg = AppColors.brand;
     }
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -476,7 +477,7 @@ class _SprintSummary extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: Colors.white.withValues(alpha: 0.6),
+                color: context.c.textSecondary,
                 letterSpacing: 0.6,
               ),
             ),
@@ -487,14 +488,14 @@ class _SprintSummary extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 42,
                 fontWeight: FontWeight.w900,
-                color: Color(0xFF7C5CFF),
+                color: AppColors.brand,
               ),
             ),
             Text(
               '${pctScore.toStringAsFixed(0)}% de acierto - ${entry.secondsUsed}s usados',
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.white.withValues(alpha: 0.7),
+                color: context.c.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -506,7 +507,7 @@ class _SprintSummary extends StatelessWidget {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.06),
+                  color: context.c.surfaceMuted,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
@@ -538,7 +539,7 @@ class _SprintSummary extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: Colors.white.withValues(alpha: 0.6),
+                color: context.c.textSecondary,
                 letterSpacing: 0.6,
               ),
             ),
@@ -549,7 +550,7 @@ class _SprintSummary extends StatelessWidget {
               onPressed: onExit,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                backgroundColor: const Color(0xFF7C5CFF),
+                backgroundColor: AppColors.brand,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

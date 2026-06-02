@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../../data/repositories/dgt_repository.dart';
 import '../dgt_exam_controller.dart';
@@ -59,7 +60,7 @@ class DgtExamBody extends StatelessWidget {
             LinearProgressIndicator(
               value: (currentIndex + 1) / qs.length,
               minHeight: 4,
-              backgroundColor: Colors.white.withValues(alpha: 0.08),
+              backgroundColor: context.c.surfaceMuted,
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -160,7 +161,7 @@ class _QuestionHeader extends StatelessWidget {
         Text(
           'Pregunta ${currentIndex + 1} / $total',
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.6),
+            color: context.c.textSecondary,
             fontWeight: FontWeight.w600,
           ),
         ),

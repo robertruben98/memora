@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../data/api/api_client.dart';
 
@@ -131,7 +132,7 @@ class _DgtSignalsCatalogScreenState
   void _openSignSheet(BuildContext context, DgtSign sign) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color(0xFF1A1A22),
+      backgroundColor: context.c.surfaceElevated,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -197,7 +198,7 @@ class _SearchBar extends StatelessWidget {
           hintText: 'Buscar senal por nombre o codigo (ej. R-301)',
           prefixIcon: const Icon(Icons.search_rounded, size: 20),
           filled: true,
-          fillColor: const Color(0xFF1A1A22),
+          fillColor: context.c.surfaceElevated,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           border: OutlineInputBorder(
@@ -273,7 +274,7 @@ class _SignTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Material(
-      color: const Color(0xFF1A1A22),
+      color: context.c.surfaceElevated,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -460,7 +461,7 @@ class _SignDetailSheet extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: 14,
                   height: 1.45,
-                  color: Colors.white.withValues(alpha: 0.85),
+                  color: context.c.textSecondary,
                 ),
               ),
             const SizedBox(height: 18),

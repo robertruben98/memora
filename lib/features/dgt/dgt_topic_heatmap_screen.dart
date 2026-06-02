@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'data/dgt_subtopic_repository.dart';
@@ -60,7 +61,7 @@ class DgtTopicHeatmapScreen extends ConsumerWidget {
                   'Toca un cluster para ver donde se concentran tus fallos.',
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: context.c.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 12),

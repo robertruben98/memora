@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_recurrent_failures_screen.dart' show DgtFailCountBadge;
@@ -181,7 +182,7 @@ class DgtTrickInsightBanner extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     height: 1.35,
-                    color: Colors.white.withValues(alpha: 0.85),
+                    color: context.c.textSecondary,
                   ),
                 ),
               ],
@@ -203,12 +204,12 @@ class _TopFailureTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.06),
+        color: context.c.surfaceMuted,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: isTrick
               ? const Color(0xFFFFB74F).withValues(alpha: 0.55)
-              : Colors.white.withValues(alpha: 0.10),
+              : context.c.border,
         ),
       ),
       child: Row(
@@ -266,7 +267,7 @@ class _LoadingSkeleton extends StatelessWidget {
       itemBuilder: (_, _) => Container(
         height: 64,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.05),
+          color: context.c.surfaceMuted,
           borderRadius: BorderRadius.circular(10),
         ),
       ),
@@ -298,7 +299,7 @@ class _EmptyState extends StatelessWidget {
               'Sigue asi!',
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.white.withValues(alpha: 0.65),
+                color: context.c.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),

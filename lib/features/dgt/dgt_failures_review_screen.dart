@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_failures_repository.dart';
@@ -141,7 +142,7 @@ class _EmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.white.withValues(alpha: 0.65),
+                color: context.c.textSecondary,
               ),
             ),
           ],
@@ -186,7 +187,7 @@ class _QuizView extends StatelessWidget {
               'Pregunta ${index + 1} de $total',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.white.withValues(alpha: 0.6),
+                color: context.c.textSecondary,
               ),
             ),
             const SizedBox(height: 16),
@@ -229,14 +230,14 @@ class _QuizView extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.05),
+                          color: context.c.surfaceMuted,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
                           question.explanation!,
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.white.withValues(alpha: 0.8),
+                            color: context.c.textSecondary,
                           ),
                         ),
                       ),
@@ -279,8 +280,8 @@ class _OptionTile extends StatelessWidget {
     final answered = picked != null;
     final isThisPicked = picked == letter;
     final isCorrectOption = letter == correct;
-    Color border = Colors.white.withValues(alpha: 0.15);
-    Color bg = const Color(0xFF1A1A22);
+    Color border = context.c.border;
+    Color bg = context.c.surfaceElevated;
     if (answered) {
       if (isCorrectOption) {
         border = const Color(0xFF4FFFB0);
@@ -364,7 +365,7 @@ class _SummaryView extends StatelessWidget {
               'Acertaste $correct - Fallaste $wrong',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withValues(alpha: 0.75),
+                color: context.c.textSecondary,
               ),
             ),
             const SizedBox(height: 24),

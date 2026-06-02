@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
+
 import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_failures_repository.dart';
@@ -152,7 +154,7 @@ class _DgtAutotestScreenState extends ConsumerState<DgtAutotestScreen> {
         LinearProgressIndicator(
           value: (_current + 1) / qs.length,
           minHeight: 4,
-          backgroundColor: Colors.white.withValues(alpha: 0.08),
+          backgroundColor: context.c.surfaceMuted,
         ),
         Expanded(
           child: SingleChildScrollView(
@@ -163,7 +165,7 @@ class _DgtAutotestScreenState extends ConsumerState<DgtAutotestScreen> {
                 Text(
                   'Pregunta ${_current + 1} / ${qs.length}',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
+                    color: context.c.textSecondary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -198,10 +200,10 @@ class _DgtAutotestScreenState extends ConsumerState<DgtAutotestScreen> {
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF7C5CFF).withValues(alpha: 0.10),
+        color: AppColors.brand.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: const Color(0xFF7C5CFF).withValues(alpha: 0.30),
+          color: AppColors.brand.withValues(alpha: 0.30),
         ),
       ),
       child: Row(
@@ -219,7 +221,7 @@ class _DgtAutotestScreenState extends ConsumerState<DgtAutotestScreen> {
               style: TextStyle(
                 fontSize: 13,
                 height: 1.4,
-                color: Colors.white.withValues(alpha: 0.85),
+                color: context.c.textPrimary,
               ),
             ),
           ),
@@ -292,7 +294,7 @@ class _DgtAutotestScreenState extends ConsumerState<DgtAutotestScreen> {
               style: TextStyle(
                 fontSize: 13,
                 height: 1.45,
-                color: Colors.white.withValues(alpha: 0.85),
+                color: context.c.textPrimary,
               ),
             ),
           ],
@@ -363,7 +365,7 @@ class _DgtAutotestScreenState extends ConsumerState<DgtAutotestScreen> {
               size: 64,
               color: hits == total
                   ? const Color(0xFFFFB74F)
-                  : const Color(0xFF7C5CFF),
+                  : AppColors.brand,
             ),
             const SizedBox(height: 12),
             const Text(
@@ -377,7 +379,7 @@ class _DgtAutotestScreenState extends ConsumerState<DgtAutotestScreen> {
             Text(
               'Self-report: aciertos / fallos',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
+                color: context.c.textSecondary,
               ),
             ),
             const SizedBox(height: 24),
@@ -464,7 +466,7 @@ class _StatBox extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.white.withValues(alpha: 0.65),
+            color: context.c.textSecondary,
           ),
         ),
       ],
@@ -486,7 +488,7 @@ class _DgtImage extends ConsumerWidget {
       errorBuilder: (_, _, _) => Container(
         height: 120,
         alignment: Alignment.center,
-        color: Colors.white.withValues(alpha: 0.05),
+        color: context.c.surfaceMuted,
         child: const Icon(Icons.image_not_supported_outlined),
       ),
     );

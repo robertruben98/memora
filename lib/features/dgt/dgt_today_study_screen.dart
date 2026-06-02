@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dgt_today_study_provider.dart';
@@ -151,7 +152,7 @@ class _DgtTodayStudyScreenState extends ConsumerState<DgtTodayStudyScreen> {
         LinearProgressIndicator(
           value: (_current + 1) / total,
           minHeight: 4,
-          backgroundColor: Colors.white.withValues(alpha: 0.08),
+          backgroundColor: context.c.surfaceMuted,
           valueColor: const AlwaysStoppedAnimation(Color(0xFF4FA8FF)),
         ),
         Expanded(
@@ -165,7 +166,7 @@ class _DgtTodayStudyScreenState extends ConsumerState<DgtTodayStudyScreen> {
                 Text(
                   'Pregunta ${_current + 1} / $total',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
+                    color: context.c.textSecondary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -208,10 +209,10 @@ class _DgtTodayStudyScreenState extends ConsumerState<DgtTodayStudyScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
+                      color: context.c.surfaceMuted,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: context.c.border,
                       ),
                     ),
                     child: Text(
@@ -285,7 +286,7 @@ class _DgtTodayStudyScreenState extends ConsumerState<DgtTodayStudyScreen> {
               '$correct de $total preguntas correctas',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
+                color: context.c.textSecondary,
               ),
             ),
             const SizedBox(height: 20),
@@ -360,7 +361,7 @@ class _IntroPanel extends StatelessWidget {
             Text(
               '$total preguntas combinando 3 fuentes para que avances en lo '
               'que mas necesitas hoy.',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.75)),
+              style: TextStyle(color: context.c.textSecondary),
             ),
             const SizedBox(height: 18),
             _IntroBreakdownRow(
@@ -406,7 +407,7 @@ class _IntroPanel extends StatelessWidget {
                         'Ya hiciste Estudio de hoy. Puedes repetirlo, pero '
                         'rinde mas espaciar a manana.',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.85),
+                          color: context.c.textPrimary,
                         ),
                       ),
                     ),
@@ -566,10 +567,10 @@ class _AnswerTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: bg ?? Colors.white.withValues(alpha: 0.04),
+            color: bg ?? context.c.surfaceMuted,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: border ?? Colors.white.withValues(alpha: 0.12),
+              color: border ?? context.c.border,
             ),
           ),
           child: Row(
@@ -577,7 +578,7 @@ class _AnswerTile extends StatelessWidget {
               CircleAvatar(
                 radius: 14,
                 backgroundColor:
-                    (border ?? Colors.white).withValues(alpha: 0.18),
+                    (border ?? context.c.textMuted).withValues(alpha: 0.18),
                 child: Text(
                   letter.toUpperCase(),
                   style: const TextStyle(

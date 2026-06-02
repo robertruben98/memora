@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
@@ -168,7 +169,7 @@ class _TopicChipsRow extends StatelessWidget {
               label: Text(label),
               selected: isSel,
               onSelected: (_) => onSelected(t),
-              selectedColor: const Color(0xFF7C5CFF),
+              selectedColor: AppColors.brand,
               labelStyle: TextStyle(
                 color: isSel ? Colors.white : null,
                 fontWeight: FontWeight.w600,
@@ -196,7 +197,7 @@ class _ResultsCounter extends StatelessWidget {
           '$count pregunta${count == 1 ? '' : 's'}',
           key: const ValueKey('favorites-counter'),
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.65),
+            color: context.c.textSecondary,
             fontSize: 12,
             fontWeight: FontWeight.w600,
           ),
@@ -254,7 +255,7 @@ class _EmptyFavorites extends StatelessWidget {
               'para repasarlas aqui antes del examen.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.65),
+                color: context.c.textSecondary,
                 height: 1.4,
               ),
             ),
@@ -312,7 +313,7 @@ class _StartQuizCta extends StatelessWidget {
         child: FilledButton.icon(
           style: FilledButton.styleFrom(
             minimumSize: const Size.fromHeight(48),
-            backgroundColor: const Color(0xFF7C5CFF),
+            backgroundColor: AppColors.brand,
           ),
           icon: const Icon(Icons.play_arrow_rounded),
           label: Text('Hacer quiz con favoritas (${questions.length})'),
@@ -336,7 +337,7 @@ class _FavoriteTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Material(
-      color: Colors.white.withValues(alpha: 0.05),
+      color: context.c.surfaceMuted,
       borderRadius: BorderRadius.circular(12),
       child: ListTile(
         title: Text(
@@ -349,7 +350,7 @@ class _FavoriteTile extends ConsumerWidget {
             : Text(
                 question.topic!,
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.55),
+                  color: context.c.textMuted,
                   fontSize: 12,
                 ),
               ),
@@ -450,7 +451,7 @@ class _DgtFavoritesQuizScreenState
           LinearProgressIndicator(
             value: (_current + 1) / _questions.length,
             minHeight: 4,
-            backgroundColor: Colors.white.withValues(alpha: 0.08),
+            backgroundColor: context.c.surfaceMuted,
           ),
           Expanded(
             child: SingleChildScrollView(
@@ -492,13 +493,13 @@ class _DgtFavoritesQuizScreenState
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.06),
+                        color: context.c.surfaceMuted,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
                         q.explanation!,
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.85),
+                          color: context.c.textSecondary,
                           height: 1.35,
                         ),
                       ),
@@ -588,7 +589,7 @@ class _DgtFavoritesQuizScreenState
                     Text(
                       'Total $total preguntas favoritas',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: context.c.textSecondary,
                         fontSize: 12,
                       ),
                     ),
@@ -637,15 +638,15 @@ class _AnswerTile extends StatelessWidget {
     Color color;
     if (!revealed) {
       color = selected
-          ? const Color(0xFF7C5CFF)
-          : Colors.white.withValues(alpha: 0.08);
+          ? AppColors.brand
+          : context.c.surfaceMuted;
     } else {
       if (isCorrect) {
         color = const Color(0xFF4FFFB0).withValues(alpha: 0.22);
       } else if (selected) {
         color = const Color(0xFFFF5C5C).withValues(alpha: 0.22);
       } else {
-        color = Colors.white.withValues(alpha: 0.06);
+        color = context.c.surfaceMuted;
       }
     }
     return Padding(
@@ -668,7 +669,7 @@ class _AnswerTile extends StatelessWidget {
                   height: 28,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.12),
+                    color: context.c.surfaceMuted,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -706,7 +707,7 @@ class _DgtImage extends ConsumerWidget {
       errorBuilder: (_, _, _) => Container(
         height: 120,
         alignment: Alignment.center,
-        color: Colors.white.withValues(alpha: 0.05),
+        color: context.c.surfaceMuted,
         child: const Icon(Icons.image_not_supported_outlined),
       ),
     );

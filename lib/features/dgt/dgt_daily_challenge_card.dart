@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/repositories/dgt_repository.dart';
@@ -205,7 +206,7 @@ class _PersonalizedChallengeTile extends StatelessWidget {
     final accuracy = stat.accuracyPct.round();
     final name = stat.topicName ?? stat.topicId;
     return Material(
-      color: const Color(0xFF1A1A22),
+      color: context.c.surfaceElevated,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -243,7 +244,7 @@ class _PersonalizedChallengeTile extends StatelessWidget {
                       'Tu accuracy: $accuracy%. Mejoralo con $kDgtDailyChallengeLimit preguntas.',
                       style: TextStyle(
                         fontSize: 12.5,
-                        color: Colors.white.withValues(alpha: 0.65),
+                        color: context.c.textSecondary,
                       ),
                     ),
                   ],
@@ -268,7 +269,7 @@ class _GenericChallengeTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFF1A1A22),
+      color: context.c.surfaceElevated,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -281,32 +282,32 @@ class _GenericChallengeTile extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7C5CFF).withValues(alpha: 0.18),
+                  color: AppColors.brand.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.flag_rounded,
-                  color: Color(0xFF7C5CFF),
+                  color: AppColors.brand,
                 ),
               ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
+                  children: [
+                    const Text(
                       'Empieza tu primer reto',
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     Text(
                       'Responde algunas preguntas para que personalicemos tu reto diario.',
                       style: TextStyle(
                         fontSize: 12.5,
-                        color: Color(0xA6FFFFFF),
+                        color: context.c.textSecondary,
                       ),
                     ),
                   ],
@@ -314,7 +315,7 @@ class _GenericChallengeTile extends StatelessWidget {
               ),
               const Icon(
                 Icons.chevron_right_rounded,
-                color: Color(0xFF7C5CFF),
+                color: AppColors.brand,
               ),
             ],
           ),

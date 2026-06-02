@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
@@ -90,10 +91,10 @@ class _DgtQuickReviewScreenState
     return '$m:$sec';
   }
 
-  Color _timerColor() {
+  Color _timerColor(BuildContext context) {
     // Bajo umbral: ultimo tercio del tiempo total.
     if (_secondsLeft <= _totalSeconds ~/ 3) return const Color(0xFFFF5C5C);
-    return Colors.white;
+    return context.c.textPrimary;
   }
 
   void _selectAnswer(String letter) {
@@ -184,7 +185,7 @@ class _DgtQuickReviewScreenState
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 16,
-                  color: _timerColor(),
+                  color: _timerColor(context),
                 ),
               ),
             ),
@@ -218,7 +219,7 @@ class _DgtQuickReviewScreenState
               LinearProgressIndicator(
                 value: (_current + 1) / qs.length,
                 minHeight: 4,
-                backgroundColor: Colors.white.withValues(alpha: 0.08),
+                backgroundColor: context.c.surfaceMuted,
               ),
               Expanded(
                 child: SingleChildScrollView(
@@ -229,7 +230,7 @@ class _DgtQuickReviewScreenState
                       Text(
                         'Pregunta ${_current + 1} / ${qs.length}',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
+                          color: context.c.textSecondary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -373,7 +374,7 @@ class _DgtQuickReviewScreenState
                     Text(
                       'Repaso no oficial - no se guarda en historial.',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: context.c.textSecondary,
                         fontSize: 12,
                       ),
                       textAlign: TextAlign.center,
@@ -383,7 +384,7 @@ class _DgtQuickReviewScreenState
                       Text(
                         'Tiempo agotado.',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
+                          color: context.c.textSecondary,
                           fontSize: 12,
                         ),
                       ),
@@ -438,9 +439,7 @@ class _AnswerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected
-        ? const Color(0xFF7C5CFF)
-        : Colors.white.withValues(alpha: 0.08);
+    final color = selected ? AppColors.brand : context.c.surfaceMuted;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Material(
@@ -462,18 +461,14 @@ class _AnswerTile extends StatelessWidget {
                   height: 28,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: selected
-                        ? Colors.white
-                        : Colors.white.withValues(alpha: 0.12),
+                    color: selected ? context.c.onAccent : context.c.border,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     letter.toUpperCase(),
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
-                      color: selected
-                          ? const Color(0xFF7C5CFF)
-                          : Colors.white,
+                      color: selected ? AppColors.brand : context.c.textPrimary,
                     ),
                   ),
                 ),
@@ -510,7 +505,7 @@ class _DgtImage extends ConsumerWidget {
       errorBuilder: (_, _, _) => Container(
         height: 120,
         alignment: Alignment.center,
-        color: Colors.white.withValues(alpha: 0.05),
+        color: context.c.surfaceMuted,
         child: const Icon(Icons.image_not_supported_outlined),
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../dgt_prediction.dart';
 
@@ -71,14 +72,14 @@ class DgtExamIntro extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w800,
-                      color: Colors.white.withValues(alpha: 0.95),
+                      color: context.c.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '30 preguntas - 30 minutos - aprobado con max 3 fallos.',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: context.c.textSecondary,
                       fontSize: 14,
                     ),
                   ),
@@ -119,7 +120,7 @@ class DgtExamIntro extends StatelessWidget {
                   onPressed: strictMode ? null : onBegin,
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: const Color(0xFF7C5CFF),
+                    backgroundColor: AppColors.brand,
                   ),
                   icon: const Icon(Icons.play_arrow_rounded),
                   label: const Text(
@@ -205,7 +206,7 @@ class _Examen2026Section extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white.withValues(alpha: 0.85),
+                    color: context.c.textSecondary,
                   ),
                 ),
               ],
@@ -336,7 +337,7 @@ class _SprintDiarioTile extends StatelessWidget {
                         '10 preguntas en 2 min - histograma de tus ultimos sprints',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: context.c.textSecondary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -345,7 +346,7 @@ class _SprintDiarioTile extends StatelessWidget {
                 ),
                 Icon(
                   Icons.chevron_right_rounded,
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: context.c.textSecondary,
                   size: 22,
                 ),
               ],

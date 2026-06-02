@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 
@@ -320,7 +321,7 @@ class _Question extends StatelessWidget {
         LinearProgressIndicator(
           value: (state.current + 1) / state.total,
           minHeight: 4,
-          backgroundColor: Colors.white.withValues(alpha: 0.08),
+          backgroundColor: context.c.surfaceMuted,
           valueColor: const AlwaysStoppedAnimation(Color(0xFF4FFFB0)),
         ),
         Expanded(
@@ -332,7 +333,7 @@ class _Question extends StatelessWidget {
                 Text(
                   '${state.current + 1} / ${state.total}',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.65),
+                    color: context.c.textSecondary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -449,9 +450,9 @@ class _AnswerButton extends StatelessWidget {
         bg = color.withValues(alpha: 0.15);
         border = color.withValues(alpha: 0.60);
       } else {
-        bg = Colors.white.withValues(alpha: 0.04);
-        border = Colors.white.withValues(alpha: 0.10);
-        fg = Colors.white.withValues(alpha: 0.55);
+        bg = context.c.surfaceMuted;
+        border = context.c.border;
+        fg = context.c.textMuted;
       }
     }
     return Material(
@@ -575,7 +576,7 @@ class _Summary extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               'Resumen de la ronda',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
+              style: TextStyle(color: context.c.textSecondary),
             ),
             const SizedBox(height: 24),
             Row(
@@ -629,7 +630,7 @@ class _StatBox extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.white.withValues(alpha: 0.65),
+            color: context.c.textSecondary,
           ),
         ),
       ],

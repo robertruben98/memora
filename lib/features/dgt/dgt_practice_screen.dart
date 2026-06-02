@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:memora/core/theme/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/api/api_client.dart';
@@ -207,7 +208,7 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
       builder: (ctx) => AlertDialog(
         title: Row(
           children: [
-            const Icon(Icons.timer_rounded, color: Color(0xFF7C5CFF)),
+            const Icon(Icons.timer_rounded, color: AppColors.brand),
             const SizedBox(width: 8),
             Expanded(child: Text(title)),
           ],
@@ -479,7 +480,7 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
       floatingActionButton: _audioMode
           ? FloatingActionButton(
               onPressed: _toggleAudioPause,
-              backgroundColor: const Color(0xFF7C5CFF),
+              backgroundColor: AppColors.brand,
               child: Icon(
                 _audioPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
               ),
@@ -523,7 +524,7 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
         LinearProgressIndicator(
           value: (_current + 1) / qs.length,
           minHeight: 4,
-          backgroundColor: Colors.white.withValues(alpha: 0.08),
+          backgroundColor: context.c.surfaceMuted,
         ),
         Expanded(
           child: _PracticeQuestionView(
@@ -561,7 +562,7 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
               size: 64,
               color: correct == total
                   ? const Color(0xFFFFB74F)
-                  : const Color(0xFF7C5CFF),
+                  : AppColors.brand,
             ),
             const SizedBox(height: 12),
             Text(
@@ -575,7 +576,7 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
             Text(
               'Resumen practica',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
+                color: context.c.textSecondary,
               ),
             ),
             const SizedBox(height: 24),
@@ -634,9 +635,9 @@ class _AnswerTile extends StatelessWidget {
     final selected = picked == letter;
     final isCorrectOption = letter == correct;
 
-    Color bg = Colors.white.withValues(alpha: 0.08);
-    Color iconBg = Colors.white.withValues(alpha: 0.12);
-    Color iconFg = Colors.white;
+    Color bg = context.c.surfaceMuted;
+    Color iconBg = context.c.surfaceMuted;
+    Color iconFg = context.c.textPrimary;
 
     if (answered) {
       if (isCorrectOption) {
@@ -649,7 +650,7 @@ class _AnswerTile extends StatelessWidget {
         iconFg = Colors.white;
       }
     } else if (selected) {
-      bg = const Color(0xFF7C5CFF);
+      bg = AppColors.brand;
     }
 
     return Padding(
@@ -767,7 +768,7 @@ class _ExplanationCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               height: 1.45,
-              color: Colors.white.withValues(alpha: 0.85),
+              color: context.c.textSecondary,
             ),
           ),
         ],
@@ -794,7 +795,7 @@ class _StatBox extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.white.withValues(alpha: 0.65),
+            color: context.c.textSecondary,
           ),
         ),
       ],
@@ -816,7 +817,7 @@ class _DgtImage extends ConsumerWidget {
       errorBuilder: (_, _, _) => Container(
         height: 120,
         alignment: Alignment.center,
-        color: Colors.white.withValues(alpha: 0.05),
+        color: context.c.surfaceMuted,
         child: const Icon(Icons.image_not_supported_outlined),
       ),
     );
@@ -856,7 +857,7 @@ class _PracticeAppBarActions {
             decoration: BoxDecoration(
               color: (pomoOnBreak
                       ? const Color(0xFF4FFFB0)
-                      : const Color(0xFF7C5CFF))
+                      : AppColors.brand)
                   .withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(20),
             ),
@@ -869,7 +870,7 @@ class _PracticeAppBarActions {
                   size: 16,
                   color: pomoOnBreak
                       ? const Color(0xFF4FFFB0)
-                      : const Color(0xFF7C5CFF),
+                      : AppColors.brand,
                 ),
                 const SizedBox(width: 6),
                 Text(
@@ -889,7 +890,7 @@ class _PracticeAppBarActions {
             : 'Iniciar Pomodoro 25/5 (hoy: $pomoCyclesToday)',
         icon: Icon(
           pomoActive ? Icons.timer_off_rounded : Icons.timer_rounded,
-          color: pomoActive ? const Color(0xFF7C5CFF) : null,
+          color: pomoActive ? AppColors.brand : null,
         ),
         onPressed: onTogglePomodoro,
       ),
@@ -897,7 +898,7 @@ class _PracticeAppBarActions {
         tooltip: audioMode ? 'Salir modo audio' : 'Modo audio',
         icon: Icon(
           audioMode ? Icons.headset_off_rounded : Icons.headset_rounded,
-          color: audioMode ? const Color(0xFF7C5CFF) : null,
+          color: audioMode ? AppColors.brand : null,
         ),
         onPressed: onToggleAudio,
       ),
@@ -937,7 +938,7 @@ class _PracticeQuestionView extends StatelessWidget {
           Text(
             'Pregunta ${index + 1} / $total',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.6),
+              color: context.c.textSecondary,
               fontWeight: FontWeight.w600,
             ),
           ),

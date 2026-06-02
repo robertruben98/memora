@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
+
 import '../../data/api/api_client.dart';
 
 /// Issue #155 (dgt-ux): pantalla "Comparativa cohorte" consumiendo BE#107
@@ -248,9 +250,9 @@ class _SummaryCard extends StatelessWidget {
       key: const Key('cohortSummary'),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1F2A),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF2B3242)),
+        border: Border.all(color: context.c.border),
       ),
       child: Row(
         children: [
@@ -260,8 +262,8 @@ class _SummaryCard extends StatelessWidget {
             child: Text(
               'Estas $above tema${above == 1 ? '' : 's'} por encima de '
               'la media, $below por debajo.',
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: context.c.textPrimary,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -309,9 +311,9 @@ class _OrderToggle extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            const Icon(
+            Icon(
               Icons.swap_vert_rounded,
-              color: Color(0xFF7A8497),
+              color: context.c.textMuted,
               size: 18,
             ),
           ],
@@ -337,9 +339,9 @@ class _BenchmarkTile extends StatelessWidget {
       key: Key('benchmarkTile-${item.topicId}'),
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1F2A),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF2B3242)),
+        border: Border.all(color: context.c.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -349,8 +351,8 @@ class _BenchmarkTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   name,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: context.c.textPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -430,8 +432,8 @@ class _BarRow extends StatelessWidget {
           width: 48,
           child: Text(
             label,
-            style: const TextStyle(
-              color: Color(0xFFB0B7C3),
+            style: TextStyle(
+              color: context.c.textSecondary,
               fontSize: 12,
             ),
           ),
@@ -442,7 +444,7 @@ class _BarRow extends StatelessWidget {
             child: LinearProgressIndicator(
               value: pct == null ? 0 : (pct! / 100.0).clamp(0.0, 1.0),
               minHeight: 8,
-              backgroundColor: const Color(0xFF2B3242),
+              backgroundColor: context.c.surfaceMuted,
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),
@@ -455,8 +457,8 @@ class _BarRow extends StatelessWidget {
             textAlign: TextAlign.right,
             style: TextStyle(
               color: emptyLabel != null
-                  ? const Color(0xFF7A8497)
-                  : Colors.white,
+                  ? context.c.textMuted
+                  : context.c.textPrimary,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -479,7 +481,7 @@ class _BenchmarkSkeleton extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         height: 80,
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1F2A),
+          color: context.c.surfaceElevated,
           borderRadius: BorderRadius.circular(12),
         ),
       ),
@@ -499,23 +501,23 @@ class _EmptyView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.insights_rounded,
-              color: Color(0xFF7A8497),
+              color: context.c.textMuted,
               size: 48,
             ),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Aun no hay datos suficientes para comparar.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white, fontSize: 15),
+              style: TextStyle(color: context.c.textPrimary, fontSize: 15),
             ),
             const SizedBox(height: 6),
-            const Text(
+            Text(
               'Responde algunas preguntas DGT y vuelve cuando la cohorte '
               'tenga muestras suficientes.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Color(0xFFB0B7C3), fontSize: 13),
+              style: TextStyle(color: context.c.textSecondary, fontSize: 13),
             ),
             const SizedBox(height: 16),
             FilledButton.tonalIcon(
@@ -549,7 +551,7 @@ class _ErrorView extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
+              style: TextStyle(color: context.c.textPrimary, fontSize: 14),
             ),
             const SizedBox(height: 16),
             FilledButton.tonalIcon(

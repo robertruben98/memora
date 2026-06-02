@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../data/api/api_client.dart';
 
@@ -264,8 +265,9 @@ class DgtPredictionCard extends ConsumerWidget {
   Widget _buildCard(BuildContext context, DgtPrediction p) {
     if (!p.hasEnoughData) {
       return _baseCard(
-        color: Colors.white.withValues(alpha: 0.06),
-        accent: Colors.white.withValues(alpha: 0.5),
+        context: context,
+        color: context.c.surfaceMuted,
+        accent: context.c.textMuted,
         title: 'Haz un simulacro para ver tu prediccion',
         subtitle:
             'Necesitamos al menos $kDgtMinReviewsForPrediction respuestas '
@@ -297,6 +299,7 @@ class DgtPredictionCard extends ConsumerWidget {
       );
     }
     return _baseCard(
+      context: context,
       color: tier.background,
       accent: tier.accent,
       title: '${tier.label} - $pct% probabilidad estimada',
@@ -309,6 +312,7 @@ class DgtPredictionCard extends ConsumerWidget {
   }
 
   Widget _baseCard({
+    required BuildContext context,
     required Color color,
     required Color accent,
     required String title,
@@ -351,7 +355,7 @@ class DgtPredictionCard extends ConsumerWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.white.withValues(alpha: 0.75),
+                      color: context.c.textSecondary,
                     ),
                   ),
                 ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import 'dgt_tutorial_seen_provider.dart';
 import 'dgt_tutorials_catalog.dart';
@@ -78,14 +79,14 @@ class DgtSubtopicTutorialScreen extends ConsumerWidget {
                         'Repaso de 30 segundos antes de las preguntas.',
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white.withValues(alpha: 0.65),
+                          color: context.c.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 22),
                       _Section(
                         title: 'Concepto clave',
                         body: tutorial.concept,
-                        accent: const Color(0xFF7C5CFF),
+                        accent: AppColors.brand,
                         icon: Icons.lightbulb_outline_rounded,
                       ),
                       const SizedBox(height: 14),
@@ -154,7 +155,7 @@ class _Section extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: context.c.surfaceMuted,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: accent.withValues(alpha: 0.35), width: 1),
       ),

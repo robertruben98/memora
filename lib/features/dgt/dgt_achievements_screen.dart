@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
+
 import '../study/dgt_exam_history.dart';
 import 'dgt_prediction.dart';
 import 'dgt_streak_provider.dart';
@@ -405,7 +407,7 @@ class _Header extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.06),
+          color: context.c.surfaceMuted,
           borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
@@ -488,10 +490,10 @@ class _BadgeTile extends StatelessWidget {
     final unlocked = status.unlocked;
     final color = unlocked
         ? const Color(0xFFFFB74F)
-        : Colors.white.withValues(alpha: 0.25);
+        : context.c.textMuted;
     final bg = unlocked
         ? const Color(0xFFFFB74F).withValues(alpha: 0.12)
-        : Colors.white.withValues(alpha: 0.04);
+        : context.c.surfaceMuted;
 
     return Tooltip(
       message: unlocked
@@ -528,7 +530,7 @@ class _BadgeTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: unlocked ? null : Colors.white70,
+                      color: unlocked ? null : context.c.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -537,7 +539,7 @@ class _BadgeTile extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 10,
-                      color: unlocked ? color : Colors.white54,
+                      color: unlocked ? color : context.c.textMuted,
                     ),
                   ),
                 ],
@@ -566,7 +568,7 @@ class _BadgeTile extends StatelessWidget {
                   size: 36,
                   color: status.unlocked
                       ? const Color(0xFFFFB74F)
-                      : Colors.white54,
+                      : context.c.textMuted,
                 ),
                 const SizedBox(width: 12),
                 Expanded(

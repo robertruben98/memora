@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import 'dgt_exam_calendar_phase.dart';
 import 'dgt_favorites_screen.dart';
@@ -45,8 +46,8 @@ class _NoExamDateView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.event_busy_rounded,
-              size: 72, color: Color(0xFFBBBBBB)),
+          Icon(Icons.event_busy_rounded,
+              size: 72, color: context.c.textMuted),
           const SizedBox(height: 12),
           const Text(
             'Aun no tienes fecha de examen',
@@ -54,10 +55,10 @@ class _NoExamDateView extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Configura tu fecha en Ajustes DGT para ver tu countdown y plan de ramp-up.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Color(0xFF666666)),
+            style: TextStyle(color: context.c.textSecondary),
           ),
           const SizedBox(height: 24),
           FilledButton.icon(
@@ -286,11 +287,11 @@ class _PhaseTile extends StatelessWidget {
     final highlight = status == DgtExamPhaseStatus.current;
     final passed = status == DgtExamPhaseStatus.passed;
     final accent = _phaseAccent(phase);
-    final borderColor = highlight ? accent : const Color(0xFFE0E0E0);
+    final borderColor = highlight ? accent : context.c.border;
     final IconData icon = passed ? Icons.check_circle_rounded : _phaseIcon(phase);
     final iconColor = passed
         ? const Color(0xFF2E9E5B)
-        : (highlight ? accent : const Color(0xFF9FA6BC));
+        : (highlight ? accent : context.c.textMuted);
     final cta = _phaseCta(context, phase);
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -298,7 +299,9 @@ class _PhaseTile extends StatelessWidget {
         key: Key('examCalendarPhase-${phase.code}'),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: highlight ? accent.withValues(alpha: 0.08) : Colors.white,
+          color: highlight
+              ? accent.withValues(alpha: 0.08)
+              : context.c.surfaceElevated,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: borderColor,
@@ -323,8 +326,8 @@ class _PhaseTile extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
                             color: passed
-                                ? const Color(0xFF666666)
-                                : Colors.black,
+                                ? context.c.textMuted
+                                : context.c.textPrimary,
                           ),
                         ),
                       ),
@@ -337,15 +340,15 @@ class _PhaseTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 13,
                       color: passed
-                          ? const Color(0xFF9FA6BC)
-                          : const Color(0xFF555555),
+                          ? context.c.textMuted
+                          : context.c.textSecondary,
                     ),
                   ),
                   Text(
                     _rangeLabel(phase),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: Color(0xFF9FA6BC),
+                      color: context.c.textMuted,
                     ),
                   ),
                   if (highlight && cta != null) ...[
@@ -391,8 +394,8 @@ class _StatusChip extends StatelessWidget {
         fg = accent;
       case DgtExamPhaseStatus.upcoming:
         label = 'Proxima';
-        bg = const Color(0xFFEDEFF3);
-        fg = const Color(0xFF666666);
+        bg = context.c.surfaceMuted;
+        fg = context.c.textSecondary;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_prediction.dart';
@@ -228,7 +229,7 @@ class _DgtWeakFocusScreenState extends ConsumerState<DgtWeakFocusScreen> {
         LinearProgressIndicator(
           value: (_current + 1) / qs.length,
           minHeight: 4,
-          backgroundColor: Colors.white.withValues(alpha: 0.08),
+          backgroundColor: context.c.surfaceMuted,
           valueColor: const AlwaysStoppedAnimation(Color(0xFFFF6B35)),
         ),
         Expanded(
@@ -245,7 +246,7 @@ class _DgtWeakFocusScreenState extends ConsumerState<DgtWeakFocusScreen> {
                 Text(
                   'Pregunta ${_current + 1} / ${qs.length}',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
+                    color: context.c.textSecondary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -387,9 +388,9 @@ class _WeakFocusAnswerTile extends StatelessWidget {
     final selected = picked == letter;
     final isCorrectOption = letter == correct;
 
-    Color bg = Colors.white.withValues(alpha: 0.08);
-    Color iconBg = Colors.white.withValues(alpha: 0.12);
-    Color iconFg = Colors.white;
+    Color bg = context.c.surfaceMuted;
+    Color iconBg = context.c.border;
+    Color iconFg = context.c.textPrimary;
 
     if (answered) {
       if (isCorrectOption) {
@@ -402,7 +403,8 @@ class _WeakFocusAnswerTile extends StatelessWidget {
         iconFg = Colors.white;
       }
     } else if (selected) {
-      bg = const Color(0xFF7C5CFF);
+      bg = AppColors.brand;
+      iconFg = Colors.white;
     }
 
     return Padding(
@@ -510,7 +512,7 @@ class _ExplanationCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 height: 1.45,
-                color: Colors.white.withValues(alpha: 0.85),
+                color: context.c.textPrimary,
               ),
             ),
           ],

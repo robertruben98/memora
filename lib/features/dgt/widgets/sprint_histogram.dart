@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../dgt_sprint_history_provider.dart';
 
@@ -36,7 +37,7 @@ class SprintHistogram extends StatelessWidget {
             'Aun no tienes sprints. Este es tu primero.',
             style: TextStyle(
               fontSize: 12,
-              color: Colors.white.withValues(alpha: 0.6),
+              color: context.c.textSecondary,
               fontWeight: FontWeight.w600,
             ),
           ),

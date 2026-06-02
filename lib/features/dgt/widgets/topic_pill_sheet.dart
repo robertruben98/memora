@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memora/core/theme/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/topic_pills.dart';
@@ -75,7 +76,7 @@ class _DgtTopicPillSheetState extends State<DgtTopicPillSheet> {
   @override
   Widget build(BuildContext context) {
     final pill = widget.pill;
-    final accent = const Color(0xFF7C5CFF);
+    const accent = AppColors.brand;
     return DraggableScrollableSheet(
       initialChildSize: 0.6,
       minChildSize: 0.4,
@@ -83,9 +84,9 @@ class _DgtTopicPillSheetState extends State<DgtTopicPillSheet> {
       expand: false,
       builder: (_, scrollCtrl) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF1B1A23),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: context.c.surfaceElevated,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
           child: Column(
@@ -96,7 +97,7 @@ class _DgtTopicPillSheetState extends State<DgtTopicPillSheet> {
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
+                    color: context.c.border,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -125,7 +126,7 @@ class _DgtTopicPillSheetState extends State<DgtTopicPillSheet> {
                 'Repaso rapido antes de practicar',
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.white.withValues(alpha: 0.65),
+                  color: context.c.textSecondary,
                 ),
               ),
               const SizedBox(height: 16),

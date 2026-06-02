@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/api/api_client.dart';
@@ -118,10 +119,10 @@ class _DgtHardChallengeScreenState
     return '$m:$sec';
   }
 
-  Color _timerColor() {
+  Color _timerColor(BuildContext context) {
     if (_timeExpired) return const Color(0xFFFF5C5C);
     if (_secondsLeft <= _totalSeconds ~/ 3) return const Color(0xFFFFB74F);
-    return Colors.white;
+    return context.c.textPrimary;
   }
 
   void _selectAnswer(String letter) {
@@ -218,7 +219,7 @@ class _DgtHardChallengeScreenState
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 16,
-                  color: _timerColor(),
+                  color: _timerColor(context),
                 ),
               ),
             ),
@@ -268,7 +269,7 @@ class _DgtHardChallengeScreenState
               LinearProgressIndicator(
                 value: (_current + 1) / qs.length,
                 minHeight: 4,
-                backgroundColor: Colors.white.withValues(alpha: 0.08),
+                backgroundColor: context.c.surfaceMuted,
               ),
               Expanded(
                 child: SingleChildScrollView(
@@ -279,7 +280,7 @@ class _DgtHardChallengeScreenState
                       Text(
                         'Pregunta ${_current + 1} / ${qs.length}',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
+                          color: context.c.textSecondary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -419,7 +420,7 @@ class _DgtHardChallengeScreenState
                     Text(
                       'Fallos: $wrong - Tiempo: ${_formatTime(r.elapsedSeconds)}',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.85),
+                        color: context.c.textSecondary,
                         fontSize: 13,
                       ),
                     ),
@@ -428,7 +429,7 @@ class _DgtHardChallengeScreenState
                       // Placeholder hasta tener endpoint stats global.
                       '% vs media: pendiente (sin endpoint global)',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.55),
+                        color: context.c.textMuted,
                         fontSize: 12,
                       ),
                       textAlign: TextAlign.center,
@@ -438,7 +439,7 @@ class _DgtHardChallengeScreenState
                       Text(
                         'Tiempo agotado antes de terminar.',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: context.c.textSecondary,
                           fontSize: 12,
                         ),
                       ),
@@ -510,7 +511,7 @@ class _AnswerTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = selected
         ? const Color(0xFFFF8A4F)
-        : Colors.white.withValues(alpha: 0.08);
+        : context.c.surfaceMuted;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Material(
@@ -533,7 +534,7 @@ class _AnswerTile extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: selected
                         ? Colors.white
-                        : Colors.white.withValues(alpha: 0.12),
+                        : context.c.surfaceMuted,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -542,7 +543,7 @@ class _AnswerTile extends StatelessWidget {
                       fontWeight: FontWeight.w800,
                       color: selected
                           ? const Color(0xFFFF8A4F)
-                          : Colors.white,
+                          : context.c.textPrimary,
                     ),
                   ),
                 ),
@@ -579,7 +580,7 @@ class _DgtImage extends ConsumerWidget {
       errorBuilder: (_, _, _) => Container(
         height: 120,
         alignment: Alignment.center,
-        color: Colors.white.withValues(alpha: 0.05),
+        color: context.c.surfaceMuted,
         child: const Icon(Icons.image_not_supported_outlined),
       ),
     );

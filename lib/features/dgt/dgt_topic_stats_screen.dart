@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_practice_screen.dart';
@@ -230,7 +231,7 @@ class TopicStatTile extends StatelessWidget {
         : stat.topicName!;
     final isIntact = stat.totalAnswered <= 0;
     return Material(
-      color: Colors.white.withValues(alpha: 0.06),
+      color: context.c.surfaceMuted,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
@@ -290,7 +291,7 @@ class TopicStatTile extends StatelessWidget {
                     : '${stat.correct}/${stat.totalAnswered} aciertos',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.white.withValues(alpha: 0.65),
+                  color: context.c.textSecondary,
                 ),
               ),
               if (!isIntact) ...[
@@ -347,7 +348,7 @@ class _BarRow extends StatelessWidget {
                 label,
                 style: TextStyle(
                   fontSize: 11,
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: context.c.textSecondary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -356,7 +357,7 @@ class _BarRow extends StatelessWidget {
               trailing ?? '${clamped.toStringAsFixed(0)}%',
               style: TextStyle(
                 fontSize: 11,
-                color: Colors.white.withValues(alpha: 0.75),
+                color: context.c.textSecondary,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -368,7 +369,7 @@ class _BarRow extends StatelessWidget {
           child: LinearProgressIndicator(
             value: clamped / 100.0,
             minHeight: 6,
-            backgroundColor: Colors.white.withValues(alpha: 0.08),
+            backgroundColor: context.c.surfaceMuted,
             valueColor: AlwaysStoppedAnimation<Color>(color),
           ),
         ),
@@ -403,7 +404,7 @@ class _EmptyView extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.white.withValues(alpha: 0.7),
+                color: context.c.textSecondary,
               ),
             ),
             const SizedBox(height: 14),
