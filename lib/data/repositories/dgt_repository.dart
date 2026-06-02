@@ -314,22 +314,34 @@ class DgtRepository {
     await _cache?.clear();
   }
 
-  /// Parser tolerante: backend puede responder lista plana o `{questions: [...]}`.
-  List<DgtQuestion>? _parseQuestions(dynamic res) {
+  /// Parser generico tolerante: backend puede responder una lista plana o un
+  /// objeto `{questions: [...]}`. Aplica [factory] a cada Map del payload.
+  ///
+  /// Devuelve `null` si [res] no encaja en ninguna de las dos formas (ni lista
+  /// ni mapa con key `questions` lista), permitiendo a los callers distinguir
+  /// "shape inesperado" de "lista vacia legitima".
+  static List<T>? _parseGenericQuestions<T>(
+    dynamic res,
+    T Function(Map<String, dynamic>) factory,
+  ) {
     if (res is List) {
       return res
           .whereType<Map>()
-          .map((e) => DgtQuestion.fromJson(Map<String, dynamic>.from(e)))
+          .map((e) => factory(Map<String, dynamic>.from(e)))
           .toList();
     }
     if (res is Map && res['questions'] is List) {
       return (res['questions'] as List)
           .whereType<Map>()
-          .map((e) => DgtQuestion.fromJson(Map<String, dynamic>.from(e)))
+          .map((e) => factory(Map<String, dynamic>.from(e)))
           .toList();
     }
     return null;
   }
+
+  /// Parser tolerante: backend puede responder lista plana o `{questions: [...]}`.
+  List<DgtQuestion>? _parseQuestions(dynamic res) =>
+      _parseGenericQuestions(res, DgtQuestion.fromJson);
 
   /// Lista los bloques DGT disponibles. Backend: GET /dgt/topics.
   /// Si el endpoint falla, deriva bloques unicos del banco local.
@@ -366,17 +378,9 @@ class DgtRepository {
         '/dgt/video-questions',
         query: {'limit': '$limit'},
       );
-      if (res is List) {
-        return res
-            .whereType<Map>()
-            .map((e) => DgtVideoQuestion.fromJson(Map<String, dynamic>.from(e)))
-            .toList();
-      }
-      if (res is Map && res['questions'] is List) {
-        return (res['questions'] as List)
-            .whereType<Map>()
-            .map((e) => DgtVideoQuestion.fromJson(Map<String, dynamic>.from(e)))
-            .toList();
+      final parsed = _parseGenericQuestions(res, DgtVideoQuestion.fromJson);
+      if (parsed != null) {
+        return parsed;
       }
     } catch (_) {
       // Backend antiguo sin /dgt/video-questions, offline, o 5xx -> empty.
@@ -636,19 +640,10 @@ class DgtRepository {
         '/dgt/quiz/recurrent-failures',
         query: {'min_fails': '$mf', 'limit': '$lim'},
       );
-      if (res is List) {
-        return res
-            .whereType<Map>()
-            .map((e) =>
-                DgtRecurrentFailureItem.fromJson(Map<String, dynamic>.from(e)))
-            .toList();
-      }
-      if (res is Map && res['questions'] is List) {
-        return (res['questions'] as List)
-            .whereType<Map>()
-            .map((e) =>
-                DgtRecurrentFailureItem.fromJson(Map<String, dynamic>.from(e)))
-            .toList();
+      final parsed =
+          _parseGenericQuestions(res, DgtRecurrentFailureItem.fromJson);
+      if (parsed != null) {
+        return parsed;
       }
     } catch (_) {
       // Backend antiguo sin endpoint, offline, 5xx, o parse fail -> empty.

@@ -9,6 +9,58 @@ import 'dgt_ready_check_provider.dart';
 import 'dgt_topic_stats_screen.dart';
 import 'dgt_weak_focus_screen.dart';
 
+/// Color/icono del veredicto agregado. Centraliza el mapeo tier -> estilo
+/// para que la card no lo duplique.
+extension DgtReadyVerdictStyle on DgtReadyVerdict {
+  Color get color {
+    switch (this) {
+      case DgtReadyVerdict.ready:
+        return DgtStatusColors.success;
+      case DgtReadyVerdict.almost:
+        return DgtStatusColors.warning;
+      case DgtReadyVerdict.notReady:
+        return DgtStatusColors.error;
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case DgtReadyVerdict.ready:
+        return Icons.check_circle_rounded;
+      case DgtReadyVerdict.almost:
+        return Icons.timelapse_rounded;
+      case DgtReadyVerdict.notReady:
+        return Icons.warning_amber_rounded;
+    }
+  }
+}
+
+/// Color/icono del estado de un criterio individual. Centraliza el mapeo
+/// estado -> estilo para que el tile no lo duplique.
+extension DgtReadyCriterionStatusStyle on DgtReadyCriterionStatus {
+  Color get color {
+    switch (this) {
+      case DgtReadyCriterionStatus.pass:
+        return DgtStatusColors.success;
+      case DgtReadyCriterionStatus.warn:
+        return DgtStatusColors.warning;
+      case DgtReadyCriterionStatus.fail:
+        return DgtStatusColors.error;
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case DgtReadyCriterionStatus.pass:
+        return Icons.check_circle_rounded;
+      case DgtReadyCriterionStatus.warn:
+        return Icons.error_outline_rounded;
+      case DgtReadyCriterionStatus.fail:
+        return Icons.cancel_rounded;
+    }
+  }
+}
+
 /// Issue #136 (dgt-ux): pantalla "Listo para examen?".
 ///
 /// Muestra un checklist de 5 criterios objetivos y un veredicto global para
@@ -88,31 +140,14 @@ class DgtReadyVerdictCard extends StatelessWidget {
 
   const DgtReadyVerdictCard({super.key, required this.result});
 
-  static Color colorFor(DgtReadyVerdict v) {
-    switch (v) {
-      case DgtReadyVerdict.ready:
-        return DgtStatusColors.success;
-      case DgtReadyVerdict.almost:
-        return DgtStatusColors.warning;
-      case DgtReadyVerdict.notReady:
-        return DgtStatusColors.error;
-    }
-  }
-
-  static IconData iconFor(DgtReadyVerdict v) {
-    switch (v) {
-      case DgtReadyVerdict.ready:
-        return Icons.check_circle_rounded;
-      case DgtReadyVerdict.almost:
-        return Icons.timelapse_rounded;
-      case DgtReadyVerdict.notReady:
-        return Icons.warning_amber_rounded;
-    }
-  }
+  /// Delegan en [DgtReadyVerdictStyle] (fuente unica). Se mantienen para la
+  /// API de tests existente.
+  static Color colorFor(DgtReadyVerdict v) => v.color;
+  static IconData iconFor(DgtReadyVerdict v) => v.icon;
 
   @override
   Widget build(BuildContext context) {
-    final accent = colorFor(result.verdict);
+    final accent = result.verdict.color;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -123,7 +158,7 @@ class DgtReadyVerdictCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(iconFor(result.verdict), color: accent, size: 36),
+          Icon(result.verdict.icon, color: accent, size: 36),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -170,31 +205,14 @@ class DgtReadyCriterionTile extends StatelessWidget {
     this.onTap,
   });
 
-  static Color colorFor(DgtReadyCriterionStatus s) {
-    switch (s) {
-      case DgtReadyCriterionStatus.pass:
-        return DgtStatusColors.success;
-      case DgtReadyCriterionStatus.warn:
-        return DgtStatusColors.warning;
-      case DgtReadyCriterionStatus.fail:
-        return DgtStatusColors.error;
-    }
-  }
-
-  static IconData iconFor(DgtReadyCriterionStatus s) {
-    switch (s) {
-      case DgtReadyCriterionStatus.pass:
-        return Icons.check_circle_rounded;
-      case DgtReadyCriterionStatus.warn:
-        return Icons.error_outline_rounded;
-      case DgtReadyCriterionStatus.fail:
-        return Icons.cancel_rounded;
-    }
-  }
+  /// Delegan en [DgtReadyCriterionStatusStyle] (fuente unica). Se mantienen
+  /// para la API de tests existente.
+  static Color colorFor(DgtReadyCriterionStatus s) => s.color;
+  static IconData iconFor(DgtReadyCriterionStatus s) => s.icon;
 
   @override
   Widget build(BuildContext context) {
-    final color = colorFor(criterion.status);
+    final color = criterion.status.color;
     return Material(
       color: context.c.surfaceElevated,
       borderRadius: BorderRadius.circular(14),
@@ -206,7 +224,7 @@ class DgtReadyCriterionTile extends StatelessWidget {
           padding: const EdgeInsets.all(14),
           child: Row(
             children: [
-              Icon(iconFor(criterion.status), color: color, size: 28),
+              Icon(criterion.status.icon, color: color, size: 28),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
