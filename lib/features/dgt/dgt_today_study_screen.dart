@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
+import 'package:memora/core/widgets/dgt_question_image.dart';
 import 'package:memora/core/widgets/dgt_tinted_chip.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -182,6 +183,13 @@ class _DgtTodayStudyScreenState extends ConsumerState<DgtTodayStudyScreen> {
                     height: 1.35,
                   ),
                 ),
+                if (q.imageUrl != null && q.imageUrl!.isNotEmpty) ...[
+                  const SizedBox(height: 14),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: DgtQuestionImage(path: q.imageUrl!),
+                  ),
+                ],
                 const SizedBox(height: 16),
                 _AnswerTile(
                   letter: 'a',

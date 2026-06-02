@@ -3,8 +3,8 @@ import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
+import 'package:memora/core/widgets/dgt_question_image.dart';
 
-import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_favorites_provider.dart';
 
@@ -423,7 +423,7 @@ class _DgtFavoritesQuizScreenState
                     const SizedBox(height: 12),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: _DgtImage(path: q.imageUrl!),
+                      child: DgtQuestionImage(path: q.imageUrl!),
                     ),
                   ],
                   const SizedBox(height: 14),
@@ -640,27 +640,6 @@ class _AnswerTile extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _DgtImage extends ConsumerWidget {
-  final String path;
-  const _DgtImage({required this.path});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final api = ref.watch(apiClientProvider);
-    final url = api.remoteUrlFor(path) ?? path;
-    return Image.network(
-      url,
-      fit: BoxFit.cover,
-      errorBuilder: (_, _, _) => Container(
-        height: 120,
-        alignment: Alignment.center,
-        color: context.c.surfaceMuted,
-        child: const Icon(Icons.image_not_supported_outlined),
       ),
     );
   }
