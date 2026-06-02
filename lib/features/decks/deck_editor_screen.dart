@@ -4,6 +4,7 @@ import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../../core/theme/deck_visuals.dart';
+import '../../core/widgets/styled_text_field.dart';
 import '../../data/database/database.dart';
 import '../../data/repositories/card_repository.dart';
 import '../../data/repositories/deck_repository.dart';
@@ -53,32 +54,40 @@ class _DeckEditorScreenState extends ConsumerState<DeckEditorScreen> {
       return;
     }
     setState(() => _saving = true);
-    final repo = ref.read(deckRepositoryProvider);
-    final desc = _descriptionController.text.trim();
-    if (_isEditing) {
-      await repo.updateDeck(
-        id: widget.deckToEdit!.id,
-        name: name,
-        description: desc.isEmpty ? null : desc,
-        colorHex: _colorHex,
-        iconName: _iconName,
-      );
-    } else {
-      await repo.createDeck(
-        id: 'deck-${DateTime.now().microsecondsSinceEpoch}',
-        name: name,
-        description: desc.isEmpty ? null : desc,
-        colorHex: _colorHex,
-        iconName: _iconName,
+    try {
+      final repo = ref.read(deckRepositoryProvider);
+      final desc = _descriptionController.text.trim();
+      if (_isEditing) {
+        await repo.updateDeck(
+          id: widget.deckToEdit!.id,
+          name: name,
+          description: desc.isEmpty ? null : desc,
+          colorHex: _colorHex,
+          iconName: _iconName,
+        );
+      } else {
+        await repo.createDeck(
+          id: 'deck-${DateTime.now().microsecondsSinceEpoch}',
+          name: name,
+          description: desc.isEmpty ? null : desc,
+          colorHex: _colorHex,
+          iconName: _iconName,
+        );
+      }
+      ref.invalidate(deckSummariesProvider);
+      ref.invalidate(allCardsProvider);
+      if (_isEditing) {
+        ref.invalidate(deckByIdProvider(widget.deckToEdit!.id));
+      }
+      if (!mounted) return;
+      Navigator.of(context).pop(true);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No se pudo guardar el mazo: $e')),
       );
     }
-    ref.invalidate(deckSummariesProvider);
-    ref.invalidate(allCardsProvider);
-    if (_isEditing) {
-      ref.invalidate(deckByIdProvider(widget.deckToEdit!.id));
-    }
-    if (!mounted) return;
-    Navigator.of(context).pop(true);
   }
 
   Future<void> _delete() async {
@@ -108,11 +117,19 @@ class _DeckEditorScreenState extends ConsumerState<DeckEditorScreen> {
     );
     if (confirmed != true) return;
     setState(() => _saving = true);
-    await ref.read(deckRepositoryProvider).deleteDeck(widget.deckToEdit!.id);
-    ref.invalidate(deckSummariesProvider);
-    ref.invalidate(allCardsProvider);
-    if (!mounted) return;
-    Navigator.of(context).pop('deleted');
+    try {
+      await ref.read(deckRepositoryProvider).deleteDeck(widget.deckToEdit!.id);
+      ref.invalidate(deckSummariesProvider);
+      ref.invalidate(allCardsProvider);
+      if (!mounted) return;
+      Navigator.of(context).pop('deleted');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No se pudo eliminar el mazo: $e')),
+      );
+    }
   }
 
   @override
@@ -146,31 +163,30 @@ class _DeckEditorScreenState extends ConsumerState<DeckEditorScreen> {
               iconName: _iconName,
             ),
             const SizedBox(height: 24),
-            const _Label('Nombre'),
+            const AppLabel('Nombre'),
             const SizedBox(height: 8),
-            _Field(
+            StyledTextField(
               controller: _nameController,
               hint: 'p. ej. Inglés - Verbos',
-              onChanged: () => setState(() {}),
+              onChanged: (_) => setState(() {}),
             ),
             const SizedBox(height: 20),
-            const _Label('Descripción (opcional)'),
+            const AppLabel('Descripción (opcional)'),
             const SizedBox(height: 8),
-            _Field(
+            StyledTextField(
               controller: _descriptionController,
               hint: 'Tema del mazo',
               minLines: 2,
-              onChanged: () {},
             ),
             const SizedBox(height: 24),
-            const _Label('Color'),
+            const AppLabel('Color'),
             const SizedBox(height: 12),
             _ColorPicker(
               selectedHex: _colorHex,
               onChanged: (h) => setState(() => _colorHex = h),
             ),
             const SizedBox(height: 24),
-            const _Label('Icono'),
+            const AppLabel('Icono'),
             const SizedBox(height: 12),
             _IconPicker(
               selectedName: _iconName,
@@ -256,69 +272,6 @@ class _PreviewCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _Label extends StatelessWidget {
-  final String text;
-  const _Label(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
-        color: context.c.textSecondary,
-        letterSpacing: 0.3,
-      ),
-    );
-  }
-}
-
-class _Field extends StatelessWidget {
-  final TextEditingController controller;
-  final String hint;
-  final int minLines;
-  final VoidCallback onChanged;
-
-  const _Field({
-    required this.controller,
-    required this.hint,
-    this.minLines = 1,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      minLines: minLines,
-      maxLines: minLines == 1 ? 1 : 4,
-      textCapitalization: TextCapitalization.sentences,
-      style: const TextStyle(fontSize: 16),
-      onChanged: (_) => onChanged(),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: TextStyle(color: context.c.textMuted),
-        filled: true,
-        fillColor: context.c.surfaceElevated,
-        contentPadding: const EdgeInsets.all(14),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: context.c.border, width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.brand, width: 1.5),
-        ),
       ),
     );
   }
