@@ -8,6 +8,7 @@ import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:memora/core/widgets/confirmation_dialog.dart';
 import 'package:memora/core/widgets/dgt_answer_tile.dart';
 import 'package:memora/core/widgets/dgt_question_image.dart';
+import 'package:memora/core/utils/format_duration.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_failures_repository.dart';
@@ -89,12 +90,6 @@ class _DgtQuickReviewScreenState
     super.dispose();
   }
 
-  String _formatTime(int s) {
-    final m = (s ~/ 60).toString().padLeft(2, '0');
-    final sec = (s % 60).toString().padLeft(2, '0');
-    return '$m:$sec';
-  }
-
   Color _timerColor(BuildContext context) {
     // Bajo umbral: ultimo tercio del tiempo total.
     if (_secondsLeft <= _totalSeconds ~/ 3) return DgtStatusColors.error;
@@ -172,7 +167,7 @@ class _DgtQuickReviewScreenState
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Center(
               child: Text(
-                _formatTime(_secondsLeft),
+                formatMmSs(_secondsLeft),
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 16,

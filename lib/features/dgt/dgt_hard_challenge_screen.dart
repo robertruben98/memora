@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
+import 'package:memora/core/utils/format_duration.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:memora/core/widgets/confirmation_dialog.dart';
 import 'package:memora/core/widgets/dgt_answer_tile.dart';
@@ -117,12 +118,6 @@ class _DgtHardChallengeScreenState
     super.dispose();
   }
 
-  String _formatTime(int s) {
-    final m = (s ~/ 60).toString().padLeft(2, '0');
-    final sec = (s % 60).toString().padLeft(2, '0');
-    return '$m:$sec';
-  }
-
   Color _timerColor(BuildContext context) {
     if (_timeExpired) return DgtStatusColors.error;
     if (_secondsLeft <= _totalSeconds ~/ 3) return DgtStatusColors.warning;
@@ -206,7 +201,7 @@ class _DgtHardChallengeScreenState
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Center(
               child: Text(
-                _formatTime(_secondsLeft),
+                formatMmSs(_secondsLeft),
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 16,
@@ -418,7 +413,7 @@ class _DgtHardChallengeScreenState
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Fallos: $wrong - Tiempo: ${_formatTime(r.elapsedSeconds)}',
+                      'Fallos: $wrong - Tiempo: ${formatMmSs(r.elapsedSeconds)}',
                       style: TextStyle(
                         color: context.c.textSecondary,
                         fontSize: 13,
