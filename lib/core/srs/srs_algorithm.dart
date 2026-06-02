@@ -65,6 +65,12 @@ class SrsAlgorithm {
     required int intervalDays,
     required int quality,
   }) {
+    assert(
+      quality == qualityCorrect || quality == qualityIncorrect,
+      'DGT usa calidad binaria: quality debe ser qualityCorrect '
+      '($qualityCorrect) o qualityIncorrect ($qualityIncorrect), '
+      'recibido: $quality',
+    );
     final int newReps;
     final int newInterval;
 

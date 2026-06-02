@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/logging/app_logger.dart';
 import '../api/api_client.dart';
 import '../local/dgt_questions_cache.dart';
 import 'dgt_local_bank.dart';
@@ -30,6 +31,28 @@ class DgtTopic {
     if (v is String) return int.tryParse(v) ?? 0;
     return 0;
   }
+}
+
+/// Letras de respuesta validas para preguntas DGT multi-choice.
+const Set<String> _kValidCorrectLetters = {'a', 'b', 'c'};
+
+/// Normaliza y valida el campo `correct` de una pregunta DGT.
+///
+/// Si el valor entrante no esta en el set valido (`a`/`b`/`c`) — p.ej. `d`,
+/// null, vacio o basura — registra un warning con [appLogger] y cae a un
+/// fallback seguro (`a`) en lugar de cachear corrupcion silenciosa. Mantiene
+/// el tipo de retorno `String` no nulo para no romper las firmas existentes.
+String _normalizeCorrect(dynamic raw, {required String questionId}) {
+  final normalized = (raw ?? '').toString().toLowerCase().trim();
+  if (_kValidCorrectLetters.contains(normalized)) {
+    return normalized;
+  }
+  appLogger.warn(
+    'dgt',
+    'Pregunta DGT con campo "correct" invalido '
+        '(id=$questionId, valor="$raw"); usando fallback "a".',
+  );
+  return 'a';
 }
 
 /// Pregunta DGT 2026 con video de percepcion de riesgo (issue #77).
@@ -68,13 +91,14 @@ class DgtVideoQuestion {
   });
 
   factory DgtVideoQuestion.fromJson(Map<String, dynamic> j) {
+    final id = (j['id'] ?? '').toString();
     return DgtVideoQuestion(
-      id: (j['id'] ?? '').toString(),
+      id: id,
       statement: (j['statement'] ?? '').toString(),
       optionA: (j['option_a'] ?? '').toString(),
       optionB: (j['option_b'] ?? '').toString(),
       optionC: (j['option_c'] ?? '').toString(),
-      correct: (j['correct'] ?? 'a').toString().toLowerCase(),
+      correct: _normalizeCorrect(j['correct'], questionId: id),
       explanation: (j['explanation'] ?? '').toString(),
       videoUrl: (j['video_url'] ?? '').toString(),
       thumbnailUrl: j['thumbnail_url'] as String?,
@@ -111,14 +135,15 @@ class DgtQuestion {
   });
 
   factory DgtQuestion.fromJson(Map<String, dynamic> j) {
+    final id = (j['id'] ?? '').toString();
     return DgtQuestion(
-      id: (j['id'] ?? '').toString(),
+      id: id,
       statement: (j['statement'] ?? '').toString(),
       imageUrl: j['image_url'] as String?,
       optionA: (j['option_a'] ?? '').toString(),
       optionB: (j['option_b'] ?? '').toString(),
       optionC: (j['option_c'] ?? '').toString(),
-      correct: (j['correct'] ?? 'a').toString().toLowerCase(),
+      correct: _normalizeCorrect(j['correct'], questionId: id),
       explanation: j['explanation'] as String?,
       topic: j['topic'] as String?,
     );

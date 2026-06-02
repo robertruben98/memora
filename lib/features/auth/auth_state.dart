@@ -62,14 +62,17 @@ class AuthNotifier extends Notifier<AuthState> {
     await prefs.setString(_kUserId, userId);
   }
 
-  Future<void> login({required String email, required String password}) async {
-    final api = ref.read(unauthApiClientProvider);
-    final res = await api.post('/auth/login', {
-      'email': email,
-      'password': password,
-    }) as Map<String, dynamic>;
-    final token = res['access_token'] as String;
-    final userId = res['user_id'] as String;
+  Future<void> _handleAuthSuccess(
+    Map<String, dynamic> res, {
+    required String email,
+  }) async {
+    final token = res['access_token'];
+    final userId = res['user_id'];
+    if (token is! String || token.isEmpty || userId is! String || userId.isEmpty) {
+      throw Exception(
+        'Respuesta de autenticación inválida: faltan access_token o user_id',
+      );
+    }
     await _persist(token: token, email: email, userId: userId);
     state = AuthState(
       token: token,
@@ -77,6 +80,15 @@ class AuthNotifier extends Notifier<AuthState> {
       userId: userId,
       initialized: true,
     );
+  }
+
+  Future<void> login({required String email, required String password}) async {
+    final api = ref.read(unauthApiClientProvider);
+    final res = await api.post('/auth/login', {
+      'email': email,
+      'password': password,
+    }) as Map<String, dynamic>;
+    await _handleAuthSuccess(res, email: email);
   }
 
   Future<void> register({
@@ -89,15 +101,7 @@ class AuthNotifier extends Notifier<AuthState> {
     final body = <String, dynamic>{'email': email, 'password': password};
     if (displayName != null) body['display_name'] = displayName;
     final res = await api.post('/auth/register', body) as Map<String, dynamic>;
-    final token = res['access_token'] as String;
-    final userId = res['user_id'] as String;
-    await _persist(token: token, email: email, userId: userId);
-    state = AuthState(
-      token: token,
-      email: email,
-      userId: userId,
-      initialized: true,
-    );
+    await _handleAuthSuccess(res, email: email);
   }
 
   Future<void> logout() async {

@@ -490,10 +490,10 @@ class _BadgeTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final unlocked = status.unlocked;
     final color = unlocked
-        ? const Color(0xFFFFB74F)
+        ? context.c.achievementUnlocked
         : context.c.textMuted;
     final bg = unlocked
-        ? const Color(0xFFFFB74F).withValues(alpha: 0.12)
+        ? context.c.achievementUnlocked.withValues(alpha: 0.12)
         : context.c.surfaceMuted;
 
     return Tooltip(
@@ -568,7 +568,7 @@ class _BadgeTile extends StatelessWidget {
                   status.spec.icon,
                   size: 36,
                   color: status.unlocked
-                      ? const Color(0xFFFFB74F)
+                      ? context.c.achievementUnlocked
                       : context.c.textMuted,
                 ),
                 const SizedBox(width: 12),
