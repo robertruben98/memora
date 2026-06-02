@@ -213,8 +213,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 16),
                   TextButton.icon(
                     onPressed: _busy ? null : _useLegacy,
-                    icon: const Icon(Icons.fast_forward_rounded, size: 18),
-                    label: const Text('Continuar sin login (legacy)'),
+                    icon: const Icon(Icons.person_outline_rounded, size: 18),
+                    label: const Text('Entrar como invitado'),
                     style: TextButton.styleFrom(
                       foregroundColor: context.c.textMuted,
                     ),
