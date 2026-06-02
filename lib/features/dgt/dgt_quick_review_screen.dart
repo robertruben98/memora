@@ -6,6 +6,7 @@ import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:memora/core/widgets/confirmation_dialog.dart';
+import 'package:memora/core/widgets/dgt_answer_tile.dart';
 import 'package:memora/core/widgets/dgt_question_image.dart';
 
 import '../../data/repositories/dgt_repository.dart';
@@ -241,22 +242,25 @@ class _DgtQuickReviewScreenState
                         ),
                       ],
                       const SizedBox(height: 16),
-                      _AnswerTile(
+                      DgtAnswerTile(
                         letter: 'a',
                         text: q.optionA,
                         selected: picked == 'a',
+                        minHeight: 48,
                         onTap: () => _selectAnswer('a'),
                       ),
-                      _AnswerTile(
+                      DgtAnswerTile(
                         letter: 'b',
                         text: q.optionB,
                         selected: picked == 'b',
+                        minHeight: 48,
                         onTap: () => _selectAnswer('b'),
                       ),
-                      _AnswerTile(
+                      DgtAnswerTile(
                         letter: 'c',
                         text: q.optionC,
                         selected: picked == 'c',
+                        minHeight: 48,
                         onTap: () => _selectAnswer('c'),
                       ),
                     ],
@@ -412,71 +416,4 @@ class _QuickReviewResult {
     required this.correct,
     required this.autoSubmitted,
   });
-}
-
-class _AnswerTile extends StatelessWidget {
-  final String letter;
-  final String text;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _AnswerTile({
-    required this.letter,
-    required this.text,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = selected ? AppColors.brand : context.c.surfaceMuted;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Material(
-        color: color,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            // Tap-target accesible: 48px altura minima cumple Material >=44.
-            constraints: const BoxConstraints(minHeight: 48),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 28,
-                  height: 28,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: selected ? context.c.onAccent : context.c.border,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    letter.toUpperCase(),
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: selected ? AppColors.brand : context.c.textPrimary,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    text,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      height: 1.35,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }

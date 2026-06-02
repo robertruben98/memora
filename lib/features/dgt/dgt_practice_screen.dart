@@ -6,6 +6,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
+import 'package:memora/core/widgets/dgt_answer_tile.dart';
 import 'package:memora/core/widgets/dgt_question_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -615,103 +616,6 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
   }
 }
 
-class _AnswerTile extends StatelessWidget {
-  final String letter;
-  final String text;
-  final String? picked;
-  final String correct;
-  final bool answered;
-  final VoidCallback onTap;
-
-  const _AnswerTile({
-    required this.letter,
-    required this.text,
-    required this.picked,
-    required this.correct,
-    required this.answered,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final selected = picked == letter;
-    final isCorrectOption = letter == correct;
-
-    Color bg = context.c.surfaceMuted;
-    Color iconBg = context.c.surfaceMuted;
-    Color iconFg = context.c.textPrimary;
-
-    if (answered) {
-      if (isCorrectOption) {
-        bg = DgtStatusColors.success.withValues(alpha: 0.18);
-        iconBg = DgtStatusColors.success;
-        iconFg = Colors.black;
-      } else if (selected) {
-        bg = DgtStatusColors.error.withValues(alpha: 0.18);
-        iconBg = DgtStatusColors.error;
-        iconFg = Colors.white;
-      }
-    } else if (selected) {
-      bg = AppColors.brand;
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Material(
-        color: bg,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          onTap: answered ? null : onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 28,
-                  height: 28,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: iconBg,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    letter.toUpperCase(),
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: iconFg,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    text,
-                    style: const TextStyle(fontSize: 15, height: 1.35),
-                  ),
-                ),
-                if (answered && isCorrectOption)
-                  const Icon(
-                    Icons.check_circle_rounded,
-                    color: DgtStatusColors.success,
-                    size: 20,
-                  )
-                else if (answered && selected && !isCorrectOption)
-                  const Icon(
-                    Icons.cancel_rounded,
-                    color: DgtStatusColors.error,
-                    size: 20,
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _ExplanationCard extends StatelessWidget {
   final DgtQuestion question;
   final bool isCorrect;
@@ -940,7 +844,7 @@ class _PracticeQuestionView extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 16),
-          _AnswerTile(
+          DgtAnswerTile.graded(
             letter: 'a',
             text: q.optionA,
             picked: picked,
@@ -948,7 +852,7 @@ class _PracticeQuestionView extends StatelessWidget {
             answered: answered,
             onTap: () => onSelect('a'),
           ),
-          _AnswerTile(
+          DgtAnswerTile.graded(
             letter: 'b',
             text: q.optionB,
             picked: picked,
@@ -956,7 +860,7 @@ class _PracticeQuestionView extends StatelessWidget {
             answered: answered,
             onTap: () => onSelect('b'),
           ),
-          _AnswerTile(
+          DgtAnswerTile.graded(
             letter: 'c',
             text: q.optionC,
             picked: picked,
