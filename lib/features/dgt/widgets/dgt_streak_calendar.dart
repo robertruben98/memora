@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../dgt_streak_provider.dart';
 
@@ -136,8 +137,11 @@ class _DayCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final status = month.statusForDay(day);
     final count = month.activityByDay[day] ?? 0;
+    // Celdas con actividad (partial/full) llevan colores de SEÑAL fijos,
+    // idénticos en claro/oscuro (heatmap). La celda "sin actividad" es un
+    // fill neutro de UI que sí debe seguir el tema.
     final color = switch (status) {
-      DgtDayStatus.none => Colors.grey.shade300,
+      DgtDayStatus.none => context.c.surfaceMuted,
       DgtDayStatus.partial => Colors.amber.shade400,
       DgtDayStatus.full => Colors.green.shade500,
     };
@@ -159,7 +163,7 @@ class _DayCell extends StatelessWidget {
             color: color,
             borderRadius: BorderRadius.circular(6),
             border: isToday
-                ? Border.all(color: Colors.blue, width: 2)
+                ? Border.all(color: context.c.accent, width: 2)
                 : null,
           ),
           alignment: Alignment.center,
@@ -168,8 +172,11 @@ class _DayCell extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+              // En celda sin actividad el texto va sobre un fill neutro del
+              // tema, así que debe seguir el tema. En celdas con color de
+              // señal (partial/full) se mantiene blanco intencional.
               color: status == DgtDayStatus.none
-                  ? Colors.black54
+                  ? context.c.textSecondary
                   : Colors.white,
             ),
           ),

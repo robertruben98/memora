@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../dgt_sprint_history_provider.dart';
 
@@ -33,15 +33,10 @@ class SprintHistogram extends StatelessWidget {
     if (entries.isEmpty) {
       return SizedBox(
         height: height,
-        child: Center(
-          child: Text(
-            'Aun no tienes sprints. Este es tu primero.',
-            style: TextStyle(
-              fontSize: 12,
-              color: context.c.textSecondary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+        child: AppStateView.empty(
+          icon: Icons.bar_chart_rounded,
+          title: 'Aun no tienes sprints',
+          message: 'Este es tu primero.',
         ),
       );
     }
