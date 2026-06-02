@@ -54,7 +54,10 @@ class _DgtSignalsCatalogScreenState
         error: (e, _) => AppStateView.error(e),
         data: (signs) {
           if (signs.isEmpty) {
-            return const Center(child: Text('Catalogo vacio.'));
+            return AppStateView.empty(
+              icon: Icons.signpost_outlined,
+              title: 'Catalogo vacio.',
+            );
           }
           final categories = _categoriesFromSigns(signs);
           final filtered = _applyFilters(signs);

@@ -68,8 +68,8 @@ class _DgtVideoQuestionsScreenState
             return const _LoadingSkeleton();
           }
           if (snap.hasError) {
-            return _ErrorView(
-              message: 'No se pudo cargar la lista: ${snap.error}',
+            return AppStateView.error(
+              'No se pudo cargar la lista: ${snap.error}',
               onRetry: _refresh,
             );
           }
@@ -289,34 +289,6 @@ class _LoadingSkeleton extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.c.surfaceMuted,
           borderRadius: BorderRadius.circular(14),
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  final String message;
-  final Future<void> Function() onRetry;
-
-  const _ErrorView({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(message, textAlign: TextAlign.center),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Reintentar'),
-            ),
-          ],
         ),
       ),
     );

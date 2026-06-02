@@ -21,7 +21,7 @@ class DgtWeekPlanScreen extends ConsumerWidget {
       body: asyncPlan.when(
         data: (plan) => _Body(plan: plan),
         loading: () => AppStateView.loading(),
-        error: (_, _) => const _ErrorMessage(),
+        error: (error, _) => AppStateView.error(error),
       ),
     );
   }
@@ -191,18 +191,3 @@ class _Badge extends StatelessWidget {
   }
 }
 
-class _ErrorMessage extends StatelessWidget {
-  const _ErrorMessage();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(24),
-        child: Text(
-          'No se pudo cargar el plan semanal. Intentalo mas tarde.',
-        ),
-      ),
-    );
-  }
-}

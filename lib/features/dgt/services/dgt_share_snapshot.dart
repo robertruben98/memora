@@ -123,6 +123,22 @@ String computeShareToken(String uid, DateTime day) {
   return hash.toRadixString(16).padLeft(16, '0');
 }
 
+/// Observa de forma segura el `.future` de un provider asincrono
+/// ([futureProvider]) y degrada al valor [fallback] si la dependencia lanza.
+/// Encapsula el patron repetido de
+/// `try { await ref.watch(...future); } catch (_) { fallback; }`.
+Future<T> _safeWatch<T>(
+  Ref ref,
+  ProviderListenable<Future<T>> futureProvider,
+  T fallback,
+) async {
+  try {
+    return await ref.watch(futureProvider);
+  } catch (_) {
+    return fallback;
+  }
+}
+
 /// Provider del snapshot. Recolecta predictor + streak + settings y arma el
 /// payload public. Si falla cualquier dependencia => degrada a "sin datos".
 final dgtShareSnapshotProvider =
@@ -131,26 +147,21 @@ final dgtShareSnapshotProvider =
   final uid = await resolveShareUid();
   final token = computeShareToken(uid, now);
 
-  DgtPrediction prediction = DgtPrediction.empty;
-  try {
-    prediction = await ref.watch(dgtPredictionProvider.future);
-  } catch (_) {
-    prediction = DgtPrediction.empty;
-  }
-
-  DgtStreakMonth streak = DgtStreakMonth.empty;
-  try {
-    streak = await ref.watch(dgtStreakMonthProvider.future);
-  } catch (_) {
-    streak = DgtStreakMonth.empty;
-  }
-
-  DgtSettings settings = DgtSettings.defaults;
-  try {
-    settings = await ref.watch(dgtSettingsProvider.future);
-  } catch (_) {
-    settings = DgtSettings.defaults;
-  }
+  final prediction = await _safeWatch(
+    ref,
+    dgtPredictionProvider.future,
+    DgtPrediction.empty,
+  );
+  final streak = await _safeWatch(
+    ref,
+    dgtStreakMonthProvider.future,
+    DgtStreakMonth.empty,
+  );
+  final settings = await _safeWatch(
+    ref,
+    dgtSettingsProvider.future,
+    DgtSettings.defaults,
+  );
 
   return DgtShareSnapshot(
     token: token,
