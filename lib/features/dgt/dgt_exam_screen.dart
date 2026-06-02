@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
+import 'package:memora/core/utils/format_duration.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_exam_controller.dart';
@@ -202,12 +203,6 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
     super.dispose();
   }
 
-  String _formatTime(int s) {
-    final m = (s ~/ 60).toString().padLeft(2, '0');
-    final sec = (s % 60).toString().padLeft(2, '0');
-    return '$m:$sec';
-  }
-
   Color _timerColor(BuildContext context, int remainingSeconds) {
     if (remainingSeconds <= 5 * 60) return DgtStatusColors.error;
     return context.c.textPrimary;
@@ -378,7 +373,7 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Center(
               child: Text(
-                _formatTime(
+                formatMmSs(
                     ctrl?.remainingSeconds ?? DgtExamController.totalSeconds),
                 style: TextStyle(
                   fontWeight: FontWeight.w800,

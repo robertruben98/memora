@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
+import 'package:memora/core/utils/format_duration.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_simulacro_review_screen.dart';
@@ -89,10 +90,7 @@ class _DgtResultScreenState extends State<DgtResultScreen> {
         'Resultado: ${result.correct}/${result.total} (${passed ? "APTO" : "NO APTO"})');
     buf.write('Aciertos: $pct%');
     if (result.elapsedSeconds != null) {
-      final s = result.elapsedSeconds!;
-      final m = (s ~/ 60).toString().padLeft(2, '0');
-      final ss = (s % 60).toString().padLeft(2, '0');
-      buf.write(' | Tiempo: $m:$ss');
+      buf.write(' | Tiempo: ${formatMmSs(result.elapsedSeconds!)}');
     }
     buf.writeln();
     if (result.wrong.isNotEmpty) {
@@ -220,13 +218,10 @@ class _DgtResultScreenState extends State<DgtResultScreen> {
                       const SizedBox(height: 6),
                       Text(
                         () {
-                          final s = result.elapsedSeconds!;
-                          final m = (s ~/ 60).toString().padLeft(2, '0');
-                          final ss = (s % 60).toString().padLeft(2, '0');
                           final prefix = result.strictMode
                               ? 'Modo examen real - tiempo usado'
                               : 'Tiempo usado';
-                          return '$prefix: $m:$ss';
+                          return '$prefix: ${formatMmSs(result.elapsedSeconds!)}';
                         }(),
                         style: TextStyle(
                           color: context.c.textSecondary,

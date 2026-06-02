@@ -166,17 +166,72 @@ class _DeckEditorScreenState extends ConsumerState<DeckEditorScreen> {
             const SizedBox(height: 24),
             const AppLabel('Color'),
             const SizedBox(height: 12),
-            _ColorPicker(
-              selectedHex: _colorHex,
-              onChanged: (h) => setState(() => _colorHex = h),
+            _SelectablePicker<String>(
+              items: DeckVisuals.palette,
+              selected: _colorHex,
+              onSelect: (h) => setState(() => _colorHex = h),
+              itemBuilder: (context, hex, selected) {
+                final swatch = DeckVisuals.colorFromHex(hex);
+                return Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: swatch,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: selected
+                          ? context.c.textPrimary
+                          : Colors.transparent,
+                      width: 3,
+                    ),
+                    boxShadow: selected
+                        ? [
+                            BoxShadow(
+                              color: swatch.withValues(alpha: 0.5),
+                              blurRadius: 12,
+                              spreadRadius: 1,
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: selected
+                      ? const Icon(Icons.check_rounded,
+                          color: Colors.black, size: 22)
+                      : null,
+                );
+              },
             ),
             const SizedBox(height: 24),
             const AppLabel('Icono'),
             const SizedBox(height: 12),
-            _IconPicker(
-              selectedName: _iconName,
-              tint: color,
-              onChanged: (n) => setState(() => _iconName = n),
+            _SelectablePicker<DeckIconOption>(
+              items: DeckVisuals.icons,
+              selected: DeckVisuals.icons.firstWhere(
+                (opt) => opt.name == _iconName,
+                orElse: () => DeckVisuals.icons.first,
+              ),
+              onSelect: (opt) => setState(() => _iconName = opt.name),
+              itemBuilder: (context, opt, selected) {
+                return Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: selected
+                        ? color.withValues(alpha: 0.2)
+                        : context.c.surfaceElevated,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: selected ? color : context.c.border,
+                      width: selected ? 2 : 1,
+                    ),
+                  ),
+                  child: Icon(
+                    opt.icon,
+                    color: selected ? color : context.c.textSecondary,
+                    size: 26,
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 32),
             FilledButton(
@@ -262,61 +317,23 @@ class _PreviewCard extends StatelessWidget {
   }
 }
 
-class _ColorPicker extends StatelessWidget {
-  final String selectedHex;
-  final ValueChanged<String> onChanged;
+/// Grid genérico de items seleccionables con highlight.
+///
+/// Unifica el comportamiento común de los pickers de color e icono: un [Wrap]
+/// de items envueltos en [GestureDetector], donde cada item se pinta vía
+/// [itemBuilder] recibiendo si está actualmente seleccionado.
+class _SelectablePicker<T> extends StatelessWidget {
+  final List<T> items;
+  final T selected;
+  final ValueChanged<T> onSelect;
+  final Widget Function(BuildContext context, T item, bool selected)
+      itemBuilder;
 
-  const _ColorPicker({required this.selectedHex, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: DeckVisuals.palette.map((hex) {
-        final color = DeckVisuals.colorFromHex(hex);
-        final selected = hex == selectedHex;
-        return GestureDetector(
-          onTap: () => onChanged(hex),
-          child: Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: selected ? context.c.textPrimary : Colors.transparent,
-                width: 3,
-              ),
-              boxShadow: selected
-                  ? [
-                      BoxShadow(
-                        color: color.withValues(alpha: 0.5),
-                        blurRadius: 12,
-                        spreadRadius: 1,
-                      ),
-                    ]
-                  : null,
-            ),
-            child: selected
-                ? const Icon(Icons.check_rounded, color: Colors.black, size: 22)
-                : null,
-          ),
-        );
-      }).toList(),
-    );
-  }
-}
-
-class _IconPicker extends StatelessWidget {
-  final String selectedName;
-  final Color tint;
-  final ValueChanged<String> onChanged;
-
-  const _IconPicker({
-    required this.selectedName,
-    required this.tint,
-    required this.onChanged,
+  const _SelectablePicker({
+    required this.items,
+    required this.selected,
+    required this.onSelect,
+    required this.itemBuilder,
   });
 
   @override
@@ -324,29 +341,11 @@ class _IconPicker extends StatelessWidget {
     return Wrap(
       spacing: 12,
       runSpacing: 12,
-      children: DeckVisuals.icons.map((opt) {
-        final selected = opt.name == selectedName;
+      children: items.map((item) {
+        final isSelected = item == selected;
         return GestureDetector(
-          onTap: () => onChanged(opt.name),
-          child: Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: selected
-                  ? tint.withValues(alpha: 0.2)
-                  : context.c.surfaceElevated,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: selected ? tint : context.c.border,
-                width: selected ? 2 : 1,
-              ),
-            ),
-            child: Icon(
-              opt.icon,
-              color: selected ? tint : context.c.textSecondary,
-              size: 26,
-            ),
-          ),
+          onTap: () => onSelect(item),
+          child: itemBuilder(context, item, isSelected),
         );
       }).toList(),
     );
