@@ -91,9 +91,7 @@ class _Bar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = passed
-        ? DgtStatusColors.success
-        : DgtStatusColors.error;
+    final color = DgtStatusColors.forPassed(passed);
     final clamped = ratio.clamp(0.05, 1.0);
     return LayoutBuilder(
       builder: (context, c) {

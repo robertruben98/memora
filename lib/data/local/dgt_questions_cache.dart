@@ -154,5 +154,7 @@ class DgtQuestionsCache {
         'correct': q.correct,
         'explanation': q.explanation,
         'topic': q.topic,
+        'difficulty': q.difficulty,
+        'subtopic_id': q.subtopicId,
       };
 }

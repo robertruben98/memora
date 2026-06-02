@@ -122,6 +122,14 @@ class DgtQuestion {
   final String? explanation;
   final String? topic;
 
+  /// Dificultad DGT (1 facil, 2 media, 3 dificil). Opcional: schema v2
+  /// (issue #156). Null en payloads/cache legacy sin la key.
+  final int? difficulty;
+
+  /// Id del subtema DGT. Opcional: schema v2 (issue #156). Null en
+  /// payloads/cache legacy sin la key.
+  final String? subtopicId;
+
   const DgtQuestion({
     required this.id,
     required this.statement,
@@ -132,6 +140,8 @@ class DgtQuestion {
     this.imageUrl,
     this.explanation,
     this.topic,
+    this.difficulty,
+    this.subtopicId,
   });
 
   factory DgtQuestion.fromJson(Map<String, dynamic> j) {
@@ -146,6 +156,8 @@ class DgtQuestion {
       correct: _normalizeCorrect(j['correct'], questionId: id),
       explanation: j['explanation'] as String?,
       topic: j['topic'] as String?,
+      difficulty: (j['difficulty'] as num?)?.toInt(),
+      subtopicId: j['subtopic_id'] as String?,
     );
   }
 }
