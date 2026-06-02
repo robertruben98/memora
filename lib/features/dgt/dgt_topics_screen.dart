@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_hard_challenge_screen.dart';
@@ -199,7 +200,7 @@ class _DgtTopicsScreenState extends ConsumerState<DgtTopicsScreen> {
         future: _future,
         builder: (context, snap) {
           if (snap.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
+            return AppStateView.loading();
           }
           if (snap.hasError) {
             return _ErrorView(

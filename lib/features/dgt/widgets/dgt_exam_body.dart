@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../../data/repositories/dgt_repository.dart';
 import '../dgt_exam_controller.dart';
@@ -34,7 +35,7 @@ class DgtExamBody extends StatelessWidget {
       future: future,
       builder: (context, snap) {
         if (snap.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
+          return AppStateView.loading();
         }
         if (snap.hasError || (snap.data ?? const []).isEmpty) {
           return Center(
@@ -49,7 +50,7 @@ class DgtExamBody extends StatelessWidget {
         }
         final ctrl = controller;
         if (ctrl == null) {
-          return const Center(child: CircularProgressIndicator());
+          return AppStateView.loading();
         }
         final qs = ctrl.questions;
         final currentIndex = ctrl.currentIndex;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../study/dgt_exam_history.dart';
 import 'dgt_prediction.dart';
@@ -353,7 +354,7 @@ class DgtAchievementsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Mis logros')),
       body: inputAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => AppStateView.loading(),
         error: (_, _) => const _AchievementsBody(input: DgtAchievementsInput.empty),
         data: (input) => _AchievementsBody(input: input),
       ),

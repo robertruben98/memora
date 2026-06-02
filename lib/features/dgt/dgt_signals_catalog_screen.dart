@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/api/api_client.dart';
 
@@ -47,16 +48,8 @@ class _DgtSignalsCatalogScreenState
         title: const Text('Catalogo de senales'),
       ),
       body: signsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(
-              'No se pudo cargar el catalogo: $e',
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
+        loading: () => AppStateView.loading(),
+        error: (e, _) => AppStateView.error(e),
         data: (signs) {
           if (signs.isEmpty) {
             return const Center(child: Text('Catalogo vacio.'));

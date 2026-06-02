@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 
 import 'dgt_exam_history.dart';
 
@@ -16,7 +17,7 @@ class DgtHistoryScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Historial de simulacros')),
       body: SafeArea(
         child: historyAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => AppStateView.loading(),
           error: (err, _) => Center(
             child: Padding(
               padding: const EdgeInsets.all(24),

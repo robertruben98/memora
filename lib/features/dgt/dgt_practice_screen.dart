@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/api/api_client.dart';
@@ -490,7 +491,7 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
         future: _future,
         builder: (context, snap) {
           if (snap.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
+            return AppStateView.loading();
           }
           if (snap.hasError || (snap.data ?? const []).isEmpty) {
             return Center(

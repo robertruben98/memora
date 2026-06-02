@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../core/models/memora_card.dart';
 import '../../data/repositories/card_repository.dart';
@@ -130,12 +131,12 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
   Widget build(BuildContext context) {
     final cardsAsync = ref.watch(allCardsProvider);
     return cardsAsync.when(
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      loading: () => Scaffold(
+        body: AppStateView.loading(),
       ),
       error: (e, _) => Scaffold(
         appBar: AppBar(title: const Text('Simulacro DGT')),
-        body: Center(child: Text('Error cargando preguntas: $e')),
+        body: AppStateView.error(e),
       ),
       data: (cards) {
         if (cards.length < DgtExamScreen.questionCount) {

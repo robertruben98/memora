@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:memora/core/widgets/app_state_view.dart';
+
 import '../study/dgt_exam_history.dart';
 import 'dgt_failures_repository.dart';
 import 'dgt_favorites_provider.dart';
@@ -33,8 +35,8 @@ class DgtSettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Ajustes DGT')),
       body: settingsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        loading: () => AppStateView.loading(),
+        error: (e, _) => AppStateView.error(e),
         data: (settings) => _Body(settings: settings),
       ),
     );

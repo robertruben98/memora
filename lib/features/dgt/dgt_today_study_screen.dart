@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dgt_today_study_provider.dart';
@@ -104,7 +105,7 @@ class _DgtTodayStudyScreenState extends ConsumerState<DgtTodayStudyScreen> {
         elevation: 0,
       ),
       body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => AppStateView.loading(),
         error: (err, _) => _Empty(
           icon: Icons.cloud_off_rounded,
           message:

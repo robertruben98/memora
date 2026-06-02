@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 
@@ -286,7 +287,7 @@ class DgtTrueFalseScreen extends ConsumerWidget {
     DgtTrueFalseNotifier notifier,
   ) {
     if (state.loading) {
-      return const Center(child: CircularProgressIndicator());
+      return AppStateView.loading();
     }
     if (state.error != null && state.statements.isEmpty) {
       return _Empty(message: state.error!, onRetry: notifier.restart);
