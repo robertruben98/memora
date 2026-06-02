@@ -351,7 +351,7 @@ class _LegendRow extends StatelessWidget {
       children: [
         _LegendDot(color: Color(0xFF4FA8FF), label: '% acierto'),
         _LegendDot(color: Color(0xFFFF6B35), label: 'Simulacros'),
-        _LegendDot(color: Color(0xFF7C5CFF), label: 'Streak (dias)'),
+        _LegendDot(color: AppColors.brand, label: 'Streak (dias)'),
       ],
     );
   }
@@ -459,7 +459,7 @@ class _WeeklyTrendChart extends StatelessWidget {
         lineBarsData: [
           _line(accuracySpots, const Color(0xFF4FA8FF)),
           _line(simulacrosSpots, const Color(0xFFFF6B35)),
-          _line(streakSpots, const Color(0xFF7C5CFF)),
+          _line(streakSpots, AppColors.brand),
         ],
         lineTouchData: LineTouchData(
           enabled: true,

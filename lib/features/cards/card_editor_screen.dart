@@ -255,6 +255,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
           if (_isEditing)
             IconButton(
               icon: const Icon(Icons.delete_outline_rounded),
+              tooltip: 'Eliminar tarjeta',
               color: const Color(0xFFFF4F6B),
               onPressed: _saving ? null : _delete,
             ),

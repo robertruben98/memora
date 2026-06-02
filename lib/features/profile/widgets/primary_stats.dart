@@ -17,7 +17,7 @@ class PrimaryStats extends StatelessWidget {
             icon: '⚔️',
             label: 'Reviews',
             value: progress.totalReviews.toString(),
-            tint: const Color(0xFF7C5CFF),
+            tint: AppColors.brand,
           ),
         ),
         const SizedBox(width: 8),

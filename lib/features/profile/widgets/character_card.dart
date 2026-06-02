@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
 import '../character_progress.dart';
 
 /// Tarjeta de personaje principal: avatar con anillo de nivel, clase, título, XP bar.
@@ -27,7 +28,7 @@ class CharacterCard extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF7C5CFF).withValues(alpha: 0.25),
+            color: AppColors.brand.withValues(alpha: 0.25),
             blurRadius: 30,
             offset: const Offset(0, 12),
           ),

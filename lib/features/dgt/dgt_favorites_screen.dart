@@ -57,7 +57,7 @@ class _DgtFavoritesScreenState extends ConsumerState<DgtFavoritesScreen> {
         future: _favoritesFuture,
         builder: (context, snap) {
           if (snap.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
+            return AppStateView.loading();
           }
           final all = snap.data ?? const <DgtQuestion>[];
           if (all.isEmpty) {
