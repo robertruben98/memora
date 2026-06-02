@@ -68,25 +68,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final pages = <Widget>[
       const _IntroPage(
         gradient: [Color(0xFF7C5CFF), Color(0xFF4F8AFF)],
-        icon: Icons.bolt_rounded,
-        title: 'Aprende como haces scroll',
-        body: 'RutaB muestra tus tarjetas en un feed vertical. '
-            'Toca para revelar la respuesta y di si la sabias.',
+        icon: Icons.directions_car_rounded,
+        title: 'Aprueba el teorico a la primera',
+        body: 'RutaB te prepara para el examen teorico de la DGT 2026 '
+            '(permiso B) con simulacros al estilo del examen real.',
       ),
       const _IntroPage(
         gradient: [DgtStatusColors.accentOrange, DgtStatusColors.warningStrong],
         icon: Icons.auto_awesome_rounded,
-        title: 'Repeticion espaciada',
-        body: 'El algoritmo SM-2 calcula cuando deberias volver a '
-            'ver cada tarjeta. Aciertas, mas espaciada. Fallas, '
-            'vuelve antes.',
+        title: 'Repaso inteligente',
+        body: 'La repeticion espaciada prioriza tus fallos y te programa '
+            'el repaso justo antes de olvidar. Estudia menos, reten mas.',
       ),
       const _IntroPage(
         gradient: [DgtStatusColors.success, Color(0xFF4FFFE9)],
-        icon: Icons.create_rounded,
-        title: 'Crea tus mazos',
-        body: 'Ingles, geografia, programacion, lo que quieras. '
-            'Texto e imagenes, organizacion por mazos, todo local.',
+        icon: Icons.traffic_rounded,
+        title: 'Senales y percepcion del riesgo',
+        body: 'Practica por temas, domina el catalogo de senales oficiales '
+            'y entrena con preguntas de percepcion del riesgo en video.',
       ),
       _LicensePage(
         selected: _licenseType,
