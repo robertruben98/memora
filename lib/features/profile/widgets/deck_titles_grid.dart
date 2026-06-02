@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 import '../../../core/theme/deck_visuals.dart';
 import '../character_progress.dart';
 
@@ -17,39 +18,10 @@ class DeckTitlesGrid extends StatelessWidget {
       ..sort((a, b) => b.rank.index.compareTo(a.rank.index));
 
     if (earned.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: context.c.surfaceElevated,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: context.c.border),
-        ),
-        child: Column(
-          children: [
-            Text(
-              '🏷️',
-              style: const TextStyle(fontSize: 28),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Sin títulos todavía',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: context.c.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Acierta 5 cartas de un mazo para ganar el primer rango.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 11,
-                color: context.c.textMuted,
-              ),
-            ),
-          ],
-        ),
+      return AppStateView.empty(
+        icon: Icons.emoji_events,
+        title: 'Sin títulos todavía',
+        message: 'Acierta 5 cartas de un mazo para ganar el primer rango.',
       );
     }
     return Column(

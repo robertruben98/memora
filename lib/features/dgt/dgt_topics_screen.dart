@@ -204,16 +204,15 @@ class _DgtTopicsScreenState extends ConsumerState<DgtTopicsScreen> {
             return AppStateView.loading();
           }
           if (snap.hasError) {
-            return _ErrorView(
-              message: 'No se pudieron cargar los temas: ${snap.error}',
-              onRetry: _refresh,
-            );
+            return AppStateView.error(snap.error!, onRetry: _refresh);
           }
           final topics = snap.data ?? const <DgtTopic>[];
           if (topics.isEmpty) {
-            return _ErrorView(
-              message: 'No hay temas disponibles. El banco local podria '
-                  'estar vacio o el backend no responde.',
+            return AppStateView.empty(
+              icon: Icons.menu_book_outlined,
+              title: 'No hay temas disponibles',
+              message: 'El banco local podria estar vacio o el backend '
+                  'no responde.',
               onRetry: _refresh,
             );
           }
@@ -458,34 +457,6 @@ class _HardChallengeTile extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  final String message;
-  final Future<void> Function() onRetry;
-
-  const _ErrorView({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(message, textAlign: TextAlign.center),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Reintentar'),
-            ),
-          ],
         ),
       ),
     );

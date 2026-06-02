@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/logging/app_logger.dart';
@@ -577,9 +579,8 @@ class DgtRepository {
     } catch (_) {
       // Backend antiguo / offline / 5xx -> fallback local.
     }
-    // Fallback: muestra barajada del banco local mini. Usa Random fijo para
-    // mantener tests deterministas; en runtime el backend siempre responde.
-    final local = List<DgtQuestion>.from(dgtLocalBank);
+    // Fallback: muestra barajada del banco local mini.
+    final local = List<DgtQuestion>.from(dgtLocalBank)..shuffle(Random());
     if (local.length <= limit) return local;
     return local.take(limit).toList();
   }
