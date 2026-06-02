@@ -169,7 +169,7 @@ class DgtGoalNotificationService {
     try {
       await _plugin.show(
         kDgtGoalAchievedNotifId,
-        'Memora DGT',
+        'RutaB DGT',
         body,
         details,
         payload: kDailyChallengeDeeplink,

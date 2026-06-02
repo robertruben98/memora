@@ -67,7 +67,7 @@ const learnCategories = <LearnCategory>[
         source: 'Ebbinghaus 1885',
         evidence: EvidenceLevel.high,
         memoraNote:
-            'Memora calcula el "next review date" para que veas la '
+            'RutaB calcula el "next review date" para que veas la '
             'tarjeta justo antes de que la olvides.',
       ),
       LearnMethod(
@@ -79,12 +79,12 @@ const learnCategories = <LearnCategory>[
             'En vez de estudiar 10 veces seguidas (cramming), espacias '
             'los repasos: día 1, día 3, día 7, día 17… Los intervalos se '
             'expanden cada vez que aciertas y se reinician si fallas.\n\n'
-            'Algoritmos: SM-2 (Anki, Memora actual), FSRS (más moderno, '
+            'Algoritmos: SM-2 (Anki, RutaB actual), FSRS (más moderno, '
             'usa ML para predecir tu olvido individual).',
         source: 'Pimsleur 1967, Wozniak 1990',
         evidence: EvidenceLevel.high,
         memoraNote:
-            'Memora usa SM-2 con quality binario (Acerté=4, No acerté=1). '
+            'RutaB usa SM-2 con quality binario (Acerté=4, No acerté=1). '
             'Curva: 1d → 6d → 15d → 38d → 95d con ease 2.5.',
       ),
       LearnMethod(
@@ -132,7 +132,7 @@ const learnCategories = <LearnCategory>[
         source: 'Cepeda et al 2008',
         evidence: EvidenceLevel.high,
         memoraNote:
-            'La quest diaria de Memora te empuja a sesiones cortas y '
+            'La quest diaria de RutaB te empuja a sesiones cortas y '
             'frecuentes. La racha refuerza el hábito.',
       ),
       LearnMethod(
@@ -196,7 +196,7 @@ const learnCategories = <LearnCategory>[
         source: 'Ericsson 1993',
         evidence: EvidenceLevel.high,
         memoraNote:
-            'En Memora: mira tu retención, identifica los mazos con '
+            'En RutaB: mira tu retención, identifica los mazos con '
             'menor % acierto, dedícales más sesiones cortas.',
       ),
       LearnMethod(
@@ -386,7 +386,7 @@ const learnCategories = <LearnCategory>[
             'Simple, robusto, base de la mayoría de apps de SRS.',
         source: 'Wozniak 1990',
         evidence: EvidenceLevel.high,
-        memoraNote: 'Es lo que usa Memora actualmente.',
+        memoraNote: 'Es lo que usa RutaB actualmente.',
       ),
       LearnMethod(
         name: 'FSRS',
@@ -400,7 +400,7 @@ const learnCategories = <LearnCategory>[
         source: 'Ye Jiarui 2022',
         evidence: EvidenceLevel.high,
         memoraNote:
-            'Posible upgrade futuro de Memora — sustituye SM-2 sin '
+            'Posible upgrade futuro de RutaB — sustituye SM-2 sin '
             'romper interfaz.',
       ),
       LearnMethod(

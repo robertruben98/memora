@@ -186,15 +186,15 @@ class _DgtExamResultScreenState extends ConsumerState<DgtExamResultScreen> {
 
   /// Genera el texto para compartir y lo expone via share_plus.
   ///
-  /// Formato aprobado:   "Simulacro DGT - 27/30 (APROBADO) en 18:42. Memora App."
-  /// Formato suspenso:   "Simulacro DGT - 22/30 (SUSPENSO) en 18:42. Memora App."
+  /// Formato aprobado:   "Simulacro DGT - 27/30 (APROBADO) en 18:42. RutaB App."
+  /// Formato suspenso:   "Simulacro DGT - 22/30 (SUSPENSO) en 18:42. RutaB App."
   /// Incluye emojis discretos (check verde / libro). No expone datos personales.
   String _buildShareText() {
     final total = widget.answers.length;
     final time = _fmtDuration(widget.timeUsed);
     final emoji = _passed ? '✅' : '📚';
     final veredicto = _passed ? 'APROBADO' : 'SUSPENSO';
-    return '$emoji Simulacro DGT - $_correct/$total ($veredicto) en $time. Memora App.';
+    return '$emoji Simulacro DGT - $_correct/$total ($veredicto) en $time. RutaB App.';
   }
 
   Future<void> _share(BuildContext context) async {
