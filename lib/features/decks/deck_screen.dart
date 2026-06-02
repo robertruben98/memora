@@ -289,9 +289,13 @@ class _DeckBodyState extends State<_DeckBody> {
           ),
         ),
         if (cards.isEmpty)
-          const SliverFillRemaining(
+          SliverFillRemaining(
             hasScrollBody: false,
-            child: _EmptyState(),
+            child: AppStateView.empty(
+              icon: Icons.library_books_outlined,
+              title: 'Aún no tienes tarjetas en este mazo',
+              message: 'Toca "+ Nueva tarjeta" para crear la primera',
+            ),
           )
         else if (filtered.isEmpty)
           SliverFillRemaining(
@@ -606,45 +610,6 @@ class _CardListTile extends ConsumerWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.library_books_outlined,
-            size: 64,
-            color: context.c.textMuted,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Aún no tienes tarjetas en este mazo',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              color: context.c.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Toca "+ Nueva tarjeta" para crear la primera',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 13,
-              color: context.c.textMuted,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

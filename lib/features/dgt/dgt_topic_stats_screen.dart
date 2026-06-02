@@ -48,7 +48,12 @@ class DgtTopicStatsScreen extends ConsumerWidget {
         ),
         data: (stats) {
           if (stats.where((s) => s.totalAnswered > 0).isEmpty) {
-            return _EmptyView(
+            return AppStateView.empty(
+              icon: Icons.insights_outlined,
+              title: 'Aun no hay respuestas registradas.',
+              message:
+                  'Practica unas cuantas preguntas y vuelve para ver tu '
+                  'progreso por tema.',
               onRetry: () => ref.invalidate(dgtTopicStatsProvider),
             );
           }
@@ -375,48 +380,6 @@ class _BarRow extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _EmptyView extends StatelessWidget {
-  final VoidCallback onRetry;
-  const _EmptyView({required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.insights_outlined, size: 48),
-            const SizedBox(height: 12),
-            const Text(
-              'Aun no hay respuestas registradas.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Practica unas cuantas preguntas y vuelve para ver tu '
-              'progreso por tema.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                color: context.c.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 14),
-            OutlinedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Reintentar'),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -29,7 +29,12 @@ class DgtHistoryScreen extends ConsumerWidget {
           ),
           data: (entries) {
             if (entries.isEmpty) {
-              return const _EmptyHistory();
+              return AppStateView.empty(
+                icon: Icons.history_rounded,
+                title: 'Aun no has hecho ningun simulacro',
+                message:
+                    'Cuando termines tu primer simulacro DGT aparecera aqui con score y veredicto.',
+              );
             }
             final summary = DgtExamHistoryRepository.summarize(entries);
             return ListView.separated(
@@ -46,45 +51,6 @@ class DgtHistoryScreen extends ConsumerWidget {
               },
             );
           },
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyHistory extends StatelessWidget {
-  const _EmptyHistory();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.history_rounded,
-              size: 48,
-              color: context.c.textMuted,
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Aun no has hecho ningun simulacro',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Cuando termines tu primer simulacro DGT aparecera aqui con score y veredicto.',
-              style: TextStyle(
-                fontSize: 13,
-                color: context.c.textSecondary,
-                height: 1.4,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
         ),
       ),
     );

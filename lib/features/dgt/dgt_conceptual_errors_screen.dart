@@ -154,7 +154,12 @@ class _DgtConceptualErrorsScreenState
           }
           final items = snap.data ?? const <DgtRecurrentFailureItem>[];
           if (items.isEmpty) {
-            return _EmptyState(onRetry: _reload);
+            return AppStateView.empty(
+              icon: Icons.celebration_rounded,
+              title: 'Sin errores recurrentes. Sigue asi.',
+              onRetry: _reload,
+              retryLabel: 'Recargar',
+            );
           }
           final groups = _groupByConcept(items);
           return RefreshIndicator(
@@ -336,42 +341,6 @@ class _LoadingSkeleton extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.c.surfaceMuted,
           borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  final VoidCallback onRetry;
-  const _EmptyState({required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.celebration_rounded,
-              color: Color(0xFF4FFFB0),
-              size: 64,
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Sin errores recurrentes. Sigue asi.',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            TextButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Recargar'),
-            ),
-          ],
         ),
       ),
     );

@@ -290,11 +290,16 @@ class DgtTrueFalseScreen extends ConsumerWidget {
       return AppStateView.loading();
     }
     if (state.error != null && state.statements.isEmpty) {
-      return _Empty(message: state.error!, onRetry: notifier.restart);
+      return AppStateView.empty(
+        icon: Icons.psychology_alt_rounded,
+        title: state.error!,
+        onRetry: notifier.restart,
+      );
     }
     if (state.statements.isEmpty) {
-      return _Empty(
-        message: 'Aun no hay afirmaciones disponibles.',
+      return AppStateView.empty(
+        icon: Icons.psychology_alt_rounded,
+        title: 'Aun no hay afirmaciones disponibles.',
         onRetry: notifier.restart,
       );
     }
@@ -635,36 +640,6 @@ class _StatBox extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _Empty extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-  const _Empty({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.psychology_alt_rounded,
-                color: Color(0xFF4FFFB0), size: 48),
-            const SizedBox(height: 12),
-            Text(message, textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Reintentar'),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

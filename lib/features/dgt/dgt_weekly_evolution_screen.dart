@@ -179,47 +179,17 @@ class DgtWeeklyEvolutionScreen extends ConsumerWidget {
           ),
           data: (evo) {
             if (evo.isEmpty) {
-              return const _EmptyView();
+              return AppStateView.empty(
+                icon: Icons.show_chart_rounded,
+                title:
+                    'Necesitas al menos 1 semana de datos para ver tu evolucion.',
+                message: 'Empieza haciendo un quiz hoy.',
+              );
             }
             return _EvolutionBody(evolution: evo);
           },
         ),
       ),
-    );
-  }
-}
-
-class _EmptyView extends StatelessWidget {
-  const _EmptyView();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      children: [
-        const SizedBox(height: 80),
-        Icon(Icons.show_chart_rounded,
-            size: 72, color: context.c.textMuted),
-        const SizedBox(height: 12),
-        const Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              'Necesitas al menos 1 semana de datos para ver tu evolucion.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Center(
-          child: Text(
-            'Empieza haciendo un quiz hoy.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: context.c.textMuted),
-          ),
-        ),
-      ],
     );
   }
 }

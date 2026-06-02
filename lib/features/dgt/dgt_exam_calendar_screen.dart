@@ -29,52 +29,21 @@ class DgtExamCalendarScreen extends ConsumerWidget {
         loading: () => AppStateView.loading(),
         error: (e, _) => _ErrorView(message: 'No se pudo cargar: $e'),
         data: (settings) => settings.examDate == null
-            ? const _NoExamDateView()
+            ? AppStateView.empty(
+                icon: Icons.event_busy_rounded,
+                title: 'Aun no tienes fecha de examen',
+                message:
+                    'Configura tu fecha en Ajustes DGT para ver tu countdown y plan de ramp-up.',
+                retryLabel: 'Abrir Ajustes DGT',
+                onRetry: () {
+                  Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => const DgtSettingsScreen(),
+                    ),
+                  );
+                },
+              )
             : _CalendarBody(settings: settings),
-      ),
-    );
-  }
-}
-
-class _NoExamDateView extends StatelessWidget {
-  const _NoExamDateView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      key: const Key('examCalendarEmpty'),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.event_busy_rounded,
-              size: 72, color: context.c.textMuted),
-          const SizedBox(height: 12),
-          const Text(
-            'Aun no tienes fecha de examen',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Configura tu fecha en Ajustes DGT para ver tu countdown y plan de ramp-up.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: context.c.textSecondary),
-          ),
-          const SizedBox(height: 24),
-          FilledButton.icon(
-            key: const Key('examCalendarCtaSettings'),
-            onPressed: () {
-              Navigator.of(context).push<void>(
-                MaterialPageRoute(
-                  builder: (_) => const DgtSettingsScreen(),
-                ),
-              );
-            },
-            icon: const Icon(Icons.tune_rounded),
-            label: const Text('Abrir Ajustes DGT'),
-          ),
-        ],
       ),
     );
   }
