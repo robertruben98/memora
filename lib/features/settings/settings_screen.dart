@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/srs/study_settings.dart';
@@ -150,7 +151,7 @@ class SettingsScreen extends ConsumerWidget {
             const _SectionTitle('Cuenta'),
             const SizedBox(height: 8),
             Material(
-              color: const Color(0xFF1A1A22),
+              color: context.c.surfaceElevated,
               borderRadius: BorderRadius.circular(14),
               child: ListTile(
                 shape: RoundedRectangleBorder(
@@ -175,7 +176,7 @@ class SettingsScreen extends ConsumerWidget {
                   'Irreversible.',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white.withValues(alpha: 0.6),
+                    color: context.c.textSecondary,
                     height: 1.4,
                   ),
                 ),
@@ -201,7 +202,7 @@ class SettingsScreen extends ConsumerWidget {
     final ok1 = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A22),
+        backgroundColor: context.c.surfaceElevated,
         title: const Text('¿Eliminar tu cuenta?'),
         content: const Text(
           'Se borrarán permanentemente tu cuenta, mazos, tarjetas, '
@@ -228,7 +229,7 @@ class SettingsScreen extends ConsumerWidget {
     final ok2 = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A22),
+        backgroundColor: context.c.surfaceElevated,
         title: const Text('¿Estás seguro?'),
         content: const Text(
           'Última confirmación. Toca "Sí, eliminar" para borrar tu '
@@ -284,7 +285,7 @@ class SettingsScreen extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A22),
+        backgroundColor: context.c.surfaceElevated,
         title: const Text('¿Reemplazar contenido?'),
         content: const Text(
           'Importar un backup borra TODOS tus mazos, tarjetas y '
@@ -341,7 +342,7 @@ class SettingsScreen extends ConsumerWidget {
     final ok1 = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A22),
+        backgroundColor: context.c.surfaceElevated,
         title: const Text('¿Resetear progreso?'),
         content: const Text(
           'Vas a borrar tu historial de estudio: todas las '
@@ -368,7 +369,7 @@ class SettingsScreen extends ConsumerWidget {
     final ok2 = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A22),
+        backgroundColor: context.c.surfaceElevated,
         title: const Text('¿Estás seguro?'),
         content: const Text(
           'Última confirmación. Toca "Sí, resetear" para borrar '
@@ -422,7 +423,7 @@ class _SectionTitle extends StatelessWidget {
           fontSize: 11,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.0,
-          color: Colors.white.withValues(alpha: 0.5),
+          color: context.c.textMuted,
         ),
       ),
     );
@@ -453,9 +454,9 @@ class _SliderSetting extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: context.c.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -476,7 +477,7 @@ class _SliderSetting extends StatelessWidget {
                   vertical: 3,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7C5CFF).withValues(alpha: 0.18),
+                  color: AppColors.brand.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -484,7 +485,7 @@ class _SliderSetting extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF7C5CFF),
+                    color: AppColors.brand,
                   ),
                 ),
               ),
@@ -514,21 +515,23 @@ class _ThemeSelector extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: context.c.border),
       ),
       child: Row(
         children: [
-          _option(ThemeMode.light, Icons.light_mode_rounded, 'Claro'),
-          _option(ThemeMode.dark, Icons.dark_mode_rounded, 'Oscuro'),
-          _option(ThemeMode.system, Icons.smartphone_rounded, 'Sistema'),
+          _option(context, ThemeMode.light, Icons.light_mode_rounded, 'Claro'),
+          _option(context, ThemeMode.dark, Icons.dark_mode_rounded, 'Oscuro'),
+          _option(
+              context, ThemeMode.system, Icons.smartphone_rounded, 'Sistema'),
         ],
       ),
     );
   }
 
-  Widget _option(ThemeMode mode, IconData icon, String label) {
+  Widget _option(
+      BuildContext context, ThemeMode mode, IconData icon, String label) {
     final active = selected == mode;
     return Expanded(
       child: GestureDetector(
@@ -538,12 +541,12 @@ class _ThemeSelector extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: active
-                ? const Color(0xFF7C5CFF).withValues(alpha: 0.2)
+                ? AppColors.brand.withValues(alpha: 0.2)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
             border: active
                 ? Border.all(
-                    color: const Color(0xFF7C5CFF).withValues(alpha: 0.5),
+                    color: AppColors.brand.withValues(alpha: 0.5),
                     width: 1.5,
                   )
                 : null,
@@ -554,8 +557,8 @@ class _ThemeSelector extends StatelessWidget {
                 icon,
                 size: 22,
                 color: active
-                    ? const Color(0xFF7C5CFF)
-                    : Colors.white.withValues(alpha: 0.6),
+                    ? AppColors.brand
+                    : context.c.textSecondary,
               ),
               const SizedBox(height: 4),
               Text(
@@ -564,8 +567,8 @@ class _ThemeSelector extends StatelessWidget {
                   fontSize: 12,
                   fontWeight: active ? FontWeight.w700 : FontWeight.w500,
                   color: active
-                      ? const Color(0xFF7C5CFF)
-                      : Colors.white.withValues(alpha: 0.6),
+                      ? AppColors.brand
+                      : context.c.textSecondary,
                 ),
               ),
             ],
@@ -594,7 +597,7 @@ class _ActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFF1A1A22),
+      color: context.c.surfaceElevated,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -603,7 +606,7 @@ class _ActionCard extends StatelessWidget {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+            border: Border.all(color: context.c.border),
           ),
           child: Row(
             children: [
@@ -633,7 +636,7 @@ class _ActionCard extends StatelessWidget {
                       description,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: context.c.textSecondary,
                         height: 1.4,
                       ),
                     ),
@@ -642,7 +645,7 @@ class _ActionCard extends StatelessWidget {
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                color: Colors.white.withValues(alpha: 0.4),
+                color: context.c.textMuted,
               ),
             ],
           ),
@@ -668,7 +671,7 @@ class _DangerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFF1A1A22),
+      color: context.c.surfaceElevated,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -713,7 +716,7 @@ class _DangerCard extends StatelessWidget {
                       description,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: context.c.textSecondary,
                         height: 1.4,
                       ),
                     ),
@@ -739,9 +742,9 @@ class _DgtSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: context.c.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -847,11 +850,11 @@ class _DgtSection extends StatelessWidget {
               'con la normativa y la respuesta correcta antes de avanzar.',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.white.withValues(alpha: 0.6),
+                color: context.c.textSecondary,
                 height: 1.35,
               ),
             ),
-            activeThumbColor: const Color(0xFF7C5CFF),
+            activeThumbColor: AppColors.brand,
           ),
           const SizedBox(height: 16),
           const Divider(height: 1, thickness: 0.4),
@@ -951,9 +954,9 @@ class _AboutCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: context.c.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -991,7 +994,7 @@ class _AboutCard extends StatelessWidget {
                     'v0.10.0',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.white.withValues(alpha: 0.5),
+                      color: context.c.textMuted,
                     ),
                   ),
                 ],
@@ -1005,7 +1008,7 @@ class _AboutCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               height: 1.5,
-              color: Colors.white.withValues(alpha: 0.7),
+              color: context.c.textSecondary,
             ),
           ),
         ],
@@ -1114,11 +1117,11 @@ class _DgtReminderTile extends ConsumerWidget {
                     : 'Activa una notificacion diaria para no perder la racha.',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.white.withValues(alpha: 0.6),
+                  color: context.c.textSecondary,
                   height: 1.35,
                 ),
               ),
-              activeThumbColor: const Color(0xFF7C5CFF),
+              activeThumbColor: AppColors.brand,
             ),
             if (cfg.enabled) ...[
               const SizedBox(height: 4),
@@ -1271,7 +1274,7 @@ class _DgtBackupTileState extends ConsumerState<_DgtBackupTile> {
           'movil o tras reinstalar.',
           style: TextStyle(
             fontSize: 12,
-            color: Colors.white.withValues(alpha: 0.6),
+            color: context.c.textSecondary,
             height: 1.35,
           ),
         ),
@@ -1340,11 +1343,11 @@ class _DgtWeeklyReportTile extends ConsumerWidget {
                 : 'Sin notificacion semanal de progreso DGT.',
             style: TextStyle(
               fontSize: 12,
-              color: Colors.white.withValues(alpha: 0.6),
+              color: context.c.textSecondary,
               height: 1.35,
             ),
           ),
-          activeThumbColor: const Color(0xFF7C5CFF),
+          activeThumbColor: AppColors.brand,
         );
       },
     );

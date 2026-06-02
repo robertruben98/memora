@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
 import '../../../core/theme/deck_visuals.dart';
 import '../character_progress.dart';
 
@@ -17,9 +18,9 @@ class DeckSkillRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: context.c.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,7 +69,7 @@ class DeckSkillRow extends StatelessWidget {
                             '  ·  ',
                             style: TextStyle(
                               fontSize: 11,
-                              color: Colors.white.withValues(alpha: 0.3),
+                              color: context.c.textMuted,
                             ),
                           ),
                         ],
@@ -78,7 +79,7 @@ class DeckSkillRow extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 11,
-                              color: Colors.white.withValues(alpha: 0.5),
+                              color: context.c.textMuted,
                             ),
                           ),
                         ),

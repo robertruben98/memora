@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../core/models/memora_card.dart';
 import '../../core/theme/deck_visuals.dart';
@@ -148,7 +149,7 @@ class StudyHubScreen extends ConsumerWidget {
             error: (e, _) => Center(child: Text('Error: $e')),
             data: (decks) {
               if (decks.isEmpty) {
-                return _empty();
+                return _empty(context);
               }
               return Column(
                 children: [
@@ -173,20 +174,20 @@ class StudyHubScreen extends ConsumerWidget {
     );
   }
 
-  Widget _empty() => Padding(
+  Widget _empty(BuildContext context) => Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
             Icon(
               Icons.style_rounded,
               size: 40,
-              color: Colors.white.withValues(alpha: 0.3),
+              color: context.c.textMuted,
             ),
             const SizedBox(height: 12),
             Text(
               'Crea un mazo desde la pestaña Mazos',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.55),
+                color: context.c.textMuted,
                 fontSize: 14,
               ),
             ),
@@ -222,7 +223,7 @@ class _StudyAllHero extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: allCaughtUp
-                  ? const [Color(0xFF1A1A22), Color(0xFF1A1A22)]
+                  ? [context.c.surfaceElevated, context.c.surfaceElevated]
                   : const [Color(0xFF7C5CFF), Color(0xFF4F8AFF)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -280,7 +281,7 @@ class _StudyAllHero extends StatelessWidget {
                               : 'Empezar sesión',
                           style: TextStyle(
                             color: allCaughtUp
-                                ? Colors.white70
+                                ? context.c.textSecondary
                                 : Colors.white,
                             fontSize: 22,
                             fontWeight: FontWeight.w800,
@@ -376,7 +377,7 @@ class _DeckQuickRow extends ConsumerWidget {
     );
     final allCaughtUp = pending == 0;
     return Material(
-      color: const Color(0xFF1A1A22),
+      color: context.c.surfaceElevated,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -423,7 +424,7 @@ class _DeckQuickRow extends ConsumerWidget {
                         fontSize: 12,
                         color: allCaughtUp
                             ? const Color(0xFF4FFFB0)
-                            : Colors.white.withValues(alpha: 0.55),
+                            : context.c.textMuted,
                         fontWeight:
                             allCaughtUp ? FontWeight.w700 : FontWeight.w500,
                       ),

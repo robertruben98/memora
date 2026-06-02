@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../stats/card_stats_provider.dart';
 
@@ -72,7 +73,7 @@ class FeedPostStatsLine extends ConsumerWidget {
         '${stats.correct} aciertos · ${stats.total} intentos · última $relTime',
         style: TextStyle(
           fontSize: 12,
-          color: Colors.white.withValues(alpha: 0.45),
+          color: context.c.textMuted,
         ),
       ),
     );

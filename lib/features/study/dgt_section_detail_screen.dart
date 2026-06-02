@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
 import '../../data/dgt/dgt_sections_local.dart';
 import '../../data/repositories/dgt_repository.dart';
 import '../dgt/dgt_practice_screen.dart';
@@ -134,9 +135,9 @@ class _ConceptCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: context.c.border),
       ),
       padding: const EdgeInsets.all(14),
       child: Column(
@@ -156,7 +157,7 @@ class _ConceptCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 13.5,
               height: 1.45,
-              color: Colors.white.withValues(alpha: 0.85),
+              color: context.c.textPrimary,
             ),
           ),
           if (concept.example != null) ...[
@@ -261,10 +262,10 @@ class _NavBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF12121A),
+        color: context.c.surfaceElevated,
         border: Border(
           top: BorderSide(
-            color: Colors.white.withValues(alpha: 0.08),
+            color: context.c.border,
           ),
         ),
       ),
@@ -276,9 +277,9 @@ class _NavBar extends StatelessWidget {
               icon: const Icon(Icons.arrow_back_rounded),
               label: const Text('Anterior'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: hasPrev ? Colors.white : Colors.white38,
+                foregroundColor: hasPrev ? context.c.textPrimary : context.c.textMuted,
                 side: BorderSide(
-                  color: Colors.white.withValues(alpha: 0.18),
+                  color: context.c.border,
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
@@ -292,8 +293,8 @@ class _NavBar extends StatelessWidget {
               label: const Text('Siguiente'),
               style: FilledButton.styleFrom(
                 backgroundColor: hasNext
-                    ? const Color(0xFF7C5CFF)
-                    : const Color(0xFF1A1A22),
+                    ? AppColors.brand
+                    : context.c.surfaceElevated,
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
             ),

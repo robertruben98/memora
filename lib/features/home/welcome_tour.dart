@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
+
 /// Issue #84 (dgt-ux): tour interactivo de bienvenida en Home.
 ///
 /// Muestra overlay oscuro + tooltip apuntando a elementos clave la primera
@@ -134,10 +136,10 @@ class _WelcomeTourOverlayState extends State<WelcomeTourOverlay> {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1A1A22),
+                    color: context.c.surfaceElevated,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: const Color(0xFF7C5CFF).withValues(alpha: 0.5),
+                      color: AppColors.brand.withValues(alpha: 0.5),
                       width: 1.5,
                     ),
                   ),
@@ -150,12 +152,12 @@ class _WelcomeTourOverlayState extends State<WelcomeTourOverlay> {
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF7C5CFF)
+                              color: AppColors.brand
                                   .withValues(alpha: 0.18),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Icon(step.icon,
-                                color: const Color(0xFF7C5CFF)),
+                                color: AppColors.brand),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -172,7 +174,7 @@ class _WelcomeTourOverlayState extends State<WelcomeTourOverlay> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white.withValues(alpha: 0.55),
+                              color: context.c.textMuted,
                             ),
                           ),
                         ],
@@ -183,7 +185,7 @@ class _WelcomeTourOverlayState extends State<WelcomeTourOverlay> {
                         style: TextStyle(
                           fontSize: 13.5,
                           height: 1.4,
-                          color: Colors.white.withValues(alpha: 0.85),
+                          color: context.c.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -193,7 +195,7 @@ class _WelcomeTourOverlayState extends State<WelcomeTourOverlay> {
                           key: const Key('welcome-tour-next'),
                           onPressed: _next,
                           style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF7C5CFF),
+                            backgroundColor: AppColors.brand,
                             minimumSize: const Size.fromHeight(44),
                           ),
                           child: Text(isLast ? 'Empezar' : 'Siguiente'),

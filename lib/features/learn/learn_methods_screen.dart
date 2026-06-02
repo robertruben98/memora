@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
+
 import 'learn_methods_data.dart';
 
 class LearnMethodsScreen extends StatelessWidget {
@@ -155,12 +157,12 @@ class _MethodCardState extends State<_MethodCard> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: _expanded
               ? widget.accent.withValues(alpha: 0.45)
-              : Colors.white.withValues(alpha: 0.06),
+              : context.c.border,
         ),
       ),
       child: Material(
@@ -206,7 +208,7 @@ class _MethodCardState extends State<_MethodCard> {
                             style: TextStyle(
                               fontSize: 12.5,
                               height: 1.4,
-                              color: Colors.white.withValues(alpha: 0.65),
+                              color: context.c.textSecondary,
                             ),
                           ),
                         ],
@@ -217,7 +219,7 @@ class _MethodCardState extends State<_MethodCard> {
                       turns: _expanded ? 0.5 : 0,
                       child: Icon(
                         Icons.keyboard_arrow_down_rounded,
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: context.c.textMuted,
                       ),
                     ),
                   ],
@@ -235,7 +237,7 @@ class _MethodCardState extends State<_MethodCard> {
                       children: [
                         Container(
                           height: 1,
-                          color: Colors.white.withValues(alpha: 0.06),
+                          color: context.c.border,
                         ),
                         const SizedBox(height: 12),
                         Text(
@@ -243,7 +245,7 @@ class _MethodCardState extends State<_MethodCard> {
                           style: TextStyle(
                             fontSize: 13.5,
                             height: 1.55,
-                            color: Colors.white.withValues(alpha: 0.85),
+                            color: context.c.textPrimary,
                           ),
                         ),
                         if (m.memoraNote != null) ...[
@@ -286,8 +288,7 @@ class _MethodCardState extends State<_MethodCard> {
                                         style: TextStyle(
                                           fontSize: 12.5,
                                           height: 1.45,
-                                          color: Colors.white
-                                              .withValues(alpha: 0.85),
+                                          color: context.c.textPrimary,
                                         ),
                                       ),
                                     ],
@@ -304,7 +305,7 @@ class _MethodCardState extends State<_MethodCard> {
                             style: TextStyle(
                               fontSize: 11,
                               fontStyle: FontStyle.italic,
-                              color: Colors.white.withValues(alpha: 0.4),
+                              color: context.c.textMuted,
                             ),
                           ),
                         ],
@@ -360,7 +361,7 @@ class _Footer extends StatelessWidget {
           style: TextStyle(
             fontSize: 11,
             height: 1.5,
-            color: Colors.white.withValues(alpha: 0.4),
+            color: context.c.textMuted,
           ),
         ),
       ),

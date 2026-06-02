@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
+
 import '../../../core/models/memora_card.dart';
 import '../../../core/theme/deck_visuals.dart';
 import '../../../data/database/database.dart';
@@ -46,9 +48,9 @@ class FeedPostHeader extends ConsumerWidget {
               ),
             ),
             child: Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xFF1A1A22),
+                color: context.c.surfaceElevated,
               ),
               child: Center(
                 child: Icon(
@@ -66,10 +68,10 @@ class FeedPostHeader extends ConsumerWidget {
               children: [
                 Text(
                   card.deck,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: context.c.textPrimary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -78,7 +80,7 @@ class FeedPostHeader extends ConsumerWidget {
                   stateLabel,
                   style: TextStyle(
                     fontSize: 11,
-                    color: Colors.white.withValues(alpha: 0.5),
+                    color: context.c.textMuted,
                   ),
                 ),
               ],
@@ -86,7 +88,7 @@ class FeedPostHeader extends ConsumerWidget {
           ),
           IconButton(
             icon: const Icon(Icons.more_vert_rounded, size: 22),
-            color: Colors.white.withValues(alpha: 0.7),
+            color: context.c.textSecondary,
             onPressed: onMore,
             tooltip: 'Más',
           ),

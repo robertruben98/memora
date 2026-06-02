@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
+
 /// Fila de acciones estilo Instagram: heart (acerté), X (fallé),
 /// share y bookmark con animaciones de bounce.
 class FeedPostActions extends StatelessWidget {
@@ -46,7 +48,7 @@ class FeedPostActions extends StatelessWidget {
             ),
             child: _IconAction(
               icon: liked ? Icons.favorite_rounded : Icons.favorite_outline,
-              color: liked ? const Color(0xFFFF4F6B) : Colors.white,
+              color: liked ? const Color(0xFFFF4F6B) : context.c.textPrimary,
               onTap: disabled || answered ? null : onCorrect,
               tooltip: 'Acerté',
             ),
@@ -55,13 +57,13 @@ class FeedPostActions extends StatelessWidget {
             icon: disliked
                 ? Icons.heart_broken_rounded
                 : Icons.close_rounded,
-            color: disliked ? const Color(0xFFFF4F6B) : Colors.white,
+            color: disliked ? const Color(0xFFFF4F6B) : context.c.textPrimary,
             onTap: disabled || answered ? null : onIncorrect,
             tooltip: 'No acerté',
           ),
           _IconAction(
             icon: Icons.send_rounded,
-            color: Colors.white,
+            color: context.c.textPrimary,
             onTap: onShare,
             tooltip: 'Compartir',
           ),
@@ -77,7 +79,7 @@ class FeedPostActions extends StatelessWidget {
               icon: bookmarked
                   ? Icons.bookmark_rounded
                   : Icons.bookmark_border_rounded,
-              color: bookmarked ? const Color(0xFFFFD24F) : Colors.white,
+              color: bookmarked ? const Color(0xFFFFD24F) : context.c.textPrimary,
               onTap: onBookmark,
               tooltip: bookmarked ? 'Quitar marcador' : 'Guardar',
             ),

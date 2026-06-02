@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import 'dgt_exam_history.dart';
 
@@ -64,7 +65,7 @@ class _EmptyHistory extends StatelessWidget {
             Icon(
               Icons.history_rounded,
               size: 48,
-              color: Colors.white.withValues(alpha: 0.4),
+              color: context.c.textMuted,
             ),
             const SizedBox(height: 16),
             const Text(
@@ -77,7 +78,7 @@ class _EmptyHistory extends StatelessWidget {
               'Cuando termines tu primer simulacro DGT aparecera aqui con score y veredicto.',
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.white.withValues(alpha: 0.6),
+                color: context.c.textSecondary,
                 height: 1.4,
               ),
               textAlign: TextAlign.center,
@@ -192,7 +193,7 @@ class _HistoryTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: chipColor.withValues(alpha: 0.35),
@@ -262,28 +263,28 @@ class _HistoryTile extends StatelessWidget {
                     Icon(
                       Icons.access_time_rounded,
                       size: 12,
-                      color: Colors.white.withValues(alpha: 0.55),
+                      color: context.c.textMuted,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       formatRelativeDate(entry.date),
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.65),
+                        color: context.c.textSecondary,
                       ),
                     ),
                     const SizedBox(width: 10),
                     Icon(
                       Icons.timer_outlined,
                       size: 12,
-                      color: Colors.white.withValues(alpha: 0.55),
+                      color: context.c.textMuted,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       entry.timeLabel,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.65),
+                        color: context.c.textSecondary,
                       ),
                     ),
                   ],

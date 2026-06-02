@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../core/models/memora_card.dart';
 import '../../data/repositories/card_repository.dart';
@@ -99,7 +100,7 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
     final res = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A22),
+        backgroundColor: ctx.c.surfaceElevated,
         title: const Text('¿Salir del simulacro?'),
         content: const Text(
           'Si sales perderas el progreso. El examen oficial no permite pausa.',
@@ -174,10 +175,10 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
                   decoration: BoxDecoration(
                     color: danger
                         ? Colors.redAccent.withValues(alpha: 0.18)
-                        : Colors.white.withValues(alpha: 0.08),
+                        : context.c.surfaceMuted,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: danger ? Colors.redAccent : Colors.white24,
+                      color: danger ? Colors.redAccent : context.c.border,
                     ),
                   ),
                   child: Row(
@@ -186,13 +187,13 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
                       Icon(
                         Icons.timer_outlined,
                         size: 18,
-                        color: danger ? Colors.redAccent : Colors.white70,
+                        color: danger ? Colors.redAccent : context.c.textSecondary,
                       ),
                       const SizedBox(width: 6),
                       Text(
                         '$mins:$secs',
                         style: TextStyle(
-                          color: danger ? Colors.redAccent : Colors.white,
+                          color: danger ? Colors.redAccent : context.c.textPrimary,
                           fontWeight: FontWeight.w800,
                           fontFeatures: const [FontFeature.tabularFigures()],
                         ),
@@ -228,7 +229,7 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
                           'Marca tu respuesta (correcta / incorrecta). En el simulacro no veras la solucion hasta el final.',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.white.withValues(alpha: 0.6),
+                            color: context.c.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 18),
@@ -309,7 +310,7 @@ class _AnswerTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? color.withValues(alpha: 0.15) : const Color(0xFF1A1A22),
+      color: selected ? color.withValues(alpha: 0.15) : context.c.surfaceElevated,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -319,7 +320,7 @@ class _AnswerTile extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: selected ? color : Colors.white12,
+              color: selected ? color : context.c.border,
               width: selected ? 2 : 1,
             ),
           ),
@@ -333,7 +334,7 @@ class _AnswerTile extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: selected ? color : Colors.white,
+                    color: selected ? color : context.c.textPrimary,
                   ),
                 ),
               ),
@@ -375,7 +376,7 @@ class _NotEnoughCardsScreen extends StatelessWidget {
                 'Tienes $have. Crea o importa mas tarjetas (preguntas DGT) para poder hacer un simulacro completo.',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: context.c.textSecondary,
                 ),
                 textAlign: TextAlign.center,
               ),

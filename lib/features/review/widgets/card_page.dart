@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../../core/models/memora_card.dart';
 import '../../../core/widgets/memora_image.dart';
@@ -182,14 +183,14 @@ class _AnsweredView extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w500,
-            color: Colors.white.withValues(alpha: 0.7),
+            color: context.c.textSecondary,
             height: 1.3,
           ),
         ),
         const SizedBox(height: 20),
         Container(
           height: 1,
-          color: Colors.white.withValues(alpha: 0.1),
+          color: context.c.border,
         ),
         const SizedBox(height: 20),
         Expanded(
@@ -232,14 +233,14 @@ class _RevealHint extends StatelessWidget {
         children: [
           Icon(
             Icons.touch_app_rounded,
-            color: Colors.white.withValues(alpha: 0.4),
+            color: context.c.textMuted,
             size: 28,
           ),
           const SizedBox(height: 8),
           Text(
             'Toca o desliza para ver la respuesta',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
+              color: context.c.textMuted,
               fontSize: 14,
             ),
           ),

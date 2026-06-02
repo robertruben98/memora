@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
+
 import '../../core/models/memora_card.dart';
 import '../../core/theme/deck_visuals.dart';
 import '../../data/repositories/card_repository.dart';
@@ -52,8 +54,8 @@ class _BrowseFeedScreenState extends ConsumerState<BrowseFeedScreen> {
               ? cards
               : cards.where((c) => c.deckId == _selectedDeckId).toList();
           return RefreshIndicator(
-            color: const Color(0xFF7C5CFF),
-            backgroundColor: const Color(0xFF1A1A22),
+            color: AppColors.brand,
+            backgroundColor: context.c.surfaceElevated,
             onRefresh: () async {
               ref.invalidate(allCardsProvider);
               ref.invalidate(deckSummariesProvider);
@@ -103,7 +105,7 @@ class _BrowseFeedScreenState extends ConsumerState<BrowseFeedScreen> {
           Icon(
             Icons.dynamic_feed_rounded,
             size: 48,
-            color: Colors.white.withValues(alpha: 0.3),
+            color: context.c.textMuted,
           ),
           const SizedBox(height: 16),
           Text(
@@ -112,7 +114,7 @@ class _BrowseFeedScreenState extends ConsumerState<BrowseFeedScreen> {
                 : 'Este mazo está vacío',
             style: TextStyle(
               fontSize: 16,
-              color: Colors.white.withValues(alpha: 0.6),
+              color: context.c.textSecondary,
             ),
           ),
         ],
@@ -138,12 +140,12 @@ class _StoriesRibbon extends StatelessWidget {
       return const SizedBox(height: 8);
     }
     return Container(
-      height: 100,
+      height: 112,
       margin: const EdgeInsets.only(bottom: 4),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: Colors.white.withValues(alpha: 0.06),
+            color: context.c.border,
             width: 1,
           ),
         ),
@@ -154,7 +156,7 @@ class _StoriesRibbon extends StatelessWidget {
         children: [
           _StoryCircle(
             label: 'Todos',
-            color: const Color(0xFF7C5CFF),
+            color: AppColors.brand,
             iconName: 'dynamic_feed_rounded',
             isAllAccent: true,
             selected: selectedDeckId == null,
@@ -230,14 +232,14 @@ class _StoryCircle extends StatelessWidget {
                   border: selected
                       ? null
                       : Border.all(
-                          color: Colors.white.withValues(alpha: 0.18),
+                          color: context.c.border,
                           width: 1.5,
                         ),
                   boxShadow: selected
                       ? [
                           BoxShadow(
                             color: (isAllAccent
-                                    ? const Color(0xFF7C5CFF)
+                                    ? AppColors.brand
                                     : color)
                                 .withValues(alpha: 0.4),
                             blurRadius: 12,
@@ -249,9 +251,9 @@ class _StoryCircle extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF1A1A22),
+                    color: context.c.surfaceElevated,
                     border: Border.all(
-                      color: const Color(0xFF0E0E12),
+                      color: context.c.surface,
                       width: 2,
                     ),
                   ),
@@ -277,8 +279,8 @@ class _StoryCircle extends StatelessWidget {
                   fontSize: 11,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                   color: selected
-                      ? Colors.white
-                      : Colors.white.withValues(alpha: 0.65),
+                      ? context.c.textPrimary
+                      : context.c.textSecondary,
                 ),
               ),
             ),
@@ -328,12 +330,12 @@ class _SkeletonRibbon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 100,
+      height: 112,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: Colors.white.withValues(alpha: 0.06),
+            color: context.c.border,
             width: 1,
           ),
         ),
@@ -350,7 +352,7 @@ class _SkeletonRibbon extends StatelessWidget {
                     height: 64,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.06),
+                      color: context.c.surfaceMuted,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -358,7 +360,7 @@ class _SkeletonRibbon extends StatelessWidget {
                     width: 50,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.06),
+                      color: context.c.surfaceMuted,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -385,7 +387,7 @@ class _SkeletonCard extends StatelessWidget {
               width: w,
               height: h,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: opacity),
+                color: context.c.textPrimary.withValues(alpha: opacity),
                 borderRadius: BorderRadius.circular(6),
               ),
             );
@@ -393,9 +395,9 @@ class _SkeletonCard extends StatelessWidget {
           margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           padding: const EdgeInsets.fromLTRB(12, 10, 12, 14),
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1A22),
+            color: context.c.surfaceElevated,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+            border: Border.all(color: context.c.border),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -407,7 +409,7 @@ class _SkeletonCard extends StatelessWidget {
                     height: 40,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: opacity),
+                      color: context.c.textPrimary.withValues(alpha: opacity),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -427,7 +429,7 @@ class _SkeletonCard extends StatelessWidget {
               Container(
                 height: 200,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: opacity),
+                  color: context.c.textPrimary.withValues(alpha: opacity),
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),

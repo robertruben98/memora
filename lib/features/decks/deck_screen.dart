@@ -7,6 +7,8 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
+
 import '../../core/models/memora_card.dart';
 import '../../core/theme/deck_visuals.dart';
 import '../../data/api/api_client.dart';
@@ -54,7 +56,7 @@ Future<void> deleteCardWithUndo({
       duration: const Duration(seconds: 5),
       action: SnackBarAction(
         label: 'Deshacer',
-        textColor: const Color(0xFF7C5CFF),
+        textColor: AppColors.brand,
         onPressed: () async {
           try {
             await repo.createCard(
@@ -300,7 +302,7 @@ class _DeckBodyState extends State<_DeckBody> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.white.withValues(alpha: 0.55),
+                    color: context.c.textMuted,
                   ),
                 ),
               ),
@@ -415,12 +417,12 @@ class _StudyButton extends ConsumerWidget {
           decoration: BoxDecoration(
             color: enabled
                 ? accent.withValues(alpha: 0.18)
-                : Colors.white.withValues(alpha: 0.05),
+                : context.c.surfaceMuted,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: enabled
                   ? accent.withValues(alpha: 0.5)
-                  : Colors.white.withValues(alpha: 0.1),
+                  : context.c.border,
               width: 1.5,
             ),
           ),
@@ -428,7 +430,7 @@ class _StudyButton extends ConsumerWidget {
           child: Row(
             children: [
               Icon(icon,
-                  color: enabled ? accent : Colors.white38, size: 32),
+                  color: enabled ? accent : context.c.textMuted, size: 32),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -439,7 +441,7 @@ class _StudyButton extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: enabled ? accent : Colors.white38,
+                        color: enabled ? accent : context.c.textMuted,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -447,7 +449,7 @@ class _StudyButton extends ConsumerWidget {
                       subtitle,
                       style: TextStyle(
                         fontSize: 13,
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: context.c.textSecondary,
                       ),
                     ),
                   ],
@@ -475,7 +477,7 @@ class _CardListTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Material(
-      color: const Color(0xFF1A1A22),
+      color: context.c.surfaceElevated,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -508,7 +510,7 @@ class _CardListTile extends ConsumerWidget {
                 card.back,
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.white.withValues(alpha: 0.55),
+                  color: context.c.textMuted,
                   height: 1.3,
                 ),
                 maxLines: 2,
@@ -524,7 +526,7 @@ class _CardListTile extends ConsumerWidget {
   void _showActions(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1A1A22),
+      backgroundColor: context.c.surfaceElevated,
       builder: (sheetCtx) {
         return SafeArea(
           child: Column(
@@ -619,7 +621,7 @@ class _EmptyState extends StatelessWidget {
           Icon(
             Icons.library_books_outlined,
             size: 64,
-            color: Colors.white.withValues(alpha: 0.3),
+            color: context.c.textMuted,
           ),
           const SizedBox(height: 16),
           Text(
@@ -627,7 +629,7 @@ class _EmptyState extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.white.withValues(alpha: 0.6),
+              color: context.c.textSecondary,
             ),
           ),
           const SizedBox(height: 8),
@@ -636,7 +638,7 @@ class _EmptyState extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13,
-              color: Colors.white.withValues(alpha: 0.4),
+              color: context.c.textMuted,
             ),
           ),
         ],

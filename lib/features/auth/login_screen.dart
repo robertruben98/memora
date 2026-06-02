@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
+
 import '../../core/logging/app_logger.dart';
 import '../../data/api/api_client.dart';
 import '../../data/sync/sync_service.dart';
@@ -127,7 +129,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     _isRegister ? 'Crear cuenta' : 'Inicia sesión',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.white.withValues(alpha: 0.6),
+                      color: context.c.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -176,7 +178,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               height: 18,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.white,
+                                color: AppColors.brand,
                               ),
                             )
                           : Text(
@@ -205,7 +207,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 24),
                   Container(
                     height: 1,
-                    color: Colors.white.withValues(alpha: 0.08),
+                    color: context.c.border,
                   ),
                   const SizedBox(height: 16),
                   TextButton.icon(
@@ -213,7 +215,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     icon: const Icon(Icons.fast_forward_rounded, size: 18),
                     label: const Text('Continuar sin login (legacy)'),
                     style: TextButton.styleFrom(
-                      foregroundColor: Colors.white.withValues(alpha: 0.55),
+                      foregroundColor: context.c.textMuted,
                     ),
                   ),
                 ],
@@ -229,7 +231,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return InputDecoration(
       labelText: label,
       filled: true,
-      fillColor: const Color(0xFF1A1A22),
+      fillColor: context.c.surfaceElevated,
       contentPadding: const EdgeInsets.all(14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -237,11 +239,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+        borderSide: BorderSide(color: context.c.border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF7C5CFF), width: 1.5),
+        borderSide: const BorderSide(color: AppColors.brand, width: 1.5),
       ),
     );
   }
