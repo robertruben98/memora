@@ -135,6 +135,13 @@ class BackupService {
       throw const FormatException(
           'Este archivo no es un backup de RutaB válido');
     }
+    final version = raw['version'];
+    if (version is! num || version.toInt() != _formatVersion) {
+      throw FormatException(
+        'Versión de backup incompatible (esperaba $_formatVersion, '
+        'encontró ${version ?? 'ninguna'}).',
+      );
+    }
     final decks = _requireList(raw, 'decks');
     final cards = _requireList(raw, 'cards');
     final schedules = _requireList(raw, 'schedules');

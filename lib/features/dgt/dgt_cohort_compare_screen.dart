@@ -162,8 +162,8 @@ class _DgtCohortCompareScreenState
       ),
       body: async.when(
         loading: () => const _BenchmarkSkeleton(),
-        error: (e, _) => _ErrorView(
-          message: 'No se pudo cargar la comparativa: $e',
+        error: (e, _) => AppStateView.error(
+          'No se pudo cargar la comparativa: $e',
           onRetry: () => ref.invalidate(dgtBenchmarkProvider),
         ),
         data: (bench) {
@@ -443,40 +443,6 @@ class _BenchmarkSkeleton extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.c.surfaceElevated,
           borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-  const _ErrorView({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.error_outline_rounded,
-                color: DgtStatusColors.error, size: 48),
-            const SizedBox(height: 12),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: context.c.textPrimary, fontSize: 14),
-            ),
-            const SizedBox(height: 16),
-            FilledButton.tonalIcon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Reintentar'),
-            ),
-          ],
         ),
       ),
     );

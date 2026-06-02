@@ -325,14 +325,19 @@ class DgtTrickHighlightedStatement extends StatelessWidget {
     );
   }
 
+  /// Regex derivada del Set [dgtTrickKeywords] (DRY: una sola fuente de
+  /// verdad). Se construye una vez de forma perezosa para no recompilarla
+  /// en cada render.
+  static final RegExp _trickRegex = RegExp(
+    '\\b(${dgtTrickKeywords.map(RegExp.escape).join('|')})\\b',
+    caseSensitive: false,
+    unicode: true,
+  );
+
   static List<TextSpan> _buildSpans(String text, TextStyle base) {
     final spans = <TextSpan>[];
-    // Detecta palabras trampa case-insensitive (incluye acentos opcionales).
-    final regex = RegExp(
-      r'\b(siempre|nunca|excepto|solo|s[oó]lo|[uú]nicamente)\b',
-      caseSensitive: false,
-      unicode: true,
-    );
+    // Detecta palabras trampa case-insensitive, derivadas de dgtTrickKeywords.
+    final regex = _trickRegex;
     var last = 0;
     for (final m in regex.allMatches(text)) {
       if (m.start > last) {
