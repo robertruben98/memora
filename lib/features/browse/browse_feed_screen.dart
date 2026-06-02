@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../core/models/memora_card.dart';
 import '../../core/theme/deck_visuals.dart';
@@ -48,7 +49,7 @@ class _BrowseFeedScreenState extends ConsumerState<BrowseFeedScreen> {
       ),
       body: cardsAsync.when(
         loading: () => const _SkeletonFeed(),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => AppStateView.error(e),
         data: (cards) {
           final filtered = _selectedDeckId == null
               ? cards
