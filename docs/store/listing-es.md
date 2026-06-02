@@ -111,8 +111,8 @@ Resultado esperado: **PEGI 3 / "Apta para todos los públicos"**.
 ## Datos de contacto y enlaces
 
 - **Email de contacto del desarrollador:** robertruben98@gmail.com
-- **Política de privacidad:** https://memora.a-robertdev.com/privacidad
-- **Borrado de cuenta (URL pública):** https://memora.a-robertdev.com/eliminar-cuenta
+- **Política de privacidad:** https://memora-api.a-robertdev.com/privacidad
+- **Borrado de cuenta (URL pública):** https://memora-api.a-robertdev.com/eliminar-cuenta
 - **Sitio web:** https://memora.a-robertdev.com
 
 ---
@@ -197,7 +197,7 @@ Pantallas recomendadas (mínimo 2; ideal 4-5):
 | Categoría | Educación |
 | Tipo | App (gratis) |
 | Email de contacto | robertruben98@gmail.com |
-| Política de privacidad | https://memora.a-robertdev.com/privacidad |
+| Política de privacidad | https://memora-api.a-robertdev.com/privacidad |
 | Clasificación | PEGI 3 / Apta para todos |
 | Icono | 512×512 (desde `assets/icon/icon.png`) |
 | Feature graphic | 1024×500 (desde `docs/store/feature-graphic.html`) |
