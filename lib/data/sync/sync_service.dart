@@ -24,71 +24,85 @@ class SyncService {
       await _db.delete(_db.appSettings).go();
 
       for (final raw in (data['decks'] as List)) {
-        final d = raw as Map<String, dynamic>;
         await _db.into(_db.decks).insert(
-              DecksCompanion.insert(
-                id: d['id'] as String,
-                name: d['name'] as String,
-                description: Value(d['description'] as String?),
-                colorHex: Value(d['color_hex'] as String? ?? '#7C5CFF'),
-                iconName: Value(d['icon_name'] as String? ?? 'style_rounded'),
-                createdAt: (d['created_at'] as num).toInt(),
-                updatedAt: (d['updated_at'] as num).toInt(),
-              ),
+              _deckCompanionFromJson(raw as Map<String, dynamic>),
             );
       }
       for (final raw in (data['cards'] as List)) {
-        final c = raw as Map<String, dynamic>;
         await _db.into(_db.cards).insert(
-              CardsCompanion.insert(
-                id: c['id'] as String,
-                deckId: c['deck_id'] as String,
-                frontText: c['front_text'] as String,
-                backText: c['back_text'] as String,
-                frontImagePath: Value(c['front_image_path'] as String?),
-                backImagePath: Value(c['back_image_path'] as String?),
-                createdAt: (c['created_at'] as num).toInt(),
-                updatedAt: (c['updated_at'] as num).toInt(),
-              ),
+              _cardCompanionFromJson(raw as Map<String, dynamic>),
             );
       }
       for (final raw in (data['schedules'] as List)) {
-        final s = raw as Map<String, dynamic>;
         await _db.into(_db.cardSchedules).insert(
-              CardSchedulesCompanion.insert(
-                cardId: s['card_id'] as String,
-                easeFactor: Value((s['ease_factor'] as num).toDouble()),
-                intervalDays: Value((s['interval_days'] as num).toInt()),
-                repetitions: Value((s['repetitions'] as num).toInt()),
-                state: Value(s['state'] as String),
-                nextReviewDate: (s['next_review_date'] as num).toInt(),
-                lastReviewDate: Value((s['last_review_date'] as num?)?.toInt()),
-              ),
+              _scheduleCompanionFromJson(raw as Map<String, dynamic>),
             );
       }
       for (final raw in (data['review_logs'] as List)) {
-        final l = raw as Map<String, dynamic>;
         await _db.into(_db.reviewLogs).insert(
-              ReviewLogsCompanion.insert(
-                cardId: l['card_id'] as String,
-                reviewedAt: (l['reviewed_at'] as num).toInt(),
-                result: l['result'] as String,
-                previousIntervalDays:
-                    (l['previous_interval_days'] as num).toInt(),
-                newIntervalDays: (l['new_interval_days'] as num).toInt(),
-              ),
+              _reviewLogCompanionFromJson(raw as Map<String, dynamic>),
             );
       }
       for (final raw in (data['settings'] as List)) {
-        final s = raw as Map<String, dynamic>;
         await _db.into(_db.appSettings).insert(
-              AppSettingsCompanion.insert(
-                key: s['key'] as String,
-                value: s['value'] as String,
-              ),
+              _settingCompanionFromJson(raw as Map<String, dynamic>),
             );
       }
     });
+  }
+
+  DecksCompanion _deckCompanionFromJson(Map<String, dynamic> d) {
+    return DecksCompanion.insert(
+      id: d['id'] as String,
+      name: d['name'] as String,
+      description: Value(d['description'] as String?),
+      colorHex: Value(d['color_hex'] as String? ?? '#7C5CFF'),
+      iconName: Value(d['icon_name'] as String? ?? 'style_rounded'),
+      createdAt: (d['created_at'] as num).toInt(),
+      updatedAt: (d['updated_at'] as num).toInt(),
+    );
+  }
+
+  CardsCompanion _cardCompanionFromJson(Map<String, dynamic> c) {
+    return CardsCompanion.insert(
+      id: c['id'] as String,
+      deckId: c['deck_id'] as String,
+      frontText: c['front_text'] as String,
+      backText: c['back_text'] as String,
+      frontImagePath: Value(c['front_image_path'] as String?),
+      backImagePath: Value(c['back_image_path'] as String?),
+      createdAt: (c['created_at'] as num).toInt(),
+      updatedAt: (c['updated_at'] as num).toInt(),
+    );
+  }
+
+  CardSchedulesCompanion _scheduleCompanionFromJson(Map<String, dynamic> s) {
+    return CardSchedulesCompanion.insert(
+      cardId: s['card_id'] as String,
+      easeFactor: Value((s['ease_factor'] as num).toDouble()),
+      intervalDays: Value((s['interval_days'] as num).toInt()),
+      repetitions: Value((s['repetitions'] as num).toInt()),
+      state: Value(s['state'] as String),
+      nextReviewDate: (s['next_review_date'] as num).toInt(),
+      lastReviewDate: Value((s['last_review_date'] as num?)?.toInt()),
+    );
+  }
+
+  ReviewLogsCompanion _reviewLogCompanionFromJson(Map<String, dynamic> l) {
+    return ReviewLogsCompanion.insert(
+      cardId: l['card_id'] as String,
+      reviewedAt: (l['reviewed_at'] as num).toInt(),
+      result: l['result'] as String,
+      previousIntervalDays: (l['previous_interval_days'] as num).toInt(),
+      newIntervalDays: (l['new_interval_days'] as num).toInt(),
+    );
+  }
+
+  AppSettingsCompanion _settingCompanionFromJson(Map<String, dynamic> s) {
+    return AppSettingsCompanion.insert(
+      key: s['key'] as String,
+      value: s['value'] as String,
+    );
   }
 
   // ------ Decks ------
