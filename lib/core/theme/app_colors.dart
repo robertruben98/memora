@@ -64,8 +64,8 @@ class AppColors extends ThemeExtension<AppColors> {
     surfaceMuted: Color(0x0A000000), // black @ 4%
     border: Color(0x1F000000), // black @ 12%
     textPrimary: Color(0xFF1A1A22),
-    textSecondary: Color(0xB31A1A22), // ink @ 70%
-    textMuted: Color(0x801A1A22), // ink @ 50%
+    textSecondary: Color(0xD41A1A22), // ink @ 83% (WCAG AA 4.5:1 sobre surface)
+    textMuted: Color(0x991A1A22), // ink @ 60%
     accent: brand,
     onAccent: Colors.white,
     shadow: Color(0x1F000000),
