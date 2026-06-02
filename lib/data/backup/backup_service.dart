@@ -135,12 +135,11 @@ class BackupService {
       throw const FormatException(
           'Este archivo no es un backup de RutaB válido');
     }
-    final decks = (raw['decks'] as List? ?? const []).cast<dynamic>();
-    final cards = (raw['cards'] as List? ?? const []).cast<dynamic>();
-    final schedules =
-        (raw['schedules'] as List? ?? const []).cast<dynamic>();
-    final logs = (raw['reviewLogs'] as List? ?? const []).cast<dynamic>();
-    final settings = (raw['settings'] as List? ?? const []).cast<dynamic>();
+    final decks = _requireList(raw, 'decks');
+    final cards = _requireList(raw, 'cards');
+    final schedules = _requireList(raw, 'schedules');
+    final logs = _requireList(raw, 'reviewLogs');
+    final settings = _requireList(raw, 'settings');
 
     await _db.transaction(() async {
       if (replace) {
@@ -227,6 +226,25 @@ class BackupService {
       logs: logs.length,
       settings: settings.length,
     );
+  }
+
+  /// Lee `raw[key]` esperando una lista (sección del backup).
+  ///
+  /// - Si la clave falta o es `null`, devuelve una lista vacía (sección
+  ///   opcional/ausente válida).
+  /// - Si la clave existe pero el valor NO es una `List`, lanza
+  ///   [FormatException] con un mensaje claro, en lugar de tragarse el
+  ///   error y devolver una lista vacía silenciosamente.
+  List<dynamic> _requireList(Map<String, dynamic> raw, String key) {
+    final value = raw[key];
+    if (value == null) return const [];
+    if (value is! List) {
+      throw FormatException(
+        'Backup corrupto: la sección "$key" debería ser una lista '
+        'pero es ${value.runtimeType}.',
+      );
+    }
+    return value.cast<dynamic>();
   }
 }
 
