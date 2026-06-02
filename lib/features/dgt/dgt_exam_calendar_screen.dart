@@ -5,6 +5,7 @@ import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import 'dgt_exam_calendar_phase.dart';
+import 'dgt_phase_theme.dart';
 import 'dgt_favorites_screen.dart';
 import 'dgt_ready_check_screen.dart';
 import 'dgt_settings.dart';
@@ -257,11 +258,12 @@ class _PhaseTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final highlight = status == DgtExamPhaseStatus.current;
     final passed = status == DgtExamPhaseStatus.passed;
-    final accent = _phaseAccent(phase);
+    final theme = phaseTheme(phase);
+    final accent = theme.accent;
     final borderColor = highlight ? accent : context.c.border;
-    final IconData icon = passed ? Icons.check_circle_rounded : _phaseIcon(phase);
+    final IconData icon = passed ? dgtPhasePassedIcon : theme.icon;
     final iconColor = passed
-        ? const Color(0xFF2E9E5B)
+        ? dgtPhasePassedColor
         : (highlight ? accent : context.c.textMuted);
     final cta = _phaseCta(context, phase);
     return Padding(
@@ -358,7 +360,7 @@ class _StatusChip extends StatelessWidget {
       case DgtExamPhaseStatus.passed:
         label = 'Hecho';
         bg = const Color(0xFFE6F4EC);
-        fg = const Color(0xFF2E9E5B);
+        fg = dgtPhasePassedColor;
       case DgtExamPhaseStatus.current:
         label = 'Ahora';
         bg = accent.withValues(alpha: 0.15);
@@ -437,32 +439,6 @@ _PhaseCta? _phaseCta(BuildContext context, DgtExamPhase phase) {
           }
         }),
       );
-  }
-}
-
-Color _phaseAccent(DgtExamPhase phase) {
-  switch (phase) {
-    case DgtExamPhase.temario:
-      return DgtStatusColors.success;
-    case DgtExamPhase.refuerzo:
-      return DgtStatusColors.warning;
-    case DgtExamPhase.simulacros:
-      return const Color(0xFFFF6B35);
-    case DgtExamPhase.repaso:
-      return DgtStatusColors.error;
-  }
-}
-
-IconData _phaseIcon(DgtExamPhase phase) {
-  switch (phase) {
-    case DgtExamPhase.temario:
-      return Icons.menu_book_rounded;
-    case DgtExamPhase.refuerzo:
-      return Icons.gps_fixed_rounded;
-    case DgtExamPhase.simulacros:
-      return Icons.directions_car_rounded;
-    case DgtExamPhase.repaso:
-      return Icons.self_improvement_rounded;
   }
 }
 

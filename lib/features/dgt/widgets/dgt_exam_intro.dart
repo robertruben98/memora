@@ -165,6 +165,92 @@ class DgtExamIntro extends StatelessWidget {
   }
 }
 
+/// Card tappable reutilizable del intro (DRY issue dgt-tech): comparte el
+/// patron `Material(transparent) > InkWell(radius 14) > Ink(deco, padding
+/// h14/v12) > Row[leading, titulo+subtitulo, chevron]` usado por la seccion
+/// "Examen 2026" y el tile "Sprint diario". Solo varia la decoracion, el
+/// leading, los colores de texto/chevron y la key.
+class _TappableCard extends StatelessWidget {
+  final VoidCallback onTap;
+  final BoxDecoration decoration;
+  final Widget leading;
+  final double leadingGap;
+  final String title;
+  final String subtitle;
+
+  /// `null` deja el color por defecto del tema (DefaultTextStyle), como hacia
+  /// el tile "Sprint diario" original.
+  final Color? titleColor;
+  final Color subtitleColor;
+  final FontWeight subtitleWeight;
+  final Color chevronColor;
+
+  const _TappableCard({
+    super.key,
+    required this.onTap,
+    required this.decoration,
+    required this.leading,
+    required this.leadingGap,
+    required this.title,
+    required this.subtitle,
+    this.titleColor,
+    required this.subtitleColor,
+    required this.subtitleWeight,
+    required this.chevronColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Ink(
+          decoration: decoration,
+          padding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+              leading,
+              SizedBox(width: leadingGap),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: titleColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: subtitleColor,
+                        fontSize: 12,
+                        fontWeight: subtitleWeight,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: chevronColor,
+                size: 22,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Seccion "Examen 2026" en el intro (issue #77). Card promocional que abre
 /// el modo "Videos de percepcion de riesgo".
 class _Examen2026Section extends StatelessWidget {
@@ -213,63 +299,28 @@ class _Examen2026Section extends StatelessWidget {
               ],
             ),
           ),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onOpenVideos,
-              borderRadius: BorderRadius.circular(14),
-              child: Ink(
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF7C5CFF), Color(0xFFE04FFF)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.movie_filter_rounded,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                    const SizedBox(width: 10),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Videos de percepcion de riesgo',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          SizedBox(height: 2),
-                          Text(
-                            'Practica el nuevo formato del examen DGT 2026',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Icon(
-                      Icons.chevron_right_rounded,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                  ],
-                ),
+          _TappableCard(
+            onTap: onOpenVideos,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF7C5CFF), Color(0xFFE04FFF)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
+              borderRadius: BorderRadius.circular(14),
             ),
+            leading: const Icon(
+              Icons.movie_filter_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
+            leadingGap: 10,
+            title: 'Videos de percepcion de riesgo',
+            subtitle: 'Practica el nuevo formato del examen DGT 2026',
+            titleColor: Colors.white,
+            subtitleColor: Colors.white,
+            subtitleWeight: FontWeight.w500,
+            chevronColor: Colors.white,
           ),
         ],
       ),
@@ -288,72 +339,38 @@ class _SprintDiarioTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          key: const ValueKey('dgt-sprint-diario-cta'),
-          onTap: onTap,
+      child: _TappableCard(
+        key: const ValueKey('dgt-sprint-diario-cta'),
+        onTap: onTap,
+        decoration: BoxDecoration(
+          color: DgtStatusColors.success.withValues(alpha: 0.12),
+          border: Border.all(
+            color: DgtStatusColors.success.withValues(alpha: 0.45),
+            width: 1,
+          ),
           borderRadius: BorderRadius.circular(14),
-          child: Ink(
-            decoration: BoxDecoration(
-              color: DgtStatusColors.success.withValues(alpha: 0.12),
-              border: Border.all(
-                color: DgtStatusColors.success.withValues(alpha: 0.45),
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            child: Row(
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: DgtStatusColors.success.withValues(alpha: 0.25),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.bolt_rounded,
-                    color: DgtStatusColors.success,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Sprint diario',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '10 preguntas en 2 min - histograma de tus ultimos sprints',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: context.c.textSecondary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: context.c.textSecondary,
-                  size: 22,
-                ),
-              ],
-            ),
+        ),
+        leading: Container(
+          width: 34,
+          height: 34,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: DgtStatusColors.success.withValues(alpha: 0.25),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: const Icon(
+            Icons.bolt_rounded,
+            color: DgtStatusColors.success,
+            size: 20,
           ),
         ),
+        leadingGap: 12,
+        title: 'Sprint diario',
+        subtitle:
+            '10 preguntas en 2 min - histograma de tus ultimos sprints',
+        subtitleColor: context.c.textSecondary,
+        subtitleWeight: FontWeight.w600,
+        chevronColor: context.c.textSecondary,
       ),
     );
   }

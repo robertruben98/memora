@@ -125,9 +125,7 @@ class _DgtDailyChallengeCardState
       data: (stats) {
         final total = stats.fold<int>(0, (acc, s) => acc + s.totalAnswered);
         if (total < kDgtMinReviewsForChallenge) {
-          return _GenericChallengeTile(
-            onTap: () => _navigateGeneric(context),
-          );
+          return _genericTile(onTap: () => _navigateGeneric(context));
         }
         // Resuelve tema: si hay cache valido, usarlo; si no, recalcular.
         DgtTopicStat? topic;
@@ -145,19 +143,34 @@ class _DgtDailyChallengeCardState
         }
         topic ??= pickDgtDailyChallengeTopic(stats);
         if (topic == null) {
-          return _GenericChallengeTile(
-            onTap: () => _navigateGeneric(context),
-          );
+          return _genericTile(onTap: () => _navigateGeneric(context));
         }
         // Persistir seleccion solo si no estaba cacheada.
         if (_cachedTopicId == null) {
           writeDailyChallengeCache(DateTime.now(), topic.topicId);
         }
-        return _PersonalizedChallengeTile(
-          stat: topic,
+        final accuracy = topic.accuracyPct.round();
+        final name = topic.topicName ?? topic.topicId;
+        return _DgtChallengeTile(
+          accent: const Color(0xFFFF8A65),
+          icon: Icons.local_fire_department_rounded,
+          title: 'Reto de hoy: $name',
+          subtitle:
+              'Tu accuracy: $accuracy%. Mejoralo con $kDgtDailyChallengeLimit preguntas.',
           onTap: () => _navigatePersonalized(context, topic!),
         );
       },
+    );
+  }
+
+  _DgtChallengeTile _genericTile({required VoidCallback onTap}) {
+    return _DgtChallengeTile(
+      accent: AppColors.brand,
+      icon: Icons.flag_rounded,
+      title: 'Empieza tu primer reto',
+      subtitle:
+          'Responde algunas preguntas para que personalicemos tu reto diario.',
+      onTap: onTap,
     );
   }
 
@@ -195,16 +208,26 @@ class _DgtDailyChallengeCardState
   }
 }
 
-class _PersonalizedChallengeTile extends StatelessWidget {
-  final DgtTopicStat stat;
+/// Tile reutilizable del reto diario. Parametriza el color de acento, el
+/// icono, el titulo y el subtitulo para servir tanto al reto personalizado
+/// como al generico, manteniendo un aspecto identico.
+class _DgtChallengeTile extends StatelessWidget {
+  final Color accent;
+  final IconData icon;
+  final String title;
+  final String subtitle;
   final VoidCallback onTap;
 
-  const _PersonalizedChallengeTile({required this.stat, required this.onTap});
+  const _DgtChallengeTile({
+    required this.accent,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final accuracy = stat.accuracyPct.round();
-    final name = stat.topicName ?? stat.topicId;
     return Material(
       color: context.c.surfaceElevated,
       borderRadius: BorderRadius.circular(16),
@@ -219,13 +242,10 @@ class _PersonalizedChallengeTile extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF8A65).withValues(alpha: 0.18),
+                  color: accent.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
-                  Icons.local_fire_department_rounded,
-                  color: Color(0xFFFF8A65),
-                ),
+                child: Icon(icon, color: accent),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -233,7 +253,7 @@ class _PersonalizedChallengeTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Reto de hoy: $name',
+                      title,
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
@@ -241,7 +261,7 @@ class _PersonalizedChallengeTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Tu accuracy: $accuracy%. Mejoralo con $kDgtDailyChallengeLimit preguntas.',
+                      subtitle,
                       style: TextStyle(
                         fontSize: 12.5,
                         color: context.c.textSecondary,
@@ -250,73 +270,7 @@ class _PersonalizedChallengeTile extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: Color(0xFFFF8A65),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _GenericChallengeTile extends StatelessWidget {
-  final VoidCallback onTap;
-  const _GenericChallengeTile({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: context.c.surfaceElevated,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: AppColors.brand.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.flag_rounded,
-                  color: AppColors.brand,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Empieza tu primer reto',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Responde algunas preguntas para que personalicemos tu reto diario.',
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        color: context.c.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: AppColors.brand,
-              ),
+              Icon(Icons.chevron_right_rounded, color: accent),
             ],
           ),
         ),

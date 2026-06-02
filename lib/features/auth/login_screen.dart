@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
-import 'package:memora/core/theme/dgt_status_colors.dart';
+import 'package:memora/core/widgets/error_alert.dart';
+import 'package:memora/core/widgets/styled_text_field.dart';
 
 import '../../core/logging/app_logger.dart';
 import '../../data/api/api_client.dart';
@@ -134,35 +135,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  TextField(
+                  StyledTextField(
                     controller: _emailCtl,
+                    hint: 'Email',
+                    label: 'Email',
                     keyboardType: TextInputType.emailAddress,
+                    textCapitalization: TextCapitalization.none,
                     textInputAction: TextInputAction.next,
-                    decoration: _decor('Email'),
                   ),
                   const SizedBox(height: 12),
-                  TextField(
+                  StyledTextField(
                     controller: _passCtl,
+                    hint: 'Contraseña',
+                    label: 'Contraseña',
                     obscureText: true,
                     textInputAction: TextInputAction.done,
                     onSubmitted: (_) => _submit(),
-                    decoration: _decor('Contraseña'),
                   ),
                   if (_error != null) ...[
                     const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: DgtStatusColors.danger.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        _error!,
-                        style: const TextStyle(
-                          color: DgtStatusColors.danger,
-                          fontSize: 13,
-                        ),
-                      ),
+                    ErrorAlert(
+                      _error!,
+                      onDismiss: () => setState(() => _error = null),
                     ),
                   ],
                   const SizedBox(height: 20),
@@ -224,27 +218,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  InputDecoration _decor(String label) {
-    return InputDecoration(
-      labelText: label,
-      filled: true,
-      fillColor: context.c.surfaceElevated,
-      contentPadding: const EdgeInsets.all(14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: context.c.border),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.brand, width: 1.5),
       ),
     );
   }

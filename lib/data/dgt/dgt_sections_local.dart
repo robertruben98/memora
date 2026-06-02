@@ -648,4 +648,67 @@ const List<DgtSection> kDgtSectionsLocal = [
       ),
     ],
   ),
+  DgtSection(
+    id: 'equipamiento',
+    name: 'Equipamiento obligatorio',
+    description: 'Elementos que el vehiculo debe llevar y su uso correcto.',
+    concepts: [
+      DgtConcept(
+        title: 'Senalizacion de emergencia: triangulos y V-16',
+        body:
+            'Para senalizar el vehiculo inmovilizado se usan dos triangulos '
+            'de preemergencia (uno delante y otro detras). Desde 2026 la luz '
+            'de emergencia V-16 conectada (con geolocalizacion a DGT 3.0) '
+            'sustituye a los triangulos y evita bajar a la calzada.',
+        example:
+            'En autovia, si te quedas parado, colocar la V-16 en el techo '
+            'desde dentro del coche es mas seguro que salir a poner '
+            'triangulos.',
+      ),
+      DgtConcept(
+        title: 'Chaleco reflectante',
+        body:
+            'Es obligatorio llevar al menos un chaleco reflectante homologado '
+            'en el habitaculo (no en el maletero) y ponerselo antes de salir '
+            'del vehiculo cuando se circula o se realizan tareas en la '
+            'calzada o el arcen.',
+        example:
+            'Antes de bajar a colocar la senalizacion en carretera debes '
+            'ponerte el chaleco, no despues de haber salido del coche.',
+      ),
+      DgtConcept(
+        title: 'Rueda de repuesto y herramientas',
+        body:
+            'El vehiculo debe poder reparar un pinchazo: rueda de repuesto '
+            '(o de galleta) con gato y llave, o bien un kit antipinchazos '
+            'cuando el fabricante lo sustituye. Conviene revisar su presion '
+            'periodicamente.',
+        example:
+            'Si llevas rueda de galleta, su velocidad maxima suele estar '
+            'limitada a 80 km/h y solo debe usarse hasta el taller.',
+      ),
+      DgtConcept(
+        title: 'Documentos obligatorios',
+        body:
+            'Hay que llevar permiso de conducir en vigor, permiso de '
+            'circulacion, ficha tecnica (tarjeta ITV) y justificante del '
+            'seguro obligatorio. Pueden presentarse en formato digital '
+            'cuando la normativa lo admite.',
+        example:
+            'En un control, no poder acreditar el permiso de circulacion '
+            'del vehiculo es una infraccion sancionable.',
+      ),
+      DgtConcept(
+        title: 'Extintor (cuando aplica)',
+        body:
+            'El turismo particular no esta obligado a llevar extintor, pero '
+            'si lo estan determinados vehiculos como autobuses, camiones, '
+            'transporte de mercancias peligrosas y vehiculos de mas de 3.500 '
+            'kg, segun su reglamentacion.',
+        example:
+            'Un camion de transporte de mercancias peligrosas (ADR) debe '
+            'llevar extintores revisados y en vigor; un turismo no.',
+      ),
+    ],
+  ),
 ];

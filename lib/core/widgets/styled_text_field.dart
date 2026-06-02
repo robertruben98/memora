@@ -40,6 +40,28 @@ class StyledTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final TextStyle? style;
 
+  /// Tipo de teclado (p. ej. [TextInputType.emailAddress]).
+  final TextInputType? keyboardType;
+
+  /// Oculta el texto introducido (campos de contraseña).
+  final bool obscureText;
+
+  /// Acción del botón de envío del teclado (p. ej. [TextInputAction.next]).
+  final TextInputAction? textInputAction;
+
+  /// Callback al enviar desde el teclado.
+  final ValueChanged<String>? onSubmitted;
+
+  /// Si se indica, se usa como label flotante ([InputDecoration.labelText])
+  /// en lugar del [hint]. Si es `null` se mantiene el comportamiento actual
+  /// (solo hint).
+  final String? label;
+
+  /// Capitalización del texto. Si es `null` se mantiene el comportamiento
+  /// actual ([TextCapitalization.sentences]); permite no forzar mayúsculas
+  /// en campos como el email.
+  final TextCapitalization? textCapitalization;
+
   const StyledTextField({
     super.key,
     required this.controller,
@@ -48,6 +70,12 @@ class StyledTextField extends StatelessWidget {
     this.maxLines,
     this.onChanged,
     this.style,
+    this.keyboardType,
+    this.obscureText = false,
+    this.textInputAction,
+    this.onSubmitted,
+    this.label,
+    this.textCapitalization,
   });
 
   @override
@@ -56,10 +84,15 @@ class StyledTextField extends StatelessWidget {
       controller: controller,
       minLines: minLines,
       maxLines: maxLines ?? (minLines == 1 ? 1 : 4),
-      textCapitalization: TextCapitalization.sentences,
+      textCapitalization: textCapitalization ?? TextCapitalization.sentences,
       style: style ?? const TextStyle(fontSize: 16),
       onChanged: onChanged,
+      keyboardType: keyboardType,
+      obscureText: obscureText,
+      textInputAction: textInputAction,
+      onSubmitted: onSubmitted,
       decoration: InputDecoration(
+        labelText: label,
         hintText: hint,
         hintStyle: TextStyle(color: context.c.textMuted),
         filled: true,

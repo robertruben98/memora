@@ -109,6 +109,33 @@ class _MetricsGrid extends StatelessWidget {
   }
 }
 
+/// Base reutilizable para las cards de esta pantalla: mismo
+/// surface/radius/borde del tema. Solo varia el padding y el color del
+/// borde (acentos por tipo de card).
+class _DgtCardBase extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final Color? borderColor;
+  const _DgtCardBase({
+    required this.child,
+    this.padding = const EdgeInsets.all(14),
+    this.borderColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: context.c.surfaceElevated,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderColor ?? context.c.border),
+      ),
+      child: child,
+    );
+  }
+}
+
 class _MetricTile extends StatelessWidget {
   final String label;
   final String value;
@@ -123,13 +150,7 @@ class _MetricTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: context.c.surfaceElevated,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: context.c.border),
-      ),
+    return _DgtCardBase(
       child: Row(
         children: [
           Icon(icon, size: 22, color: AppColors.brand),
@@ -168,13 +189,8 @@ class _WeakestTopicCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: context.c.surfaceElevated,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.25)),
-      ),
+    return _DgtCardBase(
+      borderColor: Colors.redAccent.withValues(alpha: 0.25),
       child: Row(
         children: [
           const Icon(Icons.warning_amber_rounded, color: Colors.redAccent),
@@ -221,13 +237,8 @@ class _DaysToExamCard extends StatelessWidget {
     } else {
       label = 'Faltan $days dias para tu examen';
     }
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: context.c.surfaceElevated,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.25)),
-      ),
+    return _DgtCardBase(
+      borderColor: Colors.greenAccent.withValues(alpha: 0.25),
       child: Row(
         children: [
           const Icon(Icons.event_rounded, color: Colors.greenAccent),
@@ -260,13 +271,8 @@ class _EmptyWeekCard extends StatelessWidget {
             : daysToExam == 0
                 ? 'Tu examen es HOY - todavia puedes hacer un repaso rapido.'
                 : 'Faltan $daysToExam dias para tu examen.';
-    return Container(
+    return _DgtCardBase(
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: context.c.surfaceElevated,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: context.c.border),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
