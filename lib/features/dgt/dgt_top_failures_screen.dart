@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/repositories/dgt_repository.dart';
@@ -157,15 +158,15 @@ class DgtTrickInsightBanner extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(4, 4, 4, 4),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFB74F).withValues(alpha: 0.12),
+        color: DgtStatusColors.warning.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFFFB74F), width: 1.2),
+        border: Border.all(color: DgtStatusColors.warning, width: 1.2),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Icon(Icons.warning_amber_rounded,
-              color: Color(0xFFFFB74F), size: 22),
+              color: DgtStatusColors.warning, size: 22),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -176,7 +177,7 @@ class DgtTrickInsightBanner extends StatelessWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 14,
-                    color: Color(0xFFFFB74F),
+                    color: DgtStatusColors.warning,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -213,7 +214,7 @@ class _TopFailureTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: isTrick
-              ? const Color(0xFFFFB74F).withValues(alpha: 0.55)
+              ? DgtStatusColors.warning.withValues(alpha: 0.55)
               : context.c.border,
         ),
       ),
@@ -237,14 +238,14 @@ class _TopFailureTile extends StatelessWidget {
                   Row(
                     children: [
                       const Icon(Icons.warning_amber_rounded,
-                          size: 12, color: Color(0xFFFFB74F)),
+                          size: 12, color: DgtStatusColors.warning),
                       const SizedBox(width: 4),
                       Text(
                         'Pregunta trampa',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFFFFB74F)
+                          color: DgtStatusColors.warning
                               .withValues(alpha: 0.95),
                         ),
                       ),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../../core/models/memora_card.dart';
 import '../../core/widgets/memora_image.dart';
@@ -219,7 +220,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFFFF4F6B),
+              foregroundColor: DgtStatusColors.danger,
             ),
             child: const Text('Eliminar'),
           ),
@@ -256,7 +257,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
             IconButton(
               icon: const Icon(Icons.delete_outline_rounded),
               tooltip: 'Eliminar tarjeta',
-              color: const Color(0xFFFF4F6B),
+              color: DgtStatusColors.danger,
               onPressed: _saving ? null : _delete,
             ),
         ],
@@ -385,7 +386,7 @@ class _IconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = danger ? const Color(0xFFFF4F6B) : Colors.white;
+    final color = danger ? DgtStatusColors.danger : Colors.white;
     return Material(
       color: Colors.black.withValues(alpha: 0.55),
       borderRadius: BorderRadius.circular(20),

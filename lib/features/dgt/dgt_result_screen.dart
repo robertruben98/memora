@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_simulacro_review_screen.dart';
@@ -118,7 +119,7 @@ class _DgtResultScreenState extends State<DgtResultScreen> {
   Widget build(BuildContext context) {
     final result = widget.result;
     final passed = result.passed;
-    final color = passed ? const Color(0xFF4FFFB0) : const Color(0xFFFF5C5C);
+    final color = passed ? DgtStatusColors.success : DgtStatusColors.error;
 
     return Scaffold(
       appBar: AppBar(
@@ -292,8 +293,8 @@ class _DgtResultScreenState extends State<DgtResultScreen> {
                 gravity: 0.25,
                 shouldLoop: false,
                 colors: const [
-                  Color(0xFF4FFFB0),
-                  Color(0xFFFFD24F),
+                  DgtStatusColors.success,
+                  DgtStatusColors.warningStrong,
                   Color(0xFF4FB0FF),
                   Color(0xFFFF6FB5),
                 ],
@@ -348,21 +349,21 @@ class _WrongTile extends StatelessWidget {
             context,
             label: 'Correcta',
             value: '${q.correct.toUpperCase()}) ${_optionFor(q, q.correct)}',
-            color: const Color(0xFF4FFFB0),
+            color: DgtStatusColors.success,
           ),
           if (picked != null)
             _line(
               context,
               label: 'Tu respuesta',
               value: '${picked.toUpperCase()}) ${_optionFor(q, picked)}',
-              color: const Color(0xFFFF5C5C),
+              color: DgtStatusColors.error,
             )
           else
             _line(
               context,
               label: 'Tu respuesta',
               value: 'Sin responder',
-              color: const Color(0xFFFF5C5C),
+              color: DgtStatusColors.error,
             ),
           if (q.explanation != null && q.explanation!.isNotEmpty) ...[
             const SizedBox(height: 8),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -124,7 +125,7 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 8),
           _ActionCard(
             icon: Icons.download_rounded,
-            color: const Color(0xFF4FFFB0),
+            color: DgtStatusColors.success,
             title: 'Importar copia (JSON)',
             description:
                 'Reemplaza el contenido actual con un backup. '
@@ -158,18 +159,18 @@ class SettingsScreen extends ConsumerWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                   side: BorderSide(
-                    color: const Color(0xFFFF4F6B).withValues(alpha: 0.4),
+                    color: DgtStatusColors.danger.withValues(alpha: 0.4),
                   ),
                 ),
                 leading: const Icon(
                   Icons.delete_forever_rounded,
-                  color: Color(0xFFFF4F6B),
+                  color: DgtStatusColors.danger,
                 ),
                 title: const Text(
                   'Eliminar cuenta',
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFFFF4F6B),
+                    color: DgtStatusColors.danger,
                   ),
                 ),
                 subtitle: Text(
@@ -218,7 +219,7 @@ class SettingsScreen extends ConsumerWidget {
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFFFF4F6B),
+              foregroundColor: DgtStatusColors.danger,
             ),
             child: const Text('Continuar'),
           ),
@@ -244,7 +245,7 @@ class SettingsScreen extends ConsumerWidget {
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFFFF4F6B),
+              backgroundColor: DgtStatusColors.danger,
             ),
             child: const Text('Sí, eliminar'),
           ),
@@ -260,7 +261,7 @@ class SettingsScreen extends ConsumerWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Cuenta eliminada'),
-          backgroundColor: Color(0xFF4FFFB0),
+          backgroundColor: DgtStatusColors.success,
         ),
       );
     } catch (e) {
@@ -301,7 +302,7 @@ class SettingsScreen extends ConsumerWidget {
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFFFF4F6B),
+              backgroundColor: DgtStatusColors.danger,
             ),
             child: const Text('Continuar'),
           ),
@@ -328,7 +329,7 @@ class SettingsScreen extends ConsumerWidget {
             'Importado: ${result.decks} mazos, '
             '${result.cards} tarjetas, ${result.logs} reviews',
           ),
-          backgroundColor: const Color(0xFF4FFFB0),
+          backgroundColor: DgtStatusColors.success,
         ),
       );
     } catch (e) {
@@ -358,7 +359,7 @@ class SettingsScreen extends ConsumerWidget {
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFFFF4F6B),
+              foregroundColor: DgtStatusColors.danger,
             ),
             child: const Text('Continuar'),
           ),
@@ -384,7 +385,7 @@ class SettingsScreen extends ConsumerWidget {
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFFFF4F6B),
+              backgroundColor: DgtStatusColors.danger,
             ),
             child: const Text('Sí, resetear'),
           ),
@@ -404,7 +405,7 @@ class SettingsScreen extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Progreso reseteado'),
-        backgroundColor: Color(0xFF4FFFB0),
+        backgroundColor: DgtStatusColors.success,
       ),
     );
   }
@@ -682,7 +683,7 @@ class _DangerCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: const Color(0xFFFF4F6B).withValues(alpha: 0.4),
+              color: DgtStatusColors.danger.withValues(alpha: 0.4),
             ),
           ),
           child: Row(
@@ -691,12 +692,12 @@ class _DangerCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF4F6B).withValues(alpha: 0.15),
+                  color: DgtStatusColors.danger.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
                   Icons.refresh_rounded,
-                  color: Color(0xFFFF4F6B),
+                  color: DgtStatusColors.danger,
                 ),
               ),
               const SizedBox(width: 14),
@@ -709,7 +710,7 @@ class _DangerCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFFFF4F6B),
+                        color: DgtStatusColors.danger,
                       ),
                     ),
                     const SizedBox(height: 4),

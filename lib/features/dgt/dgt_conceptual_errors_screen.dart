@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -253,15 +254,15 @@ class _ConceptGroupCardState extends State<_ConceptGroupCard> {
             trailing: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFFFF5C5C).withValues(alpha: 0.15),
+                color: DgtStatusColors.error.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFFFF5C5C)),
+                border: Border.all(color: DgtStatusColors.error),
               ),
               child: Text(
                 '${group.totalFails}',
                 style: const TextStyle(
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFFFF5C5C),
+                  color: DgtStatusColors.error,
                 ),
               ),
             ),
@@ -280,14 +281,14 @@ class _ConceptGroupCardState extends State<_ConceptGroupCard> {
                           horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color:
-                            const Color(0xFFFF5C5C).withValues(alpha: 0.15),
+                            DgtStatusColors.error.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
                         '${it.failCount}x',
                         style: const TextStyle(
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFFFF5C5C),
+                          color: DgtStatusColors.error,
                           fontSize: 11,
                         ),
                       ),
@@ -545,11 +546,11 @@ class _Option extends StatelessWidget {
     Color bg = context.c.surfaceElevated;
     if (answered) {
       if (isCorrectOption) {
-        border = const Color(0xFF4FFFB0);
-        bg = const Color(0xFF4FFFB0).withValues(alpha: 0.08);
+        border = DgtStatusColors.success;
+        bg = DgtStatusColors.success.withValues(alpha: 0.08);
       } else if (isThisPicked) {
-        border = const Color(0xFFFF5C5C);
-        bg = const Color(0xFFFF5C5C).withValues(alpha: 0.08);
+        border = DgtStatusColors.error;
+        bg = DgtStatusColors.error.withValues(alpha: 0.08);
       }
     }
     return Padding(
@@ -615,7 +616,7 @@ class _QuizSummary extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.task_alt_rounded,
-                size: 64, color: Color(0xFF4FFFB0)),
+                size: 64, color: DgtStatusColors.success),
             const SizedBox(height: 16),
             Text(
               'Practicaste $total pregunta${total == 1 ? '' : 's'}',

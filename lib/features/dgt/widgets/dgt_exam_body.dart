@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../../data/repositories/dgt_repository.dart';
@@ -173,7 +174,7 @@ class _QuestionHeader extends StatelessWidget {
             onPressed: onToggleFlag,
             icon: Icon(
               isFlagged ? Icons.flag_rounded : Icons.outlined_flag_rounded,
-              color: isFlagged ? const Color(0xFFFFB74F) : null,
+              color: isFlagged ? DgtStatusColors.warning : null,
             ),
           ),
           IconButton(
@@ -233,7 +234,7 @@ class _ExamNavRow extends StatelessWidget {
           FilledButton.icon(
             onPressed: pickedCurrent != null ? onSubmit : null,
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFFFF5C5C),
+              backgroundColor: DgtStatusColors.error,
               foregroundColor: Colors.white,
             ),
             icon: const Icon(Icons.flag_rounded),
@@ -243,7 +244,7 @@ class _ExamNavRow extends StatelessWidget {
           FilledButton.icon(
             onPressed: onConfirmFinish,
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF4FFFB0),
+              backgroundColor: DgtStatusColors.success,
               foregroundColor: Colors.black,
             ),
             icon: const Icon(Icons.check_circle_rounded),

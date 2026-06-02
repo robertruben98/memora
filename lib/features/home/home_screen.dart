@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../core/models/memora_card.dart';
@@ -502,8 +503,8 @@ class _QuestBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: complete
-              ? const Color(0xFF4FFFB0).withValues(alpha: 0.45)
-              : const Color(0xFFFFD24F).withValues(alpha: 0.45),
+              ? DgtStatusColors.success.withValues(alpha: 0.45)
+              : DgtStatusColors.warningStrong.withValues(alpha: 0.45),
         ),
       ),
       child: Column(
@@ -522,7 +523,7 @@ class _QuestBanner extends StatelessWidget {
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.4,
-                  color: Color(0xFFFFD24F),
+                  color: DgtStatusColors.warningStrong,
                 ),
               ),
               const Spacer(),
@@ -549,8 +550,11 @@ class _QuestBanner extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: complete
-                          ? const [Color(0xFF4FFFB0), Color(0xFF4FFFE9)]
-                          : const [Color(0xFFFFD24F), Color(0xFFFF8A4F)],
+                          ? const [DgtStatusColors.success, Color(0xFF4FFFE9)]
+                          : const [
+                              DgtStatusColors.warningStrong,
+                              DgtStatusColors.accentOrange,
+                            ],
                     ),
                   ),
                 ),
@@ -729,7 +733,7 @@ class _DgtFailuresCard extends StatelessWidget {
         child: Ink(
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFFFF5C5C), Color(0xFFFF8A4F)],
+              colors: [DgtStatusColors.error, DgtStatusColors.accentOrange],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -789,7 +793,7 @@ class _DgtExamBanner extends StatelessWidget {
         child: Ink(
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFFFF8A4F), Color(0xFFE04FFF)],
+              colors: [DgtStatusColors.accentOrange, Color(0xFFE04FFF)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -924,7 +928,7 @@ class _StreakBadgeState extends State<StreakBadge>
             color: context.c.surfaceElevated,
             borderRadius: BorderRadius.circular(999),
             border: Border.all(
-              color: const Color(0xFFFF8A4F),
+              color: DgtStatusColors.accentOrange,
               width: 1.5,
             ),
           ),
@@ -938,7 +942,7 @@ class _StreakBadgeState extends State<StreakBadge>
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFFFF8A4F),
+                  color: DgtStatusColors.accentOrange,
                 ),
               ),
             ],
@@ -967,17 +971,17 @@ class _DgtReadyCheckBanner extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: const Color(0xFFFF5C5C).withValues(alpha: 0.12),
+            color: DgtStatusColors.error.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: const Color(0xFFFF5C5C).withValues(alpha: 0.4),
+              color: DgtStatusColors.error.withValues(alpha: 0.4),
             ),
           ),
           child: Row(
             children: [
               const Icon(
                 Icons.fact_check_rounded,
-                color: Color(0xFFFF5C5C),
+                color: DgtStatusColors.error,
                 size: 28,
               ),
               const SizedBox(width: 12),
@@ -992,7 +996,7 @@ class _DgtReadyCheckBanner extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFFFF5C5C),
+                        color: DgtStatusColors.error,
                       ),
                     ),
                     const SizedBox(height: 2),

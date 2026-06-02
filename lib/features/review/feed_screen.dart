@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/repositories/review_repository.dart';
@@ -195,7 +196,7 @@ class _ActiveFeedState extends ConsumerState<_ActiveFeed> {
               padding: const EdgeInsets.only(right: 8),
               child: _Chip(
                 label: '${widget.queue.dueCount} due',
-                color: const Color(0xFFFF8A4F),
+                color: DgtStatusColors.accentOrange,
               ),
             ),
           if (widget.queue.newCount > 0)
@@ -249,13 +250,13 @@ class _AllCaughtUpScreen extends StatelessWidget {
                 width: 96,
                 height: 96,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4FFFB0).withValues(alpha: 0.18),
+                  color: DgtStatusColors.success.withValues(alpha: 0.18),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.check_circle_outline_rounded,
                   size: 56,
-                  color: Color(0xFF4FFFB0),
+                  color: DgtStatusColors.success,
                 ),
               ),
               const SizedBox(height: 24),

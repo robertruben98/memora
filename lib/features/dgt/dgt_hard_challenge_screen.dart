@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -121,8 +122,8 @@ class _DgtHardChallengeScreenState
   }
 
   Color _timerColor(BuildContext context) {
-    if (_timeExpired) return const Color(0xFFFF5C5C);
-    if (_secondsLeft <= _totalSeconds ~/ 3) return const Color(0xFFFFB74F);
+    if (_timeExpired) return DgtStatusColors.error;
+    if (_secondsLeft <= _totalSeconds ~/ 3) return DgtStatusColors.warning;
     return context.c.textPrimary;
   }
 
@@ -254,7 +255,7 @@ class _DgtHardChallengeScreenState
               if (_timeExpired)
                 Container(
                   width: double.infinity,
-                  color: const Color(0xFFFF5C5C).withValues(alpha: 0.18),
+                  color: DgtStatusColors.error.withValues(alpha: 0.18),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 8,
@@ -263,7 +264,7 @@ class _DgtHardChallengeScreenState
                     'Tiempo agotado. Puedes terminar cuando quieras.',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFFFF5C5C),
+                      color: DgtStatusColors.error,
                     ),
                   ),
                 ),
@@ -346,7 +347,7 @@ class _DgtHardChallengeScreenState
                         FilledButton.icon(
                           onPressed: _confirmFinish,
                           style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF4FFFB0),
+                            backgroundColor: DgtStatusColors.success,
                             foregroundColor: Colors.black,
                           ),
                           icon: const Icon(Icons.check_circle_rounded),
@@ -387,24 +388,24 @@ class _DgtHardChallengeScreenState
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF8A4F).withValues(alpha: 0.12),
+                  color: DgtStatusColors.accentOrange.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFFFF8A4F).withValues(alpha: 0.5),
+                    color: DgtStatusColors.accentOrange.withValues(alpha: 0.5),
                   ),
                 ),
                 child: Column(
                   children: [
                     const Icon(
                       Icons.local_fire_department_rounded,
-                      color: Color(0xFFFF8A4F),
+                      color: DgtStatusColors.accentOrange,
                       size: 44,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Reto terminado',
                       style: const TextStyle(
-                        color: Color(0xFFFF8A4F),
+                        color: DgtStatusColors.accentOrange,
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
                       ),
@@ -511,7 +512,7 @@ class _AnswerTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = selected
-        ? const Color(0xFFFF8A4F)
+        ? DgtStatusColors.accentOrange
         : context.c.surfaceMuted;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -543,7 +544,7 @@ class _AnswerTile extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
                       color: selected
-                          ? const Color(0xFFFF8A4F)
+                          ? DgtStatusColors.accentOrange
                           : context.c.textPrimary,
                     ),
                   ),

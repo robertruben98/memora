@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import 'dgt_exam_calendar_phase.dart';
@@ -195,7 +196,7 @@ class _ExamTodayTips extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFFFFF6E5),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFFFB74F)),
+        border: Border.all(color: DgtStatusColors.warning),
       ),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -442,13 +443,13 @@ _PhaseCta? _phaseCta(BuildContext context, DgtExamPhase phase) {
 Color _phaseAccent(DgtExamPhase phase) {
   switch (phase) {
     case DgtExamPhase.temario:
-      return const Color(0xFF4FFFB0);
+      return DgtStatusColors.success;
     case DgtExamPhase.refuerzo:
-      return const Color(0xFFFFB74F);
+      return DgtStatusColors.warning;
     case DgtExamPhase.simulacros:
       return const Color(0xFFFF6B35);
     case DgtExamPhase.repaso:
-      return const Color(0xFFFF5C5C);
+      return DgtStatusColors.error;
   }
 }
 

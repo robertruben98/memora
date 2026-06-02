@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/repositories/dgt_repository.dart';
@@ -256,11 +257,11 @@ class _OptionTile extends StatelessWidget {
     Color bg = context.c.surfaceElevated;
     if (answered) {
       if (isCorrectOption) {
-        border = const Color(0xFF4FFFB0);
-        bg = const Color(0xFF4FFFB0).withValues(alpha: 0.08);
+        border = DgtStatusColors.success;
+        bg = DgtStatusColors.success.withValues(alpha: 0.08);
       } else if (isThisPicked) {
-        border = const Color(0xFFFF5C5C);
-        bg = const Color(0xFFFF5C5C).withValues(alpha: 0.08);
+        border = DgtStatusColors.error;
+        bg = DgtStatusColors.error.withValues(alpha: 0.08);
       }
     }
     return Padding(
@@ -326,7 +327,7 @@ class _SummaryView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.task_alt_rounded,
-                size: 64, color: Color(0xFF4FFFB0)),
+                size: 64, color: DgtStatusColors.success),
             const SizedBox(height: 16),
             Text(
               'Repasaste $total fallo${total == 1 ? '' : 's'}',

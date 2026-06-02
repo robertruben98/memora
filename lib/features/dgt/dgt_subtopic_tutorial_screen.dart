@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import 'dgt_tutorial_seen_provider.dart';
 import 'dgt_tutorials_catalog.dart';
@@ -93,7 +94,7 @@ class DgtSubtopicTutorialScreen extends ConsumerWidget {
                       _Section(
                         title: 'Ejemplo',
                         body: tutorial.example,
-                        accent: const Color(0xFF4FFFB0),
+                        accent: DgtStatusColors.success,
                         icon: Icons.check_circle_outline_rounded,
                       ),
                     ],

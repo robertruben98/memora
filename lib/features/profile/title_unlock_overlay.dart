@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import 'character_progress.dart';
 
@@ -10,7 +11,7 @@ class TitleUnlockOverlay {
     BuildContext context, {
     required String deckName,
     required DeckRank newRank,
-    Color accent = const Color(0xFFFFD24F),
+    Color accent = DgtStatusColors.warningStrong,
   }) {
     if (_current != null) return;
     final overlay = Overlay.of(context, rootOverlay: true);

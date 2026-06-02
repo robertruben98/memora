@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/repositories/dgt_repository.dart';
@@ -328,7 +329,7 @@ class _Question extends StatelessWidget {
           value: (state.current + 1) / state.total,
           minHeight: 4,
           backgroundColor: context.c.surfaceMuted,
-          valueColor: const AlwaysStoppedAnimation(Color(0xFF4FFFB0)),
+          valueColor: const AlwaysStoppedAnimation(DgtStatusColors.success),
         ),
         Expanded(
           child: Padding(
@@ -377,7 +378,7 @@ class _Question extends StatelessWidget {
                   child: _AnswerButton(
                     label: 'Verdadero',
                     icon: Icons.check_circle_rounded,
-                    color: const Color(0xFF4FFFB0),
+                    color: DgtStatusColors.success,
                     selected: picked == true,
                     revealed: answered,
                     isMatch: stmt.isTrue == true,
@@ -389,7 +390,7 @@ class _Question extends StatelessWidget {
                   child: _AnswerButton(
                     label: 'Falso',
                     icon: Icons.cancel_rounded,
-                    color: const Color(0xFFFF5C5C),
+                    color: DgtStatusColors.error,
                     selected: picked == false,
                     revealed: answered,
                     isMatch: stmt.isTrue == false,
@@ -503,7 +504,7 @@ class _FeedbackCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent =
-        isCorrect ? const Color(0xFF4FFFB0) : const Color(0xFFFF5C5C);
+        isCorrect ? DgtStatusColors.success : DgtStatusColors.error;
     final label = isCorrect ? 'Correcto' : 'Incorrecto';
     final explanation = isCorrect
         ? (stmt.isTrue
@@ -572,7 +573,7 @@ class _Summary extends StatelessWidget {
                   ? Icons.emoji_events_rounded
                   : Icons.psychology_alt_rounded,
               size: 64,
-              color: const Color(0xFF4FFFB0),
+              color: DgtStatusColors.success,
             ),
             const SizedBox(height: 12),
             const Text(

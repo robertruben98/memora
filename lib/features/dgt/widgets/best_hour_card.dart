@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../dgt_time_of_day_insight_provider.dart';
 
@@ -111,7 +112,7 @@ class _BestHourBody extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF4FFFB0),
+                      color: DgtStatusColors.success,
                     ),
                   ),
               ],
@@ -238,7 +239,7 @@ class _Bar extends StatelessWidget {
       ratio = (pct / maxAccuracy).clamp(0.1, 1.0);
     }
     final fillColor = isBest
-        ? const Color(0xFF4FFFB0)
+        ? DgtStatusColors.success
         : context.c.textMuted;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),

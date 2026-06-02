@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/repositories/dgt_repository.dart';
@@ -239,12 +240,12 @@ class _WarmupAnswerTile extends StatelessWidget {
 
     if (answered) {
       if (isCorrectOption) {
-        bg = const Color(0xFF4FFFB0).withValues(alpha: 0.18);
-        iconBg = const Color(0xFF4FFFB0);
+        bg = DgtStatusColors.success.withValues(alpha: 0.18);
+        iconBg = DgtStatusColors.success;
         iconFg = Colors.black;
       } else if (selected) {
-        bg = const Color(0xFFFF5C5C).withValues(alpha: 0.18);
-        iconBg = const Color(0xFFFF5C5C);
+        bg = DgtStatusColors.error.withValues(alpha: 0.18);
+        iconBg = DgtStatusColors.error;
         iconFg = Colors.white;
       }
     } else if (selected) {
@@ -291,13 +292,13 @@ class _WarmupAnswerTile extends StatelessWidget {
                 if (answered && isCorrectOption)
                   const Icon(
                     Icons.check_circle_rounded,
-                    color: Color(0xFF4FFFB0),
+                    color: DgtStatusColors.success,
                     size: 20,
                   )
                 else if (answered && selected && !isCorrectOption)
                   const Icon(
                     Icons.cancel_rounded,
-                    color: Color(0xFFFF5C5C),
+                    color: DgtStatusColors.error,
                     size: 20,
                   ),
               ],
@@ -340,7 +341,7 @@ class _WarmupSummary extends StatelessWidget {
                   : Icons.bolt_rounded,
               size: 72,
               color: isReady
-                  ? const Color(0xFF4FFFB0)
+                  ? DgtStatusColors.success
                   : const Color(0xFFFFB84F),
             ),
             const SizedBox(height: 16),
@@ -423,7 +424,7 @@ class _ErrorState extends StatelessWidget {
           children: [
             const Icon(
               Icons.error_outline_rounded,
-              color: Color(0xFFFF5C5C),
+              color: DgtStatusColors.error,
               size: 56,
             ),
             const SizedBox(height: 12),

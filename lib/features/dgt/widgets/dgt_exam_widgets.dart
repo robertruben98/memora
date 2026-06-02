@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../../../data/api/api_client.dart';
 import '../dgt_exam_controller.dart';
@@ -118,10 +119,10 @@ class DgtQuestionGridSheet {
                     if (isCurrent) {
                       bg = AppColors.brand;
                     } else if (flagged) {
-                      bg = const Color(0xFFFFB74F);
+                      bg = DgtStatusColors.warning;
                     } else if (answered) {
                       bg =
-                          const Color(0xFF4FFFB0).withValues(alpha: 0.35);
+                          DgtStatusColors.success.withValues(alpha: 0.35);
                     } else {
                       bg = context.c.surfaceMuted;
                     }
@@ -151,9 +152,9 @@ class DgtQuestionGridSheet {
                 const SizedBox(height: 16),
                 _legendRow(AppColors.brand, 'Actual'),
                 _legendRow(
-                    const Color(0xFF4FFFB0).withValues(alpha: 0.35),
+                    DgtStatusColors.success.withValues(alpha: 0.35),
                     'Respondida'),
-                _legendRow(const Color(0xFFFFB74F), 'Marcada'),
+                _legendRow(DgtStatusColors.warning, 'Marcada'),
                 _legendRow(context.c.surfaceMuted, 'Sin responder'),
               ],
             ),

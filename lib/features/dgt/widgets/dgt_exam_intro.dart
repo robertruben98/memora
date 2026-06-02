@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../dgt_prediction.dart';
 
@@ -143,8 +144,8 @@ class DgtExamIntro extends StatelessWidget {
                   onPressed: onStartStrict,
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    side: const BorderSide(color: Color(0xFFFF5C5C)),
-                    foregroundColor: const Color(0xFFFF5C5C),
+                    side: const BorderSide(color: DgtStatusColors.error),
+                    foregroundColor: DgtStatusColors.error,
                   ),
                   icon: const Icon(Icons.timer_outlined),
                   label: const Text(
@@ -187,7 +188,7 @@ class _Examen2026Section extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFB74F).withValues(alpha: 0.2),
+                    color: DgtStatusColors.warning.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: const Text(
@@ -195,7 +196,7 @@ class _Examen2026Section extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFFFFB74F),
+                      color: DgtStatusColors.warning,
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -295,9 +296,9 @@ class _SprintDiarioTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           child: Ink(
             decoration: BoxDecoration(
-              color: const Color(0xFF4FFFB0).withValues(alpha: 0.12),
+              color: DgtStatusColors.success.withValues(alpha: 0.12),
               border: Border.all(
-                color: const Color(0xFF4FFFB0).withValues(alpha: 0.45),
+                color: DgtStatusColors.success.withValues(alpha: 0.45),
                 width: 1,
               ),
               borderRadius: BorderRadius.circular(14),
@@ -311,12 +312,12 @@ class _SprintDiarioTile extends StatelessWidget {
                   height: 34,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4FFFB0).withValues(alpha: 0.25),
+                    color: DgtStatusColors.success.withValues(alpha: 0.25),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(
                     Icons.bolt_rounded,
-                    color: Color(0xFF4FFFB0),
+                    color: DgtStatusColors.success,
                     size: 20,
                   ),
                 ),

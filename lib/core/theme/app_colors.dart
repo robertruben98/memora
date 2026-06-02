@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 /// Tokens de color semánticos que se adaptan a modo claro/oscuro.
 ///
@@ -60,7 +61,7 @@ class AppColors extends ThemeExtension<AppColors> {
     accent: brand,
     onAccent: Colors.white,
     shadow: Color(0x66000000),
-    achievementUnlocked: Color(0xFFFFB74F),
+    achievementUnlocked: DgtStatusColors.warning,
   );
 
   static const AppColors light = AppColors(
@@ -74,7 +75,7 @@ class AppColors extends ThemeExtension<AppColors> {
     accent: brand,
     onAccent: Colors.white,
     shadow: Color(0x1F000000),
-    achievementUnlocked: Color(0xFFFFB74F),
+    achievementUnlocked: DgtStatusColors.warning,
   );
 
   @override

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/repositories/dgt_repository.dart';
@@ -390,7 +391,7 @@ class _HardChallengeTile extends StatelessWidget {
         child: Ink(
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFFFF5C5C), Color(0xFFFF8A4F)],
+              colors: [DgtStatusColors.error, DgtStatusColors.accentOrange],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),

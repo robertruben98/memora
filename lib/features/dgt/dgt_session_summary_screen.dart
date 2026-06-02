@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import 'dgt_failures_review_screen.dart';
 import 'dgt_weak_focus_screen.dart';
@@ -61,10 +62,10 @@ class DgtSessionSummaryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = _pct >= 80
-        ? const Color(0xFF4FFFB0)
+        ? DgtStatusColors.success
         : _pct >= 50
             ? AppColors.brand
-            : const Color(0xFFFF8A4F);
+            : DgtStatusColors.accentOrange;
 
     return Scaffold(
       appBar: AppBar(

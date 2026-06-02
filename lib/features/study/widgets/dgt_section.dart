@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:memora/core/theme/dgt_status_colors.dart';
+
 import '../../dgt/dgt_achievements_screen.dart';
 import '../../dgt/dgt_autotest_screen.dart';
 import '../../dgt/dgt_cohort_compare_screen.dart';
@@ -85,13 +87,13 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     title: 'Estudio de hoy',
     subtitleBuilder: (_) => '15 preguntas, ~12 min · auto-curada',
     icon: Icons.today_rounded,
-    accentColor: const Color(0xFF4FA8FF),
+    accentColor: DgtStatusColors.info,
     primaryIconColor: const Color(0xFF9FCBFF),
     variant: DgtTileVariant.primary,
     routeBuilder: (_) => const DgtTodayStudyScreen(),
     badgeBuilder: (_) => const DgtTileBadge(
       text: 'Recomendado',
-      color: Color(0xFF4FA8FF),
+      color: DgtStatusColors.info,
     ),
   ),
 
@@ -110,7 +112,7 @@ final List<DgtTileSpec> kDgtTileRegistry = [
       return 'Foco: $name  ·  $pct% acierto';
     },
     icon: Icons.gps_fixed_rounded,
-    accentColor: const Color(0xFFFF5C5C),
+    accentColor: DgtStatusColors.error,
     routeBuilder: (_) => const DgtWeakFocusScreen(),
     visibleWhen: (ref) => ref.watch(dgtPredictionProvider).maybeWhen(
           data: (p) => p.weakestTopic != null,
@@ -118,7 +120,7 @@ final List<DgtTileSpec> kDgtTileRegistry = [
         ),
     badgeBuilder: (_) => const DgtTileBadge(
       text: 'Adaptativo',
-      color: Color(0xFFFF5C5C),
+      color: DgtStatusColors.error,
     ),
   ),
 
@@ -128,11 +130,11 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     subtitleBuilder: (_) =>
         'Repasa las preguntas que fallas una y otra vez (>= 2 veces)',
     icon: Icons.repeat_rounded,
-    accentColor: const Color(0xFFFF5C5C),
+    accentColor: DgtStatusColors.error,
     routeBuilder: (_) => const DgtRecurrentFailuresScreen(),
     badgeBuilder: (_) => const DgtTileBadge(
       text: 'Erratas',
-      color: Color(0xFFFF5C5C),
+      color: DgtStatusColors.error,
     ),
   ),
 
@@ -144,11 +146,11 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     subtitleBuilder: (_) =>
         'Tus 5 preguntas peor llevadas + insight de palabras trampa',
     icon: Icons.trending_down_rounded,
-    accentColor: const Color(0xFFFFB74F),
+    accentColor: DgtStatusColors.warning,
     routeBuilder: (_) => const DgtTopFailuresScreen(),
     badgeBuilder: (_) => const DgtTileBadge(
       text: 'Predictivo',
-      color: Color(0xFFFFB74F),
+      color: DgtStatusColors.warning,
     ),
   ),
 
@@ -186,11 +188,11 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     subtitleBuilder: (_) =>
         '30 preguntas en 5 min, sin pausa, auto-skip 12s',
     icon: Icons.bolt_rounded,
-    accentColor: const Color(0xFFFF5C5C),
+    accentColor: DgtStatusColors.error,
     routeBuilder: (_) => const DgtSprintExtremeScreen(),
     badgeBuilder: (_) => const DgtTileBadge(
       text: 'Velocidad',
-      color: Color(0xFFFF5C5C),
+      color: DgtStatusColors.error,
     ),
   ),
 
@@ -216,11 +218,11 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     subtitleBuilder: (_) =>
         'Practica las palabras siempre / nunca / excepto / solo',
     icon: Icons.warning_amber_rounded,
-    accentColor: const Color(0xFFFFB74F),
+    accentColor: DgtStatusColors.warning,
     routeBuilder: (_) => const DgtTrickQuestionsScreen(),
     badgeBuilder: (_) => const DgtTileBadge(
       text: 'Anti-trampa',
-      color: Color(0xFFFFB74F),
+      color: DgtStatusColors.warning,
     ),
   ),
 
@@ -247,11 +249,11 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     subtitleBuilder: (_) =>
         '10 afirmaciones binarias. Entrena el reflejo si/no.',
     icon: Icons.rule_rounded,
-    accentColor: const Color(0xFF4FFFB0),
+    accentColor: DgtStatusColors.success,
     routeBuilder: (_) => const DgtTrueFalseScreen(),
     badgeBuilder: (_) => const DgtTileBadge(
       text: 'V/F',
-      color: Color(0xFF4FFFB0),
+      color: DgtStatusColors.success,
     ),
   ),
 
@@ -275,11 +277,11 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     subtitleBuilder: (_) =>
         'Tu acierto vs media global por tema (BE#107)',
     icon: Icons.people_alt_rounded,
-    accentColor: const Color(0xFF4FA8FF),
+    accentColor: DgtStatusColors.info,
     routeBuilder: (_) => const DgtCohortCompareScreen(),
     badgeBuilder: (_) => const DgtTileBadge(
       text: 'Cohorte',
-      color: Color(0xFF4FA8FF),
+      color: DgtStatusColors.info,
     ),
   ),
 
@@ -291,11 +293,11 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     subtitleBuilder: (_) =>
         'Countdown D-N + plan de ramp-up por fases',
     icon: Icons.event_rounded,
-    accentColor: const Color(0xFFFFB74F),
+    accentColor: DgtStatusColors.warning,
     routeBuilder: (_) => const DgtExamCalendarScreen(),
     badgeBuilder: (_) => const DgtTileBadge(
       text: 'Plan',
-      color: Color(0xFFFFB74F),
+      color: DgtStatusColors.warning,
     ),
   ),
 
@@ -307,11 +309,11 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     subtitleBuilder: (_) =>
         'Insignias desbloqueadas y progreso por categoria',
     icon: Icons.emoji_events_rounded,
-    accentColor: const Color(0xFFFFB74F),
+    accentColor: DgtStatusColors.warning,
     routeBuilder: (_) => const DgtAchievementsScreen(),
     badgeBuilder: (_) => const DgtTileBadge(
       text: 'Logros',
-      color: Color(0xFFFFB74F),
+      color: DgtStatusColors.warning,
     ),
   ),
 
@@ -321,11 +323,11 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     subtitleBuilder: (_) =>
         'Chart de tendencia: % acierto, simulacros y streak en 8 semanas',
     icon: Icons.show_chart_rounded,
-    accentColor: const Color(0xFF4FA8FF),
+    accentColor: DgtStatusColors.info,
     routeBuilder: (_) => const DgtWeeklyEvolutionScreen(),
     badgeBuilder: (_) => const DgtTileBadge(
       text: 'Tendencia',
-      color: Color(0xFF4FA8FF),
+      color: DgtStatusColors.info,
     ),
   ),
 
@@ -335,7 +337,7 @@ final List<DgtTileSpec> kDgtTileRegistry = [
     subtitleBuilder: (_) =>
         'Repasa senales por categoria (peligro, prohibicion...)',
     icon: Icons.traffic_rounded,
-    accentColor: const Color(0xFF4FFFB0),
+    accentColor: DgtStatusColors.success,
     routeBuilder: (_) => const DgtSignalsCatalogScreen(),
   ),
 

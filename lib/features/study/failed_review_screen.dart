@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 import '../../core/models/memora_card.dart';
 import '../../data/repositories/review_repository.dart';
@@ -178,13 +179,13 @@ class _FailedEmptyScreen extends StatelessWidget {
                 width: 96,
                 height: 96,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4FFFB0).withValues(alpha: 0.18),
+                  color: DgtStatusColors.success.withValues(alpha: 0.18),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.emoji_events_outlined,
                   size: 56,
-                  color: Color(0xFF4FFFB0),
+                  color: DgtStatusColors.success,
                 ),
               ),
               const SizedBox(height: 24),

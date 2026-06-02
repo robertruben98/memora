@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/repositories/dgt_repository.dart';
@@ -145,7 +146,7 @@ class _FiltersBar extends StatelessWidget {
           Row(
             children: [
               const Icon(Icons.repeat_rounded,
-                  color: Color(0xFFFF5C5C), size: 18),
+                  color: DgtStatusColors.error, size: 18),
               const SizedBox(width: 8),
               Text(
                 'Min fallos: $minFails',
@@ -159,7 +160,7 @@ class _FiltersBar extends StatelessWidget {
             max: 10,
             divisions: 8,
             label: '$minFails',
-            activeColor: const Color(0xFFFF5C5C),
+            activeColor: DgtStatusColors.error,
             onChanged: (v) => onMinFailsChanged(v.round()),
             onChangeEnd: (v) => onMinFailsCommitted(v.round()),
           ),
@@ -207,7 +208,7 @@ class _List extends StatelessWidget {
                 'Repasar ${items.length} errata${items.length == 1 ? '' : 's'}',
               ),
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFFF5C5C),
+                backgroundColor: DgtStatusColors.error,
               ),
             ),
           ),
@@ -271,21 +272,21 @@ class DgtFailCountBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFFF5C5C).withValues(alpha: 0.15),
+        color: DgtStatusColors.error.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFFFF5C5C)),
+        border: Border.all(color: DgtStatusColors.error),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           const Icon(Icons.repeat_rounded,
-              color: Color(0xFFFF5C5C), size: 12),
+              color: DgtStatusColors.error, size: 12),
           const SizedBox(width: 4),
           Text(
             '${count}x',
             style: const TextStyle(
               fontWeight: FontWeight.w800,
-              color: Color(0xFFFF5C5C),
+              color: DgtStatusColors.error,
               fontSize: 12,
             ),
           ),
@@ -328,7 +329,7 @@ class _ErrorState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.cloud_off_rounded,
-                color: Color(0xFFFFB74F), size: 48),
+                color: DgtStatusColors.warning, size: 48),
             const SizedBox(height: 12),
             const Text(
               'Error cargando tus erratas. Reintenta en unos segundos.',
@@ -440,7 +441,7 @@ class _QuizQuestion extends StatelessWidget {
             value: (index + 1) / total,
             minHeight: 6,
             valueColor:
-                const AlwaysStoppedAnimation(Color(0xFFFF5C5C)),
+                const AlwaysStoppedAnimation(DgtStatusColors.error),
           ),
           const SizedBox(height: 8),
           Row(
@@ -549,11 +550,11 @@ class _Option extends StatelessWidget {
     Color bg = context.c.surfaceElevated;
     if (answered) {
       if (isCorrectOption) {
-        border = const Color(0xFF4FFFB0);
-        bg = const Color(0xFF4FFFB0).withValues(alpha: 0.08);
+        border = DgtStatusColors.success;
+        bg = DgtStatusColors.success.withValues(alpha: 0.08);
       } else if (isThisPicked) {
-        border = const Color(0xFFFF5C5C);
-        bg = const Color(0xFFFF5C5C).withValues(alpha: 0.08);
+        border = DgtStatusColors.error;
+        bg = DgtStatusColors.error.withValues(alpha: 0.08);
       }
     }
     return Padding(
@@ -619,7 +620,7 @@ class _QuizSummary extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.task_alt_rounded,
-                size: 64, color: Color(0xFF4FFFB0)),
+                size: 64, color: DgtStatusColors.success),
             const SizedBox(height: 16),
             Text(
               'Repasaste $total errata${total == 1 ? '' : 's'}',

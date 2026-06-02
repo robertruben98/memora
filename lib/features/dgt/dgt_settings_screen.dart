@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../study/dgt_exam_history.dart';
@@ -297,7 +298,7 @@ class _SelectiveResetTile extends ConsumerWidget {
           TextButton(
             key: ValueKey('selective-reset-confirm-${kind.keySuffix}'),
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFFFF5C5C),
+              foregroundColor: DgtStatusColors.error,
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: const Text('Borrar'),
@@ -625,8 +626,8 @@ class _ResetProgressButton extends ConsumerWidget {
       child: OutlinedButton.icon(
         key: const ValueKey('dgt-reset-progress'),
         style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFFFF5C5C),
-          side: const BorderSide(color: Color(0xFFFF5C5C)),
+          foregroundColor: DgtStatusColors.error,
+          side: const BorderSide(color: DgtStatusColors.error),
         ),
         onPressed: () => _confirmAndReset(context, ref),
         icon: const Icon(Icons.delete_sweep_rounded, size: 18),
@@ -676,7 +677,7 @@ class _ResetProgressButton extends ConsumerWidget {
           TextButton(
             key: const ValueKey('reset-confirm-2'),
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFFFF5C5C),
+              foregroundColor: DgtStatusColors.error,
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: const Text('Resetear'),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import 'stats_repository.dart';
@@ -68,7 +69,7 @@ class _StreakHero extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: hasStreak
-              ? const [Color(0xFFFF8A4F), Color(0xFFFFD24F)]
+              ? const [DgtStatusColors.accentOrange, DgtStatusColors.warningStrong]
               : [context.c.surfaceElevated, context.c.surfaceElevated],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -154,7 +155,7 @@ class _StatsRow extends StatelessWidget {
                 : '${(snapshot.retention * 100).toStringAsFixed(0)}%',
             label: 'retención',
             icon: Icons.psychology_rounded,
-            color: const Color(0xFF4FFFB0),
+            color: DgtStatusColors.success,
           ),
         ),
       ],
@@ -246,8 +247,8 @@ class _StateDistribution extends StatelessWidget {
     }
     final items = [
       _DistItem('Nuevas', snapshot.newCount, const Color(0xFF4F8AFF)),
-      _DistItem('Aprendiendo', snapshot.learningCount, const Color(0xFFFFD24F)),
-      _DistItem('Repasando', snapshot.reviewingCount, const Color(0xFF4FFFB0)),
+      _DistItem('Aprendiendo', snapshot.learningCount, DgtStatusColors.warningStrong),
+      _DistItem('Repasando', snapshot.reviewingCount, DgtStatusColors.success),
     ];
     return Container(
       padding: const EdgeInsets.all(16),

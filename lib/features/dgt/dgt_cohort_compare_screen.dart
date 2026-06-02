@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/api/api_client.dart';
@@ -261,7 +262,7 @@ class _SummaryCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.people_rounded, color: Color(0xFF4FA8FF)),
+          const Icon(Icons.people_rounded, color: DgtStatusColors.info),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -301,7 +302,7 @@ class _OrderToggle extends StatelessWidget {
               strongestFirst
                   ? Icons.trending_up_rounded
                   : Icons.trending_down_rounded,
-              color: const Color(0xFF4FA8FF),
+              color: DgtStatusColors.info,
               size: 18,
             ),
             const SizedBox(width: 6),
@@ -310,7 +311,7 @@ class _OrderToggle extends StatelessWidget {
                   ? 'Donde estoy mas fuerte'
                   : 'Donde estoy mas debil',
               style: const TextStyle(
-                color: Color(0xFF4FA8FF),
+                color: DgtStatusColors.info,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
@@ -388,7 +389,7 @@ class _BenchmarkTile extends StatelessWidget {
           _BarRow(
             label: 'Tu',
             pct: item.userPct,
-            color: const Color(0xFF4FA8FF),
+            color: DgtStatusColors.info,
             emptyLabel: hasUser ? null : 'Sin respuestas',
           ),
           const SizedBox(height: 6),
@@ -410,9 +411,9 @@ class _BenchmarkTile extends StatelessWidget {
 
   static Color _deltaColor(double? delta) {
     if (delta == null) return const Color(0xFF7A8497);
-    if (delta > 5) return const Color(0xFF4FFFB0);
-    if (delta < -5) return const Color(0xFFFF5C5C);
-    return const Color(0xFFFFB74F);
+    if (delta > 5) return DgtStatusColors.success;
+    if (delta < -5) return DgtStatusColors.error;
+    return DgtStatusColors.warning;
   }
 }
 
@@ -508,7 +509,7 @@ class _ErrorView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.error_outline_rounded,
-                color: Color(0xFFFF5C5C), size: 48),
+                color: DgtStatusColors.error, size: 48),
             const SizedBox(height: 12),
             Text(
               message,

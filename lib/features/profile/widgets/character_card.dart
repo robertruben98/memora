@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import '../character_progress.dart';
 
 /// Tarjeta de personaje principal: avatar con anillo de nivel, clase, título, XP bar.
@@ -23,7 +24,7 @@ class CharacterCard extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: const Color(0xFFFFD24F).withValues(alpha: 0.35),
+          color: DgtStatusColors.warningStrong.withValues(alpha: 0.35),
           width: 1.5,
         ),
         boxShadow: [
@@ -41,17 +42,17 @@ class CharacterCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFD24F).withValues(alpha: 0.18),
+              color: DgtStatusColors.warningStrong.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: const Color(0xFFFFD24F).withValues(alpha: 0.5),
+                color: DgtStatusColors.warningStrong.withValues(alpha: 0.5),
                 width: 1,
               ),
             ),
             child: Text(
               progress.className.toUpperCase(),
               style: const TextStyle(
-                color: Color(0xFFFFD24F),
+                color: DgtStatusColors.warningStrong,
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.5,
@@ -104,16 +105,16 @@ class _CharacterAvatar extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: const SweepGradient(
                 colors: [
-                  Color(0xFFFFD24F),
-                  Color(0xFFFF8A4F),
+                  DgtStatusColors.warningStrong,
+                  DgtStatusColors.accentOrange,
                   Color(0xFF7C5CFF),
                   Color(0xFF4F8AFF),
-                  Color(0xFFFFD24F),
+                  DgtStatusColors.warningStrong,
                 ],
               ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFFFD24F).withValues(alpha: 0.4),
+                  color: DgtStatusColors.warningStrong.withValues(alpha: 0.4),
                   blurRadius: 24,
                   spreadRadius: 1,
                 ),
@@ -169,7 +170,7 @@ class _CharacterAvatar extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFFFFD24F), Color(0xFFFF8A4F)],
+                  colors: [DgtStatusColors.warningStrong, DgtStatusColors.accentOrange],
                 ),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
@@ -210,7 +211,7 @@ class _XpBar extends StatelessWidget {
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.2,
-                color: Color(0xFFFFD24F),
+                color: DgtStatusColors.warningStrong,
               ),
             ),
             const Spacer(),
@@ -238,8 +239,8 @@ class _XpBar extends StatelessWidget {
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Color(0xFFFFD24F),
-                          Color(0xFFFF8A4F),
+                          DgtStatusColors.warningStrong,
+                          DgtStatusColors.accentOrange,
                           Color(0xFFE04FFF),
                         ],
                       ),

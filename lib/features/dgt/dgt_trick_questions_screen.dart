@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/repositories/dgt_repository.dart';
@@ -133,7 +134,7 @@ class _DgtTrickQuestionsScreenState
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.warning_amber_rounded,
-                color: Color(0xFFFFB74F), size: 48),
+                color: DgtStatusColors.warning, size: 48),
             const SizedBox(height: 12),
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 16),
@@ -162,7 +163,7 @@ class _DgtTrickQuestionsScreenState
           value: (_current + 1) / qs.length,
           minHeight: 4,
           backgroundColor: context.c.surfaceMuted,
-          valueColor: const AlwaysStoppedAnimation(Color(0xFFFFB74F)),
+          valueColor: const AlwaysStoppedAnimation(DgtStatusColors.warning),
         ),
         Expanded(
           child: SingleChildScrollView(
@@ -253,7 +254,7 @@ class _DgtTrickQuestionsScreenState
                   ? Icons.emoji_events_rounded
                   : Icons.psychology_alt_rounded,
               size: 64,
-              color: const Color(0xFFFFB74F),
+              color: DgtStatusColors.warning,
             ),
             const SizedBox(height: 12),
             const Text(
@@ -340,10 +341,10 @@ class DgtTrickHighlightedStatement extends StatelessWidget {
       spans.add(TextSpan(
         text: text.substring(m.start, m.end),
         style: base.merge(const TextStyle(
-          color: Color(0xFFFFB74F),
+          color: DgtStatusColors.warning,
           fontWeight: FontWeight.w900,
           decoration: TextDecoration.underline,
-          decorationColor: Color(0xFFFFB74F),
+          decorationColor: DgtStatusColors.warning,
         )),
       ));
       last = m.end;
@@ -363,24 +364,24 @@ class _AntiTrampaBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFB74F).withValues(alpha: 0.15),
+        color: DgtStatusColors.warning.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: const Color(0xFFFFB74F).withValues(alpha: 0.45),
+          color: DgtStatusColors.warning.withValues(alpha: 0.45),
         ),
       ),
       child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.warning_amber_rounded,
-              size: 14, color: Color(0xFFFFB74F)),
+              size: 14, color: DgtStatusColors.warning),
           SizedBox(width: 6),
           Text(
             'Anti-trampa',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w800,
-              color: Color(0xFFFFB74F),
+              color: DgtStatusColors.warning,
               letterSpacing: 0.3,
             ),
           ),
@@ -418,12 +419,12 @@ class _AnswerTile extends StatelessWidget {
 
     if (answered) {
       if (isCorrectOption) {
-        bg = const Color(0xFF4FFFB0).withValues(alpha: 0.18);
-        iconBg = const Color(0xFF4FFFB0);
+        bg = DgtStatusColors.success.withValues(alpha: 0.18);
+        iconBg = DgtStatusColors.success;
         iconFg = Colors.black;
       } else if (selected) {
-        bg = const Color(0xFFFF5C5C).withValues(alpha: 0.18);
-        iconBg = const Color(0xFFFF5C5C);
+        bg = DgtStatusColors.error.withValues(alpha: 0.18);
+        iconBg = DgtStatusColors.error;
         iconFg = Colors.white;
       }
     } else if (selected) {
@@ -468,10 +469,10 @@ class _AnswerTile extends StatelessWidget {
                 ),
                 if (answered && isCorrectOption)
                   const Icon(Icons.check_circle_rounded,
-                      color: Color(0xFF4FFFB0), size: 20)
+                      color: DgtStatusColors.success, size: 20)
                 else if (answered && selected && !isCorrectOption)
                   const Icon(Icons.cancel_rounded,
-                      color: Color(0xFFFF5C5C), size: 20),
+                      color: DgtStatusColors.error, size: 20),
               ],
             ),
           ),
@@ -497,7 +498,7 @@ class _TrickExplanationCard extends StatelessWidget {
     final base = (question.explanation ?? '').trim();
     final trickReason = isCorrect ? '' : DgtTrickReasoning.forStatement(question.statement);
     final accent =
-        isCorrect ? const Color(0xFF4FFFB0) : const Color(0xFFFFB74F);
+        isCorrect ? DgtStatusColors.success : DgtStatusColors.warning;
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
       decoration: BoxDecoration(
