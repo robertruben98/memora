@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../settings/settings_screen.dart';
@@ -67,7 +66,10 @@ class _ProfileBody extends StatelessWidget {
         const SectionTitle('Habilidades por mazo'),
         const SizedBox(height: 12),
         if (progress.decks.isEmpty)
-          _emptyState(context)
+          AppStateView.empty(
+            icon: Icons.layers_rounded,
+            title: 'Estudia para desbloquear habilidades',
+          )
         else
           for (final d in progress.decks)
             Padding(
@@ -81,22 +83,4 @@ class _ProfileBody extends StatelessWidget {
       ],
     );
   }
-
-  Widget _emptyState(BuildContext context) => Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: context.c.surfaceElevated,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: context.c.border),
-        ),
-        child: Center(
-          child: Text(
-            'Estudia para desbloquear habilidades',
-            style: TextStyle(
-              color: context.c.textMuted,
-              fontSize: 13,
-            ),
-          ),
-        ),
-      );
 }

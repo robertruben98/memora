@@ -153,6 +153,9 @@ class _DgtConceptualErrorsScreenState
           if (snap.connectionState != ConnectionState.done) {
             return const _LoadingSkeleton();
           }
+          if (snap.hasError) {
+            return AppStateView.error(snap.error!, onRetry: _reload);
+          }
           final items = snap.data ?? const <DgtRecurrentFailureItem>[];
           if (items.isEmpty) {
             return AppStateView.empty(

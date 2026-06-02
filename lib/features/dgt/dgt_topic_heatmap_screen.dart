@@ -83,7 +83,11 @@ class DgtTopicHeatmapScreen extends ConsumerWidget {
                     itemCount: sorted.length,
                     itemBuilder: (_, i) {
                       final s = sorted[i];
-                      return SubtopicCell(stat: s);
+                      return SubtopicCell(
+                        stat: s,
+                        topicId: topicId,
+                        topicName: topicName,
+                      );
                     },
                   ),
                 ),
@@ -111,24 +115,48 @@ class DgtTopicHeatmapScreen extends ConsumerWidget {
   }
 
   void _practiceReds(BuildContext context, List<DgtSubtopicStat> reds) {
-    final topic = DgtTopic(id: topicId, name: topicName);
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => DgtPracticeScreen(
-          topic: topic,
-          limit: 10,
-          subtopicIds: reds.map((s) => s.subtopicId).toList(),
-        ),
-      ),
+    openSubtopicPractice(
+      context,
+      topicId: topicId,
+      topicName: topicName,
+      subtopicIds: reds.map((s) => s.subtopicId).toList(),
     );
   }
+}
+
+/// Abre [DgtPracticeScreen] con practica dirigida filtrada por subtemas.
+/// Reutilizado por el boton "Practicar rojos" y por el tap en una celda
+/// individual del heatmap.
+void openSubtopicPractice(
+  BuildContext context, {
+  required String topicId,
+  required String topicName,
+  required List<String> subtopicIds,
+}) {
+  final topic = DgtTopic(id: topicId, name: topicName);
+  Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => DgtPracticeScreen(
+        topic: topic,
+        limit: 10,
+        subtopicIds: subtopicIds,
+      ),
+    ),
+  );
 }
 
 /// Celda visual del heatmap. Expuesta (no privada) para tests de widget.
 class SubtopicCell extends StatelessWidget {
   final DgtSubtopicStat stat;
+  final String topicId;
+  final String topicName;
 
-  const SubtopicCell({super.key, required this.stat});
+  const SubtopicCell({
+    super.key,
+    required this.stat,
+    required this.topicId,
+    required this.topicName,
+  });
 
   /// Colores del heatmap. Pastel apagado para no quemar al usuario.
   /// Verde <20 fallos, ambar 20-50, rojo >=50.
@@ -152,7 +180,12 @@ class SubtopicCell extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () {},
+        onTap: () => openSubtopicPractice(
+          context,
+          topicId: topicId,
+          topicName: topicName,
+          subtopicIds: [stat.subtopicId],
+        ),
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: Column(

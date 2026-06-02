@@ -26,5 +26,8 @@ class ReviewLogDao extends DatabaseAccessor<MemoraDatabase>
         .get();
   }
 
+  Future<List<ReviewLogRow>> getLogsByCardId(String cardId) =>
+      (select(reviewLogs)..where((l) => l.cardId.equals(cardId))).get();
+
   Future<int> deleteAll() => delete(reviewLogs).go();
 }
