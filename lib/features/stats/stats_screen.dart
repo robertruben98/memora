@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
+import 'package:memora/core/widgets/section_title.dart';
 
 import 'stats_repository.dart';
 
@@ -43,11 +44,23 @@ class _StatsBody extends StatelessWidget {
         const SizedBox(height: 16),
         _StatsRow(snapshot: snapshot),
         const SizedBox(height: 24),
-        const _SectionTitle('Distribución de tarjetas'),
+        SectionTitle(
+          'Distribución de tarjetas',
+          uppercase: false,
+          fontSize: 16,
+          letterSpacing: null,
+          color: context.c.textPrimary,
+        ),
         const SizedBox(height: 12),
         _StateDistribution(snapshot: snapshot),
         const SizedBox(height: 24),
-        const _SectionTitle('Actividad — últimos 30 días'),
+        SectionTitle(
+          'Actividad — últimos 30 días',
+          uppercase: false,
+          fontSize: 16,
+          letterSpacing: null,
+          color: context.c.textPrimary,
+        ),
         const SizedBox(height: 12),
         _Heatmap(activity: snapshot.last30Days),
         const SizedBox(height: 12),
@@ -211,25 +224,6 @@ class _MiniStatCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  final String text;
-  const _SectionTitle(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-        ),
       ),
     );
   }

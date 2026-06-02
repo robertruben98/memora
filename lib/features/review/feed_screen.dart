@@ -15,6 +15,7 @@ import 'feed_session_notifier.dart';
 import 'review_invalidation.dart';
 import 'study_queue.dart';
 import 'widgets/card_page.dart';
+import 'widgets/review_completion_dialog.dart';
 
 class FeedScreen extends ConsumerWidget {
   /// null = estudiar todos los mazos (modo "Estudiar todo").
@@ -149,32 +150,15 @@ class _ActiveFeedState extends ConsumerState<_ActiveFeed> {
   void _showCompletion(BuildContext context, FeedSessionState state) {
     if (_completionShown) return;
     _completionShown = true;
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        backgroundColor: context.c.surfaceElevated,
-        title: const Text('¡Sesión completa!'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Tarjetas revisadas: ${state.cards.length}'),
-            const SizedBox(height: 4),
-            Text('Aciertos: ${state.correctCount}'),
-            Text('Fallos: ${state.incorrectCount}'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
-            },
-            child: const Text('Volver al inicio'),
-          ),
-        ],
-      ),
+    showReviewCompletionDialog(
+      context,
+      title: '¡Sesión completa!',
+      stats: [
+        ReviewCompletionStat('Tarjetas revisadas', state.cards.length),
+        ReviewCompletionStat('Aciertos', state.correctCount),
+        ReviewCompletionStat('Fallos', state.incorrectCount),
+      ],
+      actionLabel: 'Volver al inicio',
     );
   }
 

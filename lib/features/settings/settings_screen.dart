@@ -4,6 +4,7 @@ import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:memora/core/widgets/confirmation_dialog.dart';
+import 'package:memora/core/widgets/section_title.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/srs/study_settings.dart';
@@ -49,7 +50,7 @@ class SettingsScreen extends ConsumerWidget {
           32 + MediaQuery.viewPaddingOf(context).bottom,
         ),
         children: [
-          const _SectionTitle('Estudio'),
+          const SectionTitle('Estudio'),
           const SizedBox(height: 8),
           _SliderSetting(
             label: 'Tarjetas nuevas por día',
@@ -85,7 +86,7 @@ class SettingsScreen extends ConsumerWidget {
             },
           ),
           const SizedBox(height: 24),
-          const _SectionTitle('DGT'),
+          const SectionTitle('DGT'),
           const SizedBox(height: 8),
           dgtAsync.when(
             loading: () => Padding(
@@ -102,7 +103,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 24),
-          const _SectionTitle('Apariencia'),
+          const SectionTitle('Apariencia'),
           const SizedBox(height: 8),
           _ThemeSelector(
             selected: theme,
@@ -112,7 +113,7 @@ class SettingsScreen extends ConsumerWidget {
             },
           ),
           const SizedBox(height: 24),
-          const _SectionTitle('Backup'),
+          const SectionTitle('Backup'),
           const SizedBox(height: 8),
           _ActionCard(
             icon: Icons.upload_rounded,
@@ -134,7 +135,7 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => _importBackup(context, ref),
           ),
           const SizedBox(height: 24),
-          const _SectionTitle('Datos'),
+          const SectionTitle('Datos'),
           const SizedBox(height: 8),
           _DangerCard(
             icon: Icons.refresh_rounded,
@@ -145,13 +146,13 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => _confirmReset(context, ref),
           ),
           const SizedBox(height: 24),
-          const _SectionTitle('Acerca de'),
+          const SectionTitle('Acerca de'),
           const SizedBox(height: 8),
           const _AboutCard(),
           // Workstream C2: borrado de cuenta. Solo visible con sesion iniciada.
           if (ref.watch(authProvider).isLoggedIn) ...[
             const SizedBox(height: 24),
-            const _SectionTitle('Cuenta'),
+            const SectionTitle('Cuenta'),
             const SizedBox(height: 8),
             Material(
               color: context.c.surfaceElevated,
@@ -334,27 +335,6 @@ class SettingsScreen extends ConsumerWidget {
       const SnackBar(
         content: Text('Progreso reseteado'),
         backgroundColor: DgtStatusColors.success,
-      ),
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  final String text;
-  const _SectionTitle(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Text(
-        text.toUpperCase(),
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 1.0,
-          color: context.c.textMuted,
-        ),
       ),
     );
   }

@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:memora/core/widgets/confirmation_dialog.dart';
+import 'package:memora/core/widgets/section_title.dart';
 
 import '../study/dgt_exam_history.dart';
 import 'dgt_failures_repository.dart';
@@ -59,7 +60,14 @@ class _Body extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       children: [
-        _SectionTitle('Recordatorios'),
+        SectionTitle(
+          'Recordatorios',
+          uppercase: false,
+          fontSize: 13,
+          letterSpacing: 0.8,
+          color: const Color(0xFF9FA6BC),
+          padding: const EdgeInsets.only(bottom: 8, top: 4),
+        ),
         _ReminderTile(settings: settings),
         const SizedBox(height: 8),
         _ReminderDaysTile(
@@ -99,7 +107,14 @@ class _Body extends ConsumerWidget {
           ),
         ),
         const Divider(height: 32),
-        _SectionTitle('Simulacro'),
+        SectionTitle(
+          'Simulacro',
+          uppercase: false,
+          fontSize: 13,
+          letterSpacing: 0.8,
+          color: const Color(0xFF9FA6BC),
+          padding: const EdgeInsets.only(bottom: 8, top: 4),
+        ),
         SwitchListTile.adaptive(
           contentPadding: EdgeInsets.zero,
           value: settings.strictExamMode,
@@ -119,7 +134,14 @@ class _Body extends ConsumerWidget {
           ),
         ),
         const Divider(height: 32),
-        _SectionTitle('Compartir'),
+        SectionTitle(
+          'Compartir',
+          uppercase: false,
+          fontSize: 13,
+          letterSpacing: 0.8,
+          color: const Color(0xFF9FA6BC),
+          padding: const EdgeInsets.only(bottom: 8, top: 4),
+        ),
         ListTile(
           key: const Key('dgt-settings-share-autoescuela'),
           contentPadding: EdgeInsets.zero,
@@ -138,10 +160,24 @@ class _Body extends ConsumerWidget {
           },
         ),
         const Divider(height: 32),
-        _SectionTitle('Datos'),
+        SectionTitle(
+          'Datos',
+          uppercase: false,
+          fontSize: 13,
+          letterSpacing: 0.8,
+          color: const Color(0xFF9FA6BC),
+          padding: const EdgeInsets.only(bottom: 8, top: 4),
+        ),
         const _ExportStatsButton(),
         const Divider(height: 32),
-        _SectionTitle('Reset selectivo'),
+        SectionTitle(
+          'Reset selectivo',
+          uppercase: false,
+          fontSize: 13,
+          letterSpacing: 0.8,
+          color: const Color(0xFF9FA6BC),
+          padding: const EdgeInsets.only(bottom: 8, top: 4),
+        ),
         const _SelectiveResetTile(
           kind: _SelectiveResetKind.failures,
         ),
@@ -340,26 +376,6 @@ Future<void> _runSelectiveReset(
         await prefs.remove(k);
       }
       break;
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  final String text;
-  const _SectionTitle(this.text);
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8, top: 4),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.8,
-          color: Color(0xFF9FA6BC),
-        ),
-      ),
-    );
   }
 }
 

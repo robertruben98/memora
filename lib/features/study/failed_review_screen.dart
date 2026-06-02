@@ -9,6 +9,7 @@ import '../../core/models/memora_card.dart';
 import '../../data/repositories/review_repository.dart';
 import '../review/review_invalidation.dart';
 import '../review/widgets/card_page.dart';
+import '../review/widgets/review_completion_dialog.dart';
 import 'failed_cards_provider.dart';
 
 /// Modo "Repaso de falladas" para examen DGT:
@@ -98,32 +99,14 @@ class _ActiveFailedReviewState extends ConsumerState<_ActiveFailedReview> {
   void _showCompletion(BuildContext context) {
     if (_completionShown) return;
     _completionShown = true;
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        backgroundColor: context.c.surfaceElevated,
-        title: const Text('¡Repaso completado!'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Tarjetas repasadas: ${widget.cards.length}'),
-            const SizedBox(height: 4),
-            Text('Aciertos: $_correct'),
-            Text('Fallos: $_incorrect'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
-            },
-            child: const Text('Volver'),
-          ),
-        ],
-      ),
+    showReviewCompletionDialog(
+      context,
+      title: '¡Repaso completado!',
+      stats: [
+        ReviewCompletionStat('Tarjetas repasadas', widget.cards.length),
+        ReviewCompletionStat('Aciertos', _correct),
+        ReviewCompletionStat('Fallos', _incorrect),
+      ],
     );
   }
 
