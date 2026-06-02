@@ -8,6 +8,7 @@ import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../../core/models/memora_card.dart';
 import '../../core/widgets/memora_image.dart';
+import '../../core/widgets/styled_text_field.dart';
 import '../../data/api/api_client.dart';
 import '../../data/repositories/card_repository.dart';
 import '../../data/repositories/review_repository.dart';
@@ -160,48 +161,56 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
       return;
     }
     setState(() => _saving = true);
-    final repo = ref.read(cardRepositoryProvider);
-    if (_isEditing) {
-      await repo.updateCard(
-        id: widget.cardToEdit!.id,
-        frontText: front,
-        backText: back,
-        frontImagePath: _frontImagePath,
-        backImagePath: _backImagePath,
-      );
-    } else {
-      final newId = 'card-${DateTime.now().microsecondsSinceEpoch}';
-      await repo.createCard(
-        id: newId,
-        deckId: widget.deckId,
-        frontText: front,
-        backText: back,
-        frontImagePath: _frontImagePath,
-        backImagePath: _backImagePath,
-      );
-      await ref
-          .read(reviewRepositoryProvider)
-          .getOrCreateSchedule(newId, now: DateTime.now());
-    }
-    invalidateAfterCardChange(ref, deckId: widget.deckId);
+    try {
+      final repo = ref.read(cardRepositoryProvider);
+      if (_isEditing) {
+        await repo.updateCard(
+          id: widget.cardToEdit!.id,
+          frontText: front,
+          backText: back,
+          frontImagePath: _frontImagePath,
+          backImagePath: _backImagePath,
+        );
+      } else {
+        final newId = 'card-${DateTime.now().microsecondsSinceEpoch}';
+        await repo.createCard(
+          id: newId,
+          deckId: widget.deckId,
+          frontText: front,
+          backText: back,
+          frontImagePath: _frontImagePath,
+          backImagePath: _backImagePath,
+        );
+        await ref
+            .read(reviewRepositoryProvider)
+            .getOrCreateSchedule(newId, now: DateTime.now());
+      }
+      invalidateAfterCardChange(ref, deckId: widget.deckId);
 
-    if (!mounted) return;
-    if (createAnother && !_isEditing) {
-      _frontController.clear();
-      _backController.clear();
-      setState(() {
-        _frontImagePath = null;
-        _backImagePath = null;
-        _saving = false;
-      });
+      if (!mounted) return;
+      if (createAnother && !_isEditing) {
+        _frontController.clear();
+        _backController.clear();
+        setState(() {
+          _frontImagePath = null;
+          _backImagePath = null;
+          _saving = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Tarjeta creada. Crea la siguiente.'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      } else {
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Tarjeta creada. Crea la siguiente.'),
-          duration: Duration(seconds: 1),
-        ),
+        SnackBar(content: Text('No se pudo guardar la tarjeta: $e')),
       );
-    } else {
-      Navigator.of(context).pop();
     }
   }
 
@@ -230,18 +239,26 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     if (confirmed != true) return;
 
     setState(() => _saving = true);
-    final storage = ref.read(imageStorageProvider);
-    if (_frontImagePath != null && !_frontImagePath!.startsWith('/')) {
-      await storage.delete(_frontImagePath);
-    }
-    if (_backImagePath != null && !_backImagePath!.startsWith('/')) {
-      await storage.delete(_backImagePath);
-    }
-    await ref.read(cardRepositoryProvider).deleteCard(widget.cardToEdit!.id);
-    invalidateAfterCardChange(ref, deckId: widget.deckId);
+    try {
+      final storage = ref.read(imageStorageProvider);
+      if (_frontImagePath != null && !_frontImagePath!.startsWith('/')) {
+        await storage.delete(_frontImagePath);
+      }
+      if (_backImagePath != null && !_backImagePath!.startsWith('/')) {
+        await storage.delete(_backImagePath);
+      }
+      await ref.read(cardRepositoryProvider).deleteCard(widget.cardToEdit!.id);
+      invalidateAfterCardChange(ref, deckId: widget.deckId);
 
-    if (!mounted) return;
-    Navigator.of(context).pop();
+      if (!mounted) return;
+      Navigator.of(context).pop();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No se pudo eliminar la tarjeta: $e')),
+      );
+    }
   }
 
   @override
@@ -267,12 +284,14 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            const _Label('Pregunta (front)'),
+            const AppLabel('Pregunta (front)'),
             const SizedBox(height: 8),
-            _EditorField(
+            StyledTextField(
               controller: _frontController,
               hint: 'p. ej. ¿Qué significa "to thrive"?',
               minLines: 3,
+              maxLines: 8,
+              style: const TextStyle(fontSize: 16, height: 1.4),
             ),
             const SizedBox(height: 8),
             _ImagePickerRow(
@@ -282,12 +301,14 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
               onRemove: () => _removeImage(true),
             ),
             const SizedBox(height: 24),
-            const _Label('Respuesta (back)'),
+            const AppLabel('Respuesta (back)'),
             const SizedBox(height: 8),
-            _EditorField(
+            StyledTextField(
               controller: _backController,
               hint: 'p. ej. Prosperar, florecer.',
               minLines: 3,
+              maxLines: 8,
+              style: const TextStyle(fontSize: 16, height: 1.4),
             ),
             const SizedBox(height: 8),
             _ImagePickerRow(
@@ -402,62 +423,3 @@ class _IconButton extends StatelessWidget {
   }
 }
 
-class _Label extends StatelessWidget {
-  final String text;
-  const _Label(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
-        color: context.c.textSecondary,
-        letterSpacing: 0.3,
-      ),
-    );
-  }
-}
-
-class _EditorField extends StatelessWidget {
-  final TextEditingController controller;
-  final String hint;
-  final int minLines;
-
-  const _EditorField({
-    required this.controller,
-    required this.hint,
-    this.minLines = 1,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      minLines: minLines,
-      maxLines: 8,
-      textCapitalization: TextCapitalization.sentences,
-      style: const TextStyle(fontSize: 16, height: 1.4),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: TextStyle(color: context.c.textMuted),
-        filled: true,
-        fillColor: context.c.surfaceElevated,
-        contentPadding: const EdgeInsets.all(14),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: context.c.border, width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.brand, width: 1.5),
-        ),
-      ),
-    );
-  }
-}
