@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
+import 'package:memora/core/widgets/dgt_progress_bar_row.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_practice_screen.dart';
@@ -303,84 +304,28 @@ class TopicStatTile extends StatelessWidget {
               ),
               if (!isIntact) ...[
                 const SizedBox(height: 8),
-                _BarRow(
+                DgtProgressBarRow(
                   label: 'Accuracy',
-                  pct: pct,
+                  value: pct / 100.0,
                   color: color,
                   trailing: '${stat.correct}/${stat.totalAnswered}',
+                  barHeight: 6,
                 ),
               ],
               const SizedBox(height: 8),
-              _BarRow(
+              DgtProgressBarRow(
                 label: 'Cobertura',
-                pct: coveragePct,
+                value: coveragePct / 100.0,
                 color: coverageColor,
                 trailing:
                     '${stat.totalAnswered.clamp(0, stat.bankSize)}/'
                     '${stat.bankSize}',
+                barHeight: 6,
               ),
             ],
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Fila visual barra + etiqueta + porcentaje. Privada: solo se usa dentro
-/// de [TopicStatTile] (no expuesta para no inflar la API publica).
-class _BarRow extends StatelessWidget {
-  final String label;
-  final double pct;
-  final Color color;
-  final String? trailing;
-
-  const _BarRow({
-    required this.label,
-    required this.pct,
-    required this.color,
-    this.trailing,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final clamped = pct.clamp(0.0, 100.0);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: context.c.textSecondary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            Text(
-              trailing ?? '${clamped.toStringAsFixed(0)}%',
-              style: TextStyle(
-                fontSize: 11,
-                color: context.c.textSecondary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: clamped / 100.0,
-            minHeight: 6,
-            backgroundColor: context.c.surfaceMuted,
-            valueColor: AlwaysStoppedAnimation<Color>(color),
-          ),
-        ),
-      ],
     );
   }
 }

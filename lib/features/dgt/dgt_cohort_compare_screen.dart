@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
+import 'package:memora/core/widgets/dgt_progress_bar_row.dart';
 
 import '../../data/api/api_client.dart';
 
@@ -386,17 +387,28 @@ class _BenchmarkTile extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          _BarRow(
+          DgtProgressBarRow(
             label: 'Tu',
-            pct: item.userPct,
+            value: hasUser ? item.userPct! / 100.0 : 0,
+            trailing: hasUser
+                ? '${item.userPct!.toStringAsFixed(0)}%'
+                : 'Sin respuestas',
             color: DgtStatusColors.info,
-            emptyLabel: hasUser ? null : 'Sin respuestas',
+            labelFixedWidth: true,
+            labelWidth: 48,
+            trailingWidth: 54,
+            barHeight: 8,
           ),
           const SizedBox(height: 6),
-          _BarRow(
+          DgtProgressBarRow(
             label: 'Media',
-            pct: item.globalPct,
+            value: item.globalPct / 100.0,
+            trailing: '${item.globalPct.toStringAsFixed(0)}%',
             color: const Color(0xFF7A8497),
+            labelFixedWidth: true,
+            labelWidth: 48,
+            trailingWidth: 54,
+            barHeight: 8,
           ),
         ],
       ),
@@ -414,64 +426,6 @@ class _BenchmarkTile extends StatelessWidget {
     if (delta > 5) return DgtStatusColors.success;
     if (delta < -5) return DgtStatusColors.error;
     return DgtStatusColors.warning;
-  }
-}
-
-class _BarRow extends StatelessWidget {
-  final String label;
-  final double? pct;
-  final Color color;
-  final String? emptyLabel;
-
-  const _BarRow({
-    required this.label,
-    required this.pct,
-    required this.color,
-    this.emptyLabel,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 48,
-          child: Text(
-            label,
-            style: TextStyle(
-              color: context.c.textSecondary,
-              fontSize: 12,
-            ),
-          ),
-        ),
-        Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: pct == null ? 0 : (pct! / 100.0).clamp(0.0, 1.0),
-              minHeight: 8,
-              backgroundColor: context.c.surfaceMuted,
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        SizedBox(
-          width: 54,
-          child: Text(
-            emptyLabel ?? '${(pct ?? 0).toStringAsFixed(0)}%',
-            textAlign: TextAlign.right,
-            style: TextStyle(
-              color: emptyLabel != null
-                  ? context.c.textMuted
-                  : context.c.textPrimary,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }
 

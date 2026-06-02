@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
+import 'package:memora/core/widgets/confirmation_dialog.dart';
 
 import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
@@ -110,29 +111,16 @@ class _DgtQuickReviewScreenState
 
   Future<void> _confirmFinish() async {
     final unanswered = _questions.length - _answers.length;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Terminar repaso rapido'),
-        content: Text(
-          unanswered == 0
-              ? '¿Terminar el repaso?'
-              : 'Te quedan $unanswered preguntas sin responder. '
-                  'Las sin responder cuentan como falladas. ¿Terminar igual?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Terminar'),
-          ),
-        ],
-      ),
+    final ok = await showConfirmationDialog(
+      context,
+      title: 'Terminar repaso rapido',
+      message: unanswered == 0
+          ? '¿Terminar el repaso?'
+          : 'Te quedan $unanswered preguntas sin responder. '
+              'Las sin responder cuentan como falladas. ¿Terminar igual?',
+      confirmLabel: 'Terminar',
     );
-    if (ok == true) _submit();
+    if (ok) _submit();
   }
 
   void _submit({bool autoSubmit = false}) {

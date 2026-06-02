@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
+import 'package:memora/core/widgets/dgt_tinted_chip.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dgt_today_study_provider.dart';
@@ -499,29 +500,14 @@ class _BucketChip extends StatelessWidget {
           Icons.fiber_new_rounded,
         ),
     };
-    return Container(
-      padding: const EdgeInsets.fromLTRB(10, 4, 10, 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withValues(alpha: 0.5)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: color),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              color: color,
-              letterSpacing: 0.3,
-            ),
-          ),
-        ],
-      ),
+    return DgtTintedChip(
+      color: color,
+      icon: Icon(icon, size: 14),
+      label: label,
+      bgAlpha: 0.14,
+      borderAlpha: 0.5,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      textStyle: const TextStyle(fontSize: 11, letterSpacing: 0.3),
     );
   }
 }

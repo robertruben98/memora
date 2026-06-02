@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/dgt_tinted_chip.dart';
 
 import 'learn_methods_data.dart';
 
@@ -328,21 +329,17 @@ class _EvidenceBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return DgtTintedChip(
+      color: level.color,
+      label: level.label,
+      bgAlpha: 0.15,
+      borderAlpha: 0.4,
+      radius: 6,
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: level.color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: level.color.withValues(alpha: 0.4)),
-      ),
-      child: Text(
-        level.label,
-        style: TextStyle(
-          fontSize: 9,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.4,
-          color: level.color,
-        ),
+      textStyle: const TextStyle(
+        fontSize: 9,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.4,
       ),
     );
   }

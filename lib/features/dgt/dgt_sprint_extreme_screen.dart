@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
+import 'package:memora/core/widgets/confirmation_dialog.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 
@@ -174,37 +175,16 @@ class _DgtSprintExtremeScreenState
   }
 
   Future<void> _confirmAndStart() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: const Text(
-            'Modo extremo',
-            style: TextStyle(fontWeight: FontWeight.w800),
-          ),
-          content: const Text(
-            'Modo extremo: 30 preguntas en 5 minutos, sin pausa. '
-            'Cada pregunta auto-skip a los 12s. Continuar?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: DgtStatusColors.error,
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text('Empezar'),
-            ),
-          ],
-        );
-      },
+    final confirm = await showConfirmationDialog(
+      context,
+      title: 'Modo extremo',
+      message: 'Modo extremo: 30 preguntas en 5 minutos, sin pausa. '
+          'Cada pregunta auto-skip a los 12s. Continuar?',
+      confirmLabel: 'Empezar',
+      destructive: true,
     );
     if (!mounted) return;
-    if (confirm == true) {
+    if (confirm) {
       setState(() {
         _confirmed = true;
         _loadQuestions();
