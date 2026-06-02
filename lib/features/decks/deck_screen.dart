@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'dart:io';
 
+import 'package:memora/core/widgets/app_state_view.dart';
+
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -109,8 +111,8 @@ class DeckScreen extends ConsumerWidget {
 
     return Scaffold(
       body: cardsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        loading: () => AppStateView.loading(),
+        error: (e, _) => AppStateView.error(e),
         data: (cards) => _DeckBody(
           deck: deck,
           cards: cards,

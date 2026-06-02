@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../core/models/memora_card.dart';
 import '../../core/theme/deck_visuals.dart';
@@ -113,8 +114,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: Stack(
         children: [
           decksAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        loading: () => AppStateView.loading(),
+        error: (e, _) => AppStateView.error(e),
         data: (decks) {
           if (decks.isEmpty) {
             return _HomeEmptyState(
@@ -850,7 +851,7 @@ class _HomeFab extends StatelessWidget {
       children: [
         FloatingActionButton(
           heroTag: 'fab-ai',
-          backgroundColor: const Color(0xFFE04FFF),
+          backgroundColor: AppColors.brand,
           mini: true,
           tooltip: 'Generar con IA',
           onPressed: () => Navigator.of(

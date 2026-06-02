@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/api/api_client.dart';
 import '../../data/storage/image_storage.dart';
+import '../theme/app_colors.dart';
 
 /// Renderiza la imagen de una tarjeta. Soporta:
 ///  - paths del server "/images/abc.jpg" (Image.network)
@@ -35,30 +36,30 @@ class MemoraImage extends ConsumerWidget {
               remoteUrl,
               height: height,
               fit: fit,
-              errorBuilder: (_, _, _) => _placeholder(),
+              errorBuilder: (_, _, _) => _placeholder(context),
               loadingBuilder: (_, child, prog) {
                 if (prog == null) return child;
-                return _placeholder(loading: true);
+                return _placeholder(context, loading: true);
               },
             )
-          : _localImage(ref),
+          : _localImage(context, ref),
     );
   }
 
-  Widget _localImage(WidgetRef ref) {
+  Widget _localImage(BuildContext context, WidgetRef ref) {
     final storage = ref.read(imageStorageProvider);
     return Image.file(
       File(storage.absolutePathFor(path)),
       height: height,
       fit: fit,
-      errorBuilder: (_, _, _) => _placeholder(),
+      errorBuilder: (_, _, _) => _placeholder(context),
     );
   }
 
-  Widget _placeholder({bool loading = false}) {
+  Widget _placeholder(BuildContext context, {bool loading = false}) {
     return Container(
       height: height,
-      color: const Color(0xFF242430),
+      color: context.c.surfaceMuted,
       alignment: Alignment.center,
       child: loading
           ? const SizedBox(
@@ -68,7 +69,7 @@ class MemoraImage extends ConsumerWidget {
             )
           : Icon(
               Icons.broken_image_outlined,
-              color: Colors.white.withValues(alpha: 0.3),
+              color: context.c.textMuted,
               size: 36,
             ),
     );
