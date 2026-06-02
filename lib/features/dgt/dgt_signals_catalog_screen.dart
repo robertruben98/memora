@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
@@ -312,12 +313,17 @@ class _SignImage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final api = ref.watch(apiClientProvider);
     final url = api.remoteUrlFor(sign.imageUrl) ?? sign.imageUrl;
-    final isSvg = url.toLowerCase().endsWith('.svg');
-    // Image.network no renderiza SVG. Si el path apunta a .svg degradamos
-    // directamente al fallback estilizado (badge con codigo + color por
-    // categoria). Asi evitamos un fetch garantizado al fallo.
-    if (isSvg || url.isEmpty) {
+    if (url.isEmpty) {
       return _SignFallbackBadge(sign: sign);
+    }
+    // Las señales oficiales son SVG: las renderizamos con flutter_svg. Si la
+    // descarga falla, mostramos el badge estilizado por categoría.
+    if (url.toLowerCase().endsWith('.svg')) {
+      return SvgPicture.network(
+        url,
+        fit: BoxFit.contain,
+        placeholderBuilder: (_) => _SignFallbackBadge(sign: sign),
+      );
     }
     return Image.network(
       url,

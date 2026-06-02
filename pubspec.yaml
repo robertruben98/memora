@@ -54,6 +54,9 @@ dependencies:
   # API client
   http: ^1.2.2
 
+  # Render de señales de tráfico oficiales (SVG)
+  flutter_svg: ^2.0.10
+
   # Token persistence
   shared_preferences: ^2.3.4
 
