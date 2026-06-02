@@ -15,43 +15,32 @@ class CardRepository {
 
   CardRepository(this._cardDao, this._deckDao, this._sync);
 
+  MemoraCard _toMemoraCard(CardRow c, [DeckRow? deck]) {
+    return MemoraCard(
+      id: c.id,
+      deckId: c.deckId,
+      front: c.frontText,
+      back: c.backText,
+      frontImagePath: c.frontImagePath,
+      backImagePath: c.backImagePath,
+      deck: deck?.name ?? 'Sin mazo',
+      deckIconName: deck?.iconName ?? 'style_rounded',
+      deckColor: _parseColor(deck?.colorHex ?? '#7C5CFF'),
+    );
+  }
+
   Future<List<MemoraCard>> getAllCards() async {
     final cards = await _cardDao.getAllCards();
     final decks = await _deckDao.getAllDecks();
     final byId = {for (final d in decks) d.id: d};
-    return cards.map((c) {
-      final d = byId[c.deckId];
-      return MemoraCard(
-        id: c.id,
-        deckId: c.deckId,
-        front: c.frontText,
-        back: c.backText,
-        frontImagePath: c.frontImagePath,
-        backImagePath: c.backImagePath,
-        deck: d?.name ?? 'Sin mazo',
-        deckIconName: d?.iconName ?? 'style_rounded',
-        deckColor: _parseColor(d?.colorHex ?? '#7C5CFF'),
-      );
-    }).toList();
+    return cards.map((c) => _toMemoraCard(c, byId[c.deckId])).toList();
   }
 
   Future<List<MemoraCard>> getCardsByDeckId(String deckId) async {
     final cards = await _cardDao.getCardsByDeck(deckId);
     final deck = await _deckDao.getDeckById(deckId);
     if (deck == null) return [];
-    return cards
-        .map((c) => MemoraCard(
-              id: c.id,
-              deckId: c.deckId,
-              front: c.frontText,
-              back: c.backText,
-              frontImagePath: c.frontImagePath,
-              backImagePath: c.backImagePath,
-              deck: deck.name,
-              deckIconName: deck.iconName,
-              deckColor: _parseColor(deck.colorHex),
-            ))
-        .toList();
+    return cards.map((c) => _toMemoraCard(c, deck)).toList();
   }
 
   Future<void> createCard({

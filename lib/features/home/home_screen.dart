@@ -439,11 +439,28 @@ class _HomeEmptyState extends StatelessWidget {
   }
 }
 
-class _DueBanner extends StatelessWidget {
-  final int pending;
+/// Banner reutilizable con gradiente diagonal, icono a la izquierda, textos
+/// (titulo + subtitulo opcional) y un trailing widget (normalmente un icono).
+/// Centraliza el patron Material -> InkWell -> Ink(LinearGradient) compartido
+/// por los banners de Home, manteniendo aspecto identico.
+class _GradientBanner extends StatelessWidget {
+  final List<Color> gradient;
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final FontWeight titleWeight;
   final VoidCallback onTap;
+  final Widget? trailing;
 
-  const _DueBanner({required this.pending, required this.onTap});
+  const _GradientBanner({
+    required this.gradient,
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    this.titleWeight = FontWeight.w800,
+    required this.onTap,
+    this.trailing,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -454,8 +471,8 @@ class _DueBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         child: Ink(
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF7C5CFF), Color(0xFF4F8AFF)],
+            gradient: LinearGradient(
+              colors: gradient,
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -464,26 +481,68 @@ class _DueBanner extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Row(
             children: [
-              const Icon(Icons.bolt_rounded, color: Colors.white, size: 22),
+              Icon(icon, color: Colors.white, size: 22),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(
-                  '$pending tarjetas listas para repasar',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+                child: subtitle == null
+                    ? Text(
+                        title,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: titleWeight,
+                        ),
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: titleWeight,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            subtitle!,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
               ),
-              const Icon(
-                Icons.arrow_forward_rounded,
-                color: Colors.white,
-                size: 18,
-              ),
+              ?trailing,
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _DueBanner extends StatelessWidget {
+  final int pending;
+  final VoidCallback onTap;
+
+  const _DueBanner({required this.pending, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return _GradientBanner(
+      gradient: const [Color(0xFF7C5CFF), Color(0xFF4F8AFF)],
+      icon: Icons.bolt_rounded,
+      title: '$pending tarjetas listas para repasar',
+      titleWeight: FontWeight.w700,
+      onTap: onTap,
+      trailing: const Icon(
+        Icons.arrow_forward_rounded,
+        color: Colors.white,
+        size: 18,
       ),
     );
   }
@@ -725,56 +784,14 @@ class _DgtFailuresCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Ink(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [DgtStatusColors.error, DgtStatusColors.accentOrange],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Row(
-            children: [
-              const Icon(Icons.error_outline_rounded,
-                  color: Colors.white, size: 22),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Repaso de fallos',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '$count pendiente${count == 1 ? '' : 's'} (ultimos 7 dias)',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.arrow_forward_rounded,
-                  color: Colors.white, size: 20),
-            ],
-          ),
-        ),
-      ),
+    return _GradientBanner(
+      gradient: const [DgtStatusColors.error, DgtStatusColors.accentOrange],
+      icon: Icons.error_outline_rounded,
+      title: 'Repaso de fallos',
+      subtitle: '$count pendiente${count == 1 ? '' : 's'} (ultimos 7 dias)',
+      onTap: onTap,
+      trailing: const Icon(Icons.arrow_forward_rounded,
+          color: Colors.white, size: 20),
     );
   }
 }
@@ -785,61 +802,16 @@ class _DgtExamBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Ink(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [DgtStatusColors.accentOrange, Color(0xFFE04FFF)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.directions_car_rounded,
-                color: Colors.white,
-                size: 22,
-              ),
-              const SizedBox(width: 10),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Simulacro DGT',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      '30 preguntas · 30 min · permiso B',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(
-                Icons.play_arrow_rounded,
-                color: Colors.white,
-                size: 22,
-              ),
-            ],
-          ),
-        ),
+    return _GradientBanner(
+      gradient: const [DgtStatusColors.accentOrange, Color(0xFFE04FFF)],
+      icon: Icons.directions_car_rounded,
+      title: 'Simulacro DGT',
+      subtitle: '30 preguntas · 30 min · permiso B',
+      onTap: onTap,
+      trailing: const Icon(
+        Icons.play_arrow_rounded,
+        color: Colors.white,
+        size: 22,
       ),
     );
   }
