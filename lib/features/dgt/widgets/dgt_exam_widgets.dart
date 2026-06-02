@@ -116,7 +116,7 @@ class DgtQuestionGridSheet {
                     final isCurrent = i == controller.currentIndex;
                     Color bg;
                     if (isCurrent) {
-                      bg = const Color(0xFF7C5CFF);
+                      bg = AppColors.brand;
                     } else if (flagged) {
                       bg = const Color(0xFFFFB74F);
                     } else if (answered) {
@@ -149,7 +149,7 @@ class DgtQuestionGridSheet {
                   }),
                 ),
                 const SizedBox(height: 16),
-                _legendRow(const Color(0xFF7C5CFF), 'Actual'),
+                _legendRow(AppColors.brand, 'Actual'),
                 _legendRow(
                     const Color(0xFF4FFFB0).withValues(alpha: 0.35),
                     'Respondida'),

@@ -441,6 +441,7 @@ class _Counter extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
+            tooltip: 'Reducir cantidad',
             onPressed: value > min ? () => onChanged(value - 5) : null,
             icon: const Icon(Icons.remove_rounded),
           ),
@@ -455,6 +456,7 @@ class _Counter extends StatelessWidget {
             ),
           ),
           IconButton(
+            tooltip: 'Aumentar cantidad',
             onPressed: value < max ? () => onChanged(value + 5) : null,
             icon: const Icon(Icons.add_rounded),
           ),

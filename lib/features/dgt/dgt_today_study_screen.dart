@@ -262,7 +262,7 @@ class _DgtTodayStudyScreenState extends ConsumerState<DgtTodayStudyScreen> {
     final accent = pct >= 80
         ? const Color(0xFF4FFFB0)
         : pct >= 50
-            ? const Color(0xFF7C5CFF)
+            ? AppColors.brand
             : const Color(0xFFFF8A4F);
 
     return SafeArea(

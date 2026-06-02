@@ -338,10 +338,10 @@ class _LicenseCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7C5CFF).withValues(alpha: 0.18),
+                  color: AppColors.brand.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(_icon, color: const Color(0xFF7C5CFF)),
+                child: Icon(_icon, color: AppColors.brand),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -369,7 +369,7 @@ class _LicenseCard extends StatelessWidget {
               if (selected)
                 const Icon(
                   Icons.check_circle_rounded,
-                  color: Color(0xFF7C5CFF),
+                  color: AppColors.brand,
                 ),
             ],
           ),
@@ -400,7 +400,7 @@ class _ExamDatePage extends StatelessWidget {
           const Icon(
             Icons.event_rounded,
             size: 72,
-            color: Color(0xFF7C5CFF),
+            color: AppColors.brand,
           ),
           const SizedBox(height: 24),
           const Text(

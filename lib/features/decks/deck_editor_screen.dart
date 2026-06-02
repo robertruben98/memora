@@ -125,6 +125,7 @@ class _DeckEditorScreenState extends ConsumerState<DeckEditorScreen> {
         actions: [
           if (_isEditing)
             IconButton(
+              tooltip: 'Eliminar mazo',
               icon: const Icon(Icons.delete_outline_rounded),
               color: const Color(0xFFFF4F6B),
               onPressed: _saving ? null : _delete,
