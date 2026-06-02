@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
+
 import '../../../core/models/memora_card.dart';
 import '../../../data/repositories/review_repository.dart';
 import '../../review/review_completion_handler.dart';
@@ -127,7 +129,7 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: c.deckColor.withValues(alpha: 0.18),
@@ -201,7 +203,7 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white.withValues(alpha: 0.5),
+                    color: context.c.textMuted,
                   ),
                 ),
               ),

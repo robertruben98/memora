@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
+
 import '../../core/models/memora_card.dart';
 import '../../core/theme/deck_visuals.dart';
 import '../../data/repositories/deck_repository.dart';
@@ -95,8 +97,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               : Icons.circle_outlined,
                           size: 18,
                           color: o == sortOption
-                              ? const Color(0xFF7C5CFF)
-                              : Colors.white.withValues(alpha: 0.4),
+                              ? AppColors.brand
+                              : context.c.textMuted,
                         ),
                         const SizedBox(width: 10),
                         Text(deckSortOptionLabel(o)),
@@ -316,7 +318,7 @@ class _DeckTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFF1A1A22),
+      color: context.c.surfaceElevated,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -354,7 +356,7 @@ class _DeckTile extends StatelessWidget {
                       '${deck.dueCount} due · ${deck.totalCount} total',
                       style: TextStyle(
                         fontSize: 13,
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: context.c.textSecondary,
                       ),
                     ),
                   ],
@@ -362,7 +364,7 @@ class _DeckTile extends StatelessWidget {
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                color: Colors.white.withValues(alpha: 0.4),
+                color: context.c.textMuted,
               ),
             ],
           ),
@@ -418,7 +420,7 @@ class _HomeEmptyState extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               height: 1.5,
-              color: Colors.white.withValues(alpha: 0.65),
+              color: context.c.textSecondary,
             ),
           ),
           const SizedBox(height: 32),
@@ -496,7 +498,7 @@ class _QuestBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: complete
@@ -609,7 +611,7 @@ class _DgtBanner extends StatelessWidget {
         child: Ink(
           padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1A22),
+            color: context.c.surfaceElevated,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: accent.withValues(alpha: 0.55)),
           ),
@@ -644,7 +646,7 @@ class _DgtBanner extends StatelessWidget {
                       child: LinearProgressIndicator(
                         value: progress,
                         minHeight: 6,
-                        backgroundColor: Colors.white.withValues(alpha: 0.08),
+                        backgroundColor: context.c.surfaceMuted,
                         valueColor: AlwaysStoppedAnimation<Color>(accent),
                       ),
                     ),
@@ -665,7 +667,7 @@ class _DgtBanner extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white.withValues(alpha: 0.78),
+                  color: context.c.textSecondary,
                 ),
               ),
               if (motivation != null) ...[
@@ -936,7 +938,7 @@ class _StreakBadgeState extends State<StreakBadge>
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1A22),
+            color: context.c.surfaceElevated,
             borderRadius: BorderRadius.circular(999),
             border: Border.all(
               color: const Color(0xFFFF8A4F),
@@ -1015,7 +1017,7 @@ class _DgtReadyCheckBanner extends StatelessWidget {
                       'Revisa 5 criterios antes de presentarte',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: context.c.textSecondary,
                       ),
                     ),
                   ],
@@ -1023,7 +1025,7 @@ class _DgtReadyCheckBanner extends StatelessWidget {
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                color: Colors.white.withValues(alpha: 0.5),
+                color: context.c.textMuted,
               ),
             ],
           ),

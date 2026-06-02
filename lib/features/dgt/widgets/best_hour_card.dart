@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
+
 import '../dgt_time_of_day_insight_provider.dart';
 
 /// Issue #137 (dgt-ux): card "tu mejor hora para estudiar".
@@ -69,7 +71,7 @@ class _BestHourBody extends StatelessWidget {
                   '(${insight.totalReviews}/$kDgtTimeOfDayMinReviews reviews)',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white.withValues(alpha: 0.75),
+                    color: context.c.textSecondary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -121,7 +123,7 @@ class _BestHourBody extends StatelessWidget {
                 'entre ${best.label}h',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.white.withValues(alpha: 0.75),
+                  color: context.c.textSecondary,
                   fontWeight: FontWeight.w600,
                 ),
               )
@@ -130,7 +132,7 @@ class _BestHourBody extends StatelessWidget {
                 'Tu rendimiento esta repartido sin un horario ganador claro.',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: context.c.textSecondary,
                 ),
               ),
             const SizedBox(height: 12),
@@ -175,7 +177,7 @@ class _Container extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white.withValues(alpha: 0.06),
+      color: context.c.surfaceMuted,
       borderRadius: BorderRadius.circular(14),
       child: child,
     );
@@ -237,7 +239,7 @@ class _Bar extends StatelessWidget {
     }
     final fillColor = isBest
         ? const Color(0xFF4FFFB0)
-        : Colors.white.withValues(alpha: 0.35);
+        : context.c.textMuted;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Column(
@@ -260,7 +262,7 @@ class _Bar extends StatelessWidget {
             bucket.startHour.toString().padLeft(2, '0'),
             style: TextStyle(
               fontSize: 9,
-              color: Colors.white.withValues(alpha: isBest ? 0.95 : 0.55),
+              color: isBest ? context.c.textPrimary : context.c.textMuted,
               fontWeight: isBest ? FontWeight.w800 : FontWeight.w500,
             ),
           ),

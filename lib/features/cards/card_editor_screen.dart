@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../core/models/memora_card.dart';
 import '../../core/widgets/memora_image.dart';
@@ -58,7 +59,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
   Future<void> _pickImage(bool isFront) async {
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
-      backgroundColor: const Color(0xFF1A1A22),
+      backgroundColor: context.c.surfaceElevated,
       builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -207,7 +208,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A22),
+        backgroundColor: context.c.surfaceElevated,
         title: const Text('Eliminar tarjeta'),
         content: const Text('Esta acción no se puede deshacer.'),
         actions: [
@@ -410,7 +411,7 @@ class _Label extends StatelessWidget {
       style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w600,
-        color: Colors.white.withValues(alpha: 0.7),
+        color: context.c.textSecondary,
         letterSpacing: 0.3,
       ),
     );
@@ -438,9 +439,9 @@ class _EditorField extends StatelessWidget {
       style: const TextStyle(fontSize: 16, height: 1.4),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+        hintStyle: TextStyle(color: context.c.textMuted),
         filled: true,
-        fillColor: const Color(0xFF1A1A22),
+        fillColor: context.c.surfaceElevated,
         contentPadding: const EdgeInsets.all(14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -448,12 +449,11 @@ class _EditorField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:
-              BorderSide(color: Colors.white.withValues(alpha: 0.08), width: 1),
+          borderSide: BorderSide(color: context.c.border, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF7C5CFF), width: 1.5),
+          borderSide: const BorderSide(color: AppColors.brand, width: 1.5),
         ),
       ),
     );

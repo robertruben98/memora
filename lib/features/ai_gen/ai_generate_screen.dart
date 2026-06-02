@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
+
 import '../../core/theme/deck_visuals.dart';
 import '../../data/api/api_client.dart';
 import '../../data/repositories/card_repository.dart';
@@ -246,7 +248,7 @@ class _AiGenerateScreenState extends ConsumerState<AiGenerateScreen> {
                 'mazo. Tarda ~5-15s según la cantidad.',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: context.c.textMuted,
                   height: 1.4,
                 ),
               ),
@@ -343,7 +345,7 @@ class _AiNotConfiguredBanner extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               height: 1.5,
-              color: Colors.white.withValues(alpha: 0.7),
+              color: context.c.textSecondary,
             ),
           ),
         ],
@@ -366,7 +368,7 @@ class _Label extends StatelessWidget {
           fontSize: 11,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.0,
-          color: Colors.white.withValues(alpha: 0.5),
+          color: context.c.textMuted,
         ),
       ),
     );
@@ -392,9 +394,9 @@ class _Field extends StatelessWidget {
       style: const TextStyle(fontSize: 15),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+        hintStyle: TextStyle(color: context.c.textMuted),
         filled: true,
-        fillColor: const Color(0xFF1A1A22),
+        fillColor: context.c.surfaceElevated,
         contentPadding: const EdgeInsets.all(14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -403,12 +405,12 @@ class _Field extends StatelessWidget {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.08),
+            color: context.c.border,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF7C5CFF), width: 1.5),
+          borderSide: const BorderSide(color: AppColors.brand, width: 1.5),
         ),
       ),
     );
@@ -432,9 +434,9 @@ class _Counter extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: context.c.border),
       ),
       child: Row(
         children: [
@@ -475,16 +477,16 @@ class _LangPicker extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: context.c.border),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: value,
           isExpanded: true,
-          dropdownColor: const Color(0xFF1A1A22),
-          style: const TextStyle(fontSize: 14, color: Colors.white),
+          dropdownColor: context.c.surfaceElevated,
+          style: TextStyle(fontSize: 14, color: context.c.textPrimary),
           items: [
             for (final o in _options)
               DropdownMenuItem(value: o, child: Text(o)),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_exam_controller.dart';
@@ -206,9 +207,9 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
     return '$m:$sec';
   }
 
-  Color _timerColor(int remainingSeconds) {
+  Color _timerColor(BuildContext context, int remainingSeconds) {
     if (remainingSeconds <= 5 * 60) return const Color(0xFFFF5C5C);
-    return Colors.white;
+    return context.c.textPrimary;
   }
 
   Future<void> _confirmFinish() async {
@@ -381,7 +382,7 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 16,
-                  color: _timerColor(
+                  color: _timerColor(context,
                       ctrl?.remainingSeconds ?? DgtExamController.totalSeconds),
                 ),
               ),

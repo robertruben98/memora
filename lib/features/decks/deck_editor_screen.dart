@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../core/theme/deck_visuals.dart';
 import '../../data/database/database.dart';
@@ -83,7 +84,7 @@ class _DeckEditorScreenState extends ConsumerState<DeckEditorScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A22),
+        backgroundColor: context.c.surfaceElevated,
         title: const Text('Eliminar mazo'),
         content: const Text(
           'Se eliminará el mazo y todas sus tarjetas. '
@@ -205,7 +206,7 @@ class _PreviewCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: color.withValues(alpha: 0.4),
@@ -246,7 +247,7 @@ class _PreviewCard extends StatelessWidget {
                   'Vista previa',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white.withValues(alpha: 0.5),
+                    color: context.c.textMuted,
                   ),
                 ),
               ],
@@ -269,7 +270,7 @@ class _Label extends StatelessWidget {
       style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w600,
-        color: Colors.white.withValues(alpha: 0.7),
+        color: context.c.textSecondary,
         letterSpacing: 0.3,
       ),
     );
@@ -300,9 +301,9 @@ class _Field extends StatelessWidget {
       onChanged: (_) => onChanged(),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+        hintStyle: TextStyle(color: context.c.textMuted),
         filled: true,
-        fillColor: const Color(0xFF1A1A22),
+        fillColor: context.c.surfaceElevated,
         contentPadding: const EdgeInsets.all(14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -310,12 +311,11 @@ class _Field extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:
-              BorderSide(color: Colors.white.withValues(alpha: 0.08), width: 1),
+          borderSide: BorderSide(color: context.c.border, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF7C5CFF), width: 1.5),
+          borderSide: const BorderSide(color: AppColors.brand, width: 1.5),
         ),
       ),
     );
@@ -345,7 +345,7 @@ class _ColorPicker extends StatelessWidget {
               color: color,
               shape: BoxShape.circle,
               border: Border.all(
-                color: selected ? Colors.white : Colors.transparent,
+                color: selected ? context.c.textPrimary : Colors.transparent,
                 width: 3,
               ),
               boxShadow: selected
@@ -394,16 +394,16 @@ class _IconPicker extends StatelessWidget {
             decoration: BoxDecoration(
               color: selected
                   ? tint.withValues(alpha: 0.2)
-                  : const Color(0xFF1A1A22),
+                  : context.c.surfaceElevated,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: selected ? tint : Colors.white.withValues(alpha: 0.08),
+                color: selected ? tint : context.c.border,
                 width: selected ? 2 : 1,
               ),
             ),
             child: Icon(
               opt.icon,
-              color: selected ? tint : Colors.white.withValues(alpha: 0.7),
+              color: selected ? tint : context.c.textSecondary,
               size: 26,
             ),
           ),

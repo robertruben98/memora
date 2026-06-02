@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 
@@ -253,7 +254,7 @@ class _DgtSprintExtremeScreenState
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withValues(alpha: 0.7),
+                color: context.c.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -338,7 +339,7 @@ class _DgtSprintExtremeScreenState
             LinearProgressIndicator(
               value: progress,
               minHeight: 6,
-              backgroundColor: Colors.white.withValues(alpha: 0.08),
+              backgroundColor: context.c.surfaceMuted,
               valueColor: const AlwaysStoppedAnimation<Color>(
                 Color(0xFFFF5C5C),
               ),
@@ -348,7 +349,7 @@ class _DgtSprintExtremeScreenState
               'Pregunta ${_current + 1} de ${_questions.length}',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.white.withValues(alpha: 0.6),
+                color: context.c.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -415,7 +416,7 @@ class _DgtSprintExtremeScreenState
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: Colors.white.withValues(alpha: 0.6),
+                color: context.c.textSecondary,
                 letterSpacing: 0.6,
               ),
             ),
@@ -433,7 +434,7 @@ class _DgtSprintExtremeScreenState
               '$pct% de acierto - ${used}s usados',
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.white.withValues(alpha: 0.7),
+                color: context.c.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -565,7 +566,7 @@ class _GlobalTimerBar extends StatelessWidget {
             child: LinearProgressIndicator(
               value: fraction,
               minHeight: 8,
-              backgroundColor: Colors.white.withValues(alpha: 0.08),
+              backgroundColor: context.c.surfaceMuted,
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),
@@ -587,7 +588,7 @@ class _PerQuestionBar extends StatelessWidget {
     final urgent = secondsLeft <= 3;
     final color = urgent
         ? const Color(0xFFFF5C5C)
-        : Colors.white.withValues(alpha: 0.55);
+        : context.c.textMuted;
     return Row(
       children: [
         Icon(Icons.hourglass_bottom_rounded, color: color, size: 16),
@@ -609,7 +610,7 @@ class _PerQuestionBar extends StatelessWidget {
             child: LinearProgressIndicator(
               value: fraction,
               minHeight: 4,
-              backgroundColor: Colors.white.withValues(alpha: 0.06),
+              backgroundColor: context.c.surfaceMuted,
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),
@@ -636,8 +637,8 @@ class _ExtremeAnswerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color bg = Colors.white.withValues(alpha: 0.08);
-    Color iconBg = Colors.white.withValues(alpha: 0.12);
+    Color bg = context.c.surfaceMuted;
+    Color iconBg = context.c.border;
     if (selected) {
       bg = const Color(0xFFFF5C5C).withValues(alpha: 0.28);
       iconBg = const Color(0xFFFF5C5C);
@@ -709,7 +710,7 @@ class _SummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.06),
+        color: context.c.surfaceMuted,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(

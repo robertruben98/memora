@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
@@ -147,7 +148,7 @@ class DgtVideoQuestionTile extends ConsumerWidget {
         : null;
 
     return Material(
-      color: Colors.white.withValues(alpha: 0.06),
+      color: context.c.surfaceElevated,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
@@ -221,7 +222,7 @@ class DgtVideoQuestionTile extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white.withValues(alpha: 0.7),
+                              color: context.c.textSecondary,
                             ),
                           ),
                         ),
@@ -254,11 +255,11 @@ class _ThumbPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white.withValues(alpha: 0.05),
+      color: context.c.surfaceMuted,
       alignment: Alignment.center,
       child: Icon(
         Icons.videocam_off_outlined,
-        color: Colors.white.withValues(alpha: 0.4),
+        color: context.c.textMuted,
         size: 22,
       ),
     );
@@ -277,7 +278,7 @@ class _LoadingSkeleton extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         height: 88,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.05),
+          color: context.c.surfaceMuted,
           borderRadius: BorderRadius.circular(14),
         ),
       ),
@@ -300,7 +301,7 @@ class _EmptyView extends StatelessWidget {
             Icon(
               Icons.movie_filter_outlined,
               size: 56,
-              color: Colors.white.withValues(alpha: 0.4),
+              color: context.c.textMuted,
             ),
             const SizedBox(height: 12),
             const Text(
@@ -316,7 +317,7 @@ class _EmptyView extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.white.withValues(alpha: 0.65),
+                color: context.c.textSecondary,
               ),
             ),
             const SizedBox(height: 16),

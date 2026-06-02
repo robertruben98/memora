@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
+
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_simulacro_review_screen.dart';
 
@@ -198,7 +200,7 @@ class _DgtResultScreenState extends State<DgtResultScreen> {
                           ? 'Criterio DGT permiso B: hasta 3 fallos.'
                           : 'Criterio DGT permiso B: maximo 3 fallos.',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: context.c.textSecondary,
                         fontSize: 13,
                       ),
                       textAlign: TextAlign.center,
@@ -208,7 +210,7 @@ class _DgtResultScreenState extends State<DgtResultScreen> {
                       Text(
                         'Tiempo agotado: entregado automaticamente.',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
+                          color: context.c.textMuted,
                           fontSize: 12,
                         ),
                       ),
@@ -226,7 +228,7 @@ class _DgtResultScreenState extends State<DgtResultScreen> {
                           return '$prefix: $m:$ss';
                         }(),
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: context.c.textSecondary,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -327,7 +329,7 @@ class _WrongTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -343,18 +345,21 @@ class _WrongTile extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           _line(
+            context,
             label: 'Correcta',
             value: '${q.correct.toUpperCase()}) ${_optionFor(q, q.correct)}',
             color: const Color(0xFF4FFFB0),
           ),
           if (picked != null)
             _line(
+              context,
               label: 'Tu respuesta',
               value: '${picked.toUpperCase()}) ${_optionFor(q, picked)}',
               color: const Color(0xFFFF5C5C),
             )
           else
             _line(
+              context,
               label: 'Tu respuesta',
               value: 'Sin responder',
               color: const Color(0xFFFF5C5C),
@@ -364,7 +369,7 @@ class _WrongTile extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.04),
+                color: context.c.surfaceMuted,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -372,7 +377,7 @@ class _WrongTile extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   height: 1.35,
-                  color: Colors.white.withValues(alpha: 0.85),
+                  color: context.c.textSecondary,
                 ),
               ),
             ),
@@ -382,7 +387,7 @@ class _WrongTile extends StatelessWidget {
     );
   }
 
-  Widget _line(
+  Widget _line(BuildContext context,
       {required String label, required String value, required Color color}) {
     return Padding(
       padding: const EdgeInsets.only(top: 4),
@@ -393,7 +398,7 @@ class _WrongTile extends StatelessWidget {
             TextSpan(
               text: '$label: ',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.6),
+                color: context.c.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),

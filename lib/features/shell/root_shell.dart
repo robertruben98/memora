@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../browse/browse_feed_screen.dart';
 import '../home/home_screen.dart';
@@ -57,10 +58,10 @@ class _BottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF0E0E12),
+      decoration: BoxDecoration(
+        color: context.c.surface,
         border: Border(
-          top: BorderSide(color: Color(0x14FFFFFF), width: 0.6),
+          top: BorderSide(color: context.c.border, width: 0.6),
         ),
       ),
       child: SafeArea(
@@ -134,8 +135,8 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = selected
-        ? (accent ? const Color(0xFF7C5CFF) : Colors.white)
-        : Colors.white.withValues(alpha: 0.45);
+        ? (accent ? AppColors.brand : context.c.textPrimary)
+        : context.c.textMuted;
     return Expanded(
       child: InkResponse(
         radius: 36,

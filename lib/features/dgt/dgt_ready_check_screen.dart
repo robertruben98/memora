@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import 'dgt_exam_screen.dart';
 import 'dgt_ready_check_provider.dart';
@@ -141,8 +142,8 @@ class DgtReadyVerdictCard extends StatelessWidget {
                     result.daysUntilExam! < 0
                         ? 'Tu fecha de examen ya paso'
                         : 'Faltan ${result.daysUntilExam} dias para el examen',
-                    style: const TextStyle(
-                      color: Colors.white70,
+                    style: TextStyle(
+                      color: context.c.textSecondary,
                       fontSize: 13,
                     ),
                   ),
@@ -193,7 +194,7 @@ class DgtReadyCriterionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = colorFor(criterion.status);
     return Material(
-      color: const Color(0xFF1A1A22),
+      color: context.c.surfaceElevated,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -221,7 +222,7 @@ class DgtReadyCriterionTile extends StatelessWidget {
                       criterion.detail,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: context.c.textSecondary,
                       ),
                     ),
                   ],
@@ -230,7 +231,7 @@ class DgtReadyCriterionTile extends StatelessWidget {
               if (criterion.status != DgtReadyCriterionStatus.pass)
                 Icon(
                   Icons.chevron_right_rounded,
-                  color: Colors.white.withValues(alpha: 0.4),
+                  color: context.c.textMuted,
                 ),
             ],
           ),

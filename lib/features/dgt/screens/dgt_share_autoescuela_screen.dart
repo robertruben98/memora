@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
+
 import '../services/dgt_share_snapshot.dart';
 
 /// Issue #182 (dgt-ux): pantalla "Compartir progreso con autoescuela".
@@ -63,10 +65,10 @@ class _Body extends StatelessWidget {
           SelectableText(
             snapshot.deeplink,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'monospace',
               fontSize: 12,
-              color: Color(0xFF8A93AB),
+              color: context.c.textMuted,
             ),
           ),
           const SizedBox(height: 16),
@@ -96,11 +98,11 @@ class _HeaderCopy extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Text(
+    return Text(
       'Envia este resumen a tu profesor de autoescuela. Solo incluye '
       'metricas agregadas (no preguntas falladas ni email). El profesor '
       'puede escanear el QR para abrir tu progreso en modo verificacion.',
-      style: TextStyle(fontSize: 13, color: Color(0xFFB6BCD0)),
+      style: TextStyle(fontSize: 13, color: context.c.textSecondary),
     );
   }
 }
@@ -115,9 +117,9 @@ class _SnapshotCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2236),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF2A334D)),
+        border: Border.all(color: context.c.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,9 +161,9 @@ class _SnapshotCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Generado: ${snapshot.generatedAt.toIso8601String().split('T').first}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
-              color: Color(0xFF6E7691),
+              color: context.c.textMuted,
             ),
           ),
         ],
@@ -184,7 +186,7 @@ class _Row extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(color: Color(0xFFB6BCD0), fontSize: 13),
+              style: TextStyle(color: context.c.textSecondary, fontSize: 13),
             ),
           ),
           Text(
@@ -230,10 +232,10 @@ class _Disclaimer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Text(
+    return Text(
       'Este snapshot se genera localmente. No se sube a ningun servidor. '
       'El token cambia cada dia para que el profesor sepa que es reciente.',
-      style: TextStyle(fontSize: 11, color: Color(0xFF6E7691)),
+      style: TextStyle(fontSize: 11, color: context.c.textMuted),
       textAlign: TextAlign.center,
     );
   }

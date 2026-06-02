@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/logging/app_logger.dart';
 import 'core/srs/study_settings.dart';
+import 'core/theme/app_colors.dart';
 import 'core/theme/theme_provider.dart';
 import 'data/api/api_client.dart';
 import 'data/database/database.dart';
@@ -212,7 +213,8 @@ class _MemoraAppState extends ConsumerState<MemoraApp> {
       darkTheme: ThemeData(
         useMaterial3: true,
         colorScheme: darkScheme,
-        scaffoldBackgroundColor: const Color(0xFF0E0E12),
+        scaffoldBackgroundColor: AppColors.dark.surface,
+        extensions: const [AppColors.dark],
         textTheme: Typography.whiteMountainView.apply(
           bodyColor: Colors.white,
           displayColor: Colors.white,
@@ -221,6 +223,12 @@ class _MemoraAppState extends ConsumerState<MemoraApp> {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: lightScheme,
+        scaffoldBackgroundColor: AppColors.light.surface,
+        extensions: const [AppColors.light],
+        textTheme: Typography.blackMountainView.apply(
+          bodyColor: AppColors.light.textPrimary,
+          displayColor: AppColors.light.textPrimary,
+        ),
       ),
       home: _resolveHome(auth),
     );

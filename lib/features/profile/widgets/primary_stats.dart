@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
 import '../character_progress.dart';
 
 /// Fila con 3 tarjetas de estadísticas principales: reviews, aciertos y racha.
@@ -62,7 +63,7 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: tint.withValues(alpha: 0.3)),
       ),
@@ -88,7 +89,7 @@ class _StatCard extends StatelessWidget {
               fontSize: 10,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.2,
-              color: Colors.white.withValues(alpha: 0.6),
+              color: context.c.textSecondary,
             ),
           ),
         ],

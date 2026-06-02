@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../data/api/api_client.dart';
 
@@ -194,12 +195,12 @@ class _EmptyView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      children: const [
-        SizedBox(height: 80),
+      children: [
+        const SizedBox(height: 80),
         Icon(Icons.show_chart_rounded,
-            size: 72, color: Color(0xFFBBBBBB)),
-        SizedBox(height: 12),
-        Center(
+            size: 72, color: context.c.textMuted),
+        const SizedBox(height: 12),
+        const Center(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 32),
             child: Text(
@@ -209,12 +210,12 @@ class _EmptyView extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Center(
           child: Text(
             'Empieza haciendo un quiz hoy.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Color(0xFF666666)),
+            style: TextStyle(color: context.c.textMuted),
           ),
         ),
       ],
@@ -546,22 +547,22 @@ class _WeekDetailSheet extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12),
-            _kpi('Preguntas', '${point.questionsAnswered}'),
-            _kpi('Acierto', '$pct%'),
-            _kpi('Simulacros', '${point.simulacrosCompleted}'),
-            _kpi('Aprobados', '${point.simulacrosPassed}'),
-            _kpi('Streak', '${point.streakDays} dias'),
+            _kpi(context, 'Preguntas', '${point.questionsAnswered}'),
+            _kpi(context, 'Acierto', '$pct%'),
+            _kpi(context, 'Simulacros', '${point.simulacrosCompleted}'),
+            _kpi(context, 'Aprobados', '${point.simulacrosPassed}'),
+            _kpi(context, 'Streak', '${point.streakDays} dias'),
             if (point.weakTopicName != null)
-              _kpi('Tema mas debil', point.weakTopicName!),
+              _kpi(context, 'Tema mas debil', point.weakTopicName!),
             if (point.improvedTopicName != null)
-              _kpi('Tema que mejoraste', point.improvedTopicName!),
+              _kpi(context, 'Tema que mejoraste', point.improvedTopicName!),
             const SizedBox(height: 12),
             if (point.recommendation.isNotEmpty)
               Text(
                 point.recommendation,
-                style: const TextStyle(
+                style: TextStyle(
                   fontStyle: FontStyle.italic,
-                  color: Color(0xFF666666),
+                  color: context.c.textMuted,
                 ),
               ),
           ],
@@ -570,14 +571,14 @@ class _WeekDetailSheet extends StatelessWidget {
     );
   }
 
-  Widget _kpi(String label, String value) {
+  Widget _kpi(BuildContext context, String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           Expanded(
             child: Text(label,
-                style: const TextStyle(color: Color(0xFF666666))),
+                style: TextStyle(color: context.c.textMuted)),
           ),
           Text(value,
               style: const TextStyle(fontWeight: FontWeight.w600)),

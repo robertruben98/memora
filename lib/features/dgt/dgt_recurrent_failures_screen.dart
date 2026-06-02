@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 
@@ -231,9 +232,9 @@ class _FailureTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.06),
+        color: context.c.surfaceMuted,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+        border: Border.all(color: context.c.border),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -298,10 +299,10 @@ class _LoadingSkeleton extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
       itemCount: 5,
       separatorBuilder: (_, _) => const SizedBox(height: 8),
-      itemBuilder: (_, _) => Container(
+      itemBuilder: (context, _) => Container(
         height: 64,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.05),
+          color: context.c.surfaceMuted,
           borderRadius: BorderRadius.circular(10),
         ),
       ),
@@ -365,7 +366,7 @@ class _EmptyState extends StatelessWidget {
               'Sigue practicando!',
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.white.withValues(alpha: 0.65),
+                color: context.c.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -478,7 +479,7 @@ class _QuizQuestion extends StatelessWidget {
                 'Pregunta ${index + 1} de $total',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.white.withValues(alpha: 0.6),
+                  color: context.c.textSecondary,
                 ),
               ),
               const Spacer(),
@@ -523,7 +524,7 @@ class _QuizQuestion extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.05),
+                        color: context.c.surfaceMuted,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
@@ -531,7 +532,7 @@ class _QuizQuestion extends StatelessWidget {
                         '${q.explanation == null || q.explanation!.isEmpty ? '' : '\n${q.explanation}'}',
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white.withValues(alpha: 0.85),
+                          color: context.c.textPrimary,
                           height: 1.4,
                         ),
                       ),
@@ -574,8 +575,8 @@ class _Option extends StatelessWidget {
     final answered = picked != null;
     final isThisPicked = picked == letter;
     final isCorrectOption = letter == correct;
-    Color border = Colors.white.withValues(alpha: 0.15);
-    Color bg = const Color(0xFF1A1A22);
+    Color border = context.c.border;
+    Color bg = context.c.surfaceElevated;
     if (answered) {
       if (isCorrectOption) {
         border = const Color(0xFF4FFFB0);
@@ -660,7 +661,7 @@ class _QuizSummary extends StatelessWidget {
               'Acertaste $correct - Fallaste $wrong',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withValues(alpha: 0.75),
+                color: context.c.textSecondary,
               ),
             ),
             const SizedBox(height: 24),

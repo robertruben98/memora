@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 /// Reusable tile for the StudyHub screen.
 ///
@@ -42,7 +43,7 @@ class StudyModeTile extends StatelessWidget {
     final borderAlpha = hasBadge ? 0.45 : 0.08;
     final borderColor = hasBadge
         ? accentColor.withValues(alpha: 0.45)
-        : Colors.white.withValues(alpha: 0.08);
+        : context.c.border;
 
     // Issue #191 (dgt-tech): a11y. Label descriptivo para TalkBack / VoiceOver.
     // Si hay badge con count, anunciarlo via `value`.
@@ -64,7 +65,7 @@ class StudyModeTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: Ink(
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1A22),
+            color: context.c.surfaceElevated,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: borderColor, width: borderAlpha == 0.45 ? 1 : 1),
           ),
@@ -101,7 +102,7 @@ class StudyModeTile extends StatelessWidget {
                       subtitle,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: context.c.textSecondary,
                       ),
                     ),
                   ],
@@ -129,7 +130,7 @@ class StudyModeTile extends StatelessWidget {
               else
                 Icon(
                   Icons.arrow_forward_rounded,
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: context.c.textMuted,
                 ),
             ],
           ),

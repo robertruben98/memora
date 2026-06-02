@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import 'dgt_weekly_summary_provider.dart';
 
@@ -124,13 +125,13 @@ class _MetricTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: context.c.border),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 22, color: const Color(0xFF7C5CFF)),
+          Icon(icon, size: 22, color: AppColors.brand),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -140,7 +141,7 @@ class _MetricTile extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white.withValues(alpha: 0.6),
+                    color: context.c.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -169,7 +170,7 @@ class _WeakestTopicCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF22151A),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Colors.redAccent.withValues(alpha: 0.25)),
       ),
@@ -181,11 +182,11 @@ class _WeakestTopicCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Tema mas debil',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white70,
+                    color: context.c.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -222,7 +223,7 @@ class _DaysToExamCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF15221A),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.25)),
       ),
@@ -261,9 +262,9 @@ class _EmptyWeekCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: context.c.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,7 +278,7 @@ class _EmptyWeekCard extends StatelessWidget {
             tail,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white.withValues(alpha: 0.75),
+              color: context.c.textSecondary,
               height: 1.35,
             ),
           ),

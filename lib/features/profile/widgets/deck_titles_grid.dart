@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
 import '../../../core/theme/deck_visuals.dart';
 import '../character_progress.dart';
 
@@ -19,9 +20,9 @@ class DeckTitlesGrid extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A22),
+          color: context.c.surfaceElevated,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+          border: Border.all(color: context.c.border),
         ),
         child: Column(
           children: [
@@ -35,7 +36,7 @@ class DeckTitlesGrid extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: Colors.white.withValues(alpha: 0.6),
+                color: context.c.textSecondary,
               ),
             ),
             const SizedBox(height: 4),
@@ -44,7 +45,7 @@ class DeckTitlesGrid extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 11,
-                color: Colors.white.withValues(alpha: 0.45),
+                color: context.c.textMuted,
               ),
             ),
           ],
@@ -115,7 +116,7 @@ class _DeckTitleBadge extends StatelessWidget {
                       '${deck.correct} aciertos',
                       style: TextStyle(
                         fontSize: 11,
-                        color: Colors.white.withValues(alpha: 0.55),
+                        color: context.c.textMuted,
                       ),
                     ),
                   ],
@@ -126,7 +127,7 @@ class _DeckTitleBadge extends StatelessWidget {
                   next.emoji,
                   style: TextStyle(
                     fontSize: 18,
-                    color: Colors.white.withValues(alpha: 0.4),
+                    color: context.c.textMuted,
                   ),
                 ),
             ],
@@ -151,7 +152,7 @@ class _DeckTitleBadge extends StatelessWidget {
               '(${deck.correct}/${next.threshold})',
               style: TextStyle(
                 fontSize: 10,
-                color: Colors.white.withValues(alpha: 0.5),
+                color: context.c.textMuted,
               ),
             ),
           ],

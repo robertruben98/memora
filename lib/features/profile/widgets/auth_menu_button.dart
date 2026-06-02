@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../auth/auth_state.dart';
 import '../../auth/login_screen.dart';
@@ -62,7 +63,7 @@ class AuthMenuButton extends ConsumerWidget {
                     'ID: ${auth.userId ?? ''}',
                     style: TextStyle(
                       fontSize: 11,
-                      color: Colors.white.withValues(alpha: 0.5),
+                      color: ctx.c.textMuted,
                     ),
                   ),
                 ],
@@ -85,11 +86,11 @@ class AuthMenuButton extends ConsumerWidget {
           ];
         }
         return [
-          const PopupMenuItem(
+          PopupMenuItem(
             enabled: false,
             child: Text(
               'Modo legacy (sin login)',
-              style: TextStyle(color: Colors.white54),
+              style: TextStyle(color: ctx.c.textMuted),
             ),
           ),
           const PopupMenuDivider(),

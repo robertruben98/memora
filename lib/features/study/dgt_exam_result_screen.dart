@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/models/memora_card.dart';
@@ -271,17 +272,17 @@ class _ScoreCard extends StatelessWidget {
             'Criterio DGT: maximo 3 fallos para aprobar',
             style: TextStyle(
               fontSize: 12,
-              color: Colors.white.withValues(alpha: 0.65),
+              color: context.c.textSecondary,
             ),
           ),
           const SizedBox(height: 12),
           Row(
             children: [
-              const Icon(Icons.timer_outlined, size: 16, color: Colors.white70),
+              Icon(Icons.timer_outlined, size: 16, color: context.c.textSecondary),
               const SizedBox(width: 6),
               Text(
                 'Tiempo usado: $timeUsed',
-                style: const TextStyle(fontSize: 13, color: Colors.white70),
+                style: TextStyle(fontSize: 13, color: context.c.textSecondary),
               ),
               if (expired) ...[
                 const SizedBox(width: 10),
@@ -339,7 +340,7 @@ class _WrongTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.redAccent.withValues(alpha: 0.4)),
       ),
@@ -377,7 +378,7 @@ class _WrongTile extends StatelessWidget {
             'Explicacion: ${answer.card.back}',
             style: TextStyle(
               fontSize: 13,
-              color: Colors.white.withValues(alpha: 0.75),
+              color: context.c.textSecondary,
               height: 1.35,
             ),
           ),

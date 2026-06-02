@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../../core/models/memora_card.dart';
 
@@ -28,7 +29,7 @@ class ExplanationBottomSheet extends StatelessWidget {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF1A1A22),
+      backgroundColor: context.c.surfaceElevated,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
       ),
@@ -78,7 +79,7 @@ class ExplanationBottomSheet extends StatelessWidget {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 14),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: context.c.border,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -151,7 +152,7 @@ class ExplanationBottomSheet extends StatelessWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7C5CFF).withValues(alpha: 0.18),
+                  color: AppColors.brand.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -159,7 +160,7 @@ class ExplanationBottomSheet extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF7C5CFF),
+                    color: AppColors.brand,
                   ),
                 ),
               ),
@@ -171,7 +172,7 @@ class ExplanationBottomSheet extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13.5,
                 height: 1.5,
-                color: Colors.white.withValues(alpha: 0.82),
+                color: context.c.textSecondary,
               ),
             ),
             const SizedBox(height: 16),
@@ -189,7 +190,7 @@ class ExplanationBottomSheet extends StatelessWidget {
                     Icon(
                       Icons.open_in_new_rounded,
                       size: 16,
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: context.c.textSecondary,
                     ),
                     const SizedBox(width: 8),
                     Flexible(
@@ -198,7 +199,7 @@ class ExplanationBottomSheet extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white.withValues(alpha: 0.85),
+                          color: context.c.textSecondary,
                           decoration: TextDecoration.underline,
                         ),
                       ),
@@ -217,7 +218,7 @@ class ExplanationBottomSheet extends StatelessWidget {
                   Navigator.of(context).pop();
                 },
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF7C5CFF),
+                  backgroundColor: AppColors.brand,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),

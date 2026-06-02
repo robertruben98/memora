@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
+
 import '../../../core/models/memora_card.dart';
 import '../../../core/widgets/memora_image.dart';
 
@@ -74,10 +76,10 @@ class _QuestionBlock extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
           child: Text.rich(
             TextSpan(
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 height: 1.45,
-                color: Colors.white,
+                color: context.c.textPrimary,
               ),
               children: [
                 TextSpan(
@@ -124,14 +126,14 @@ class _AnswerBlock extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 height: 1.45,
-                color: Colors.white.withValues(alpha: 0.65),
+                color: context.c.textSecondary,
               ),
               children: [
                 TextSpan(
                   text: card.deck,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w800,
-                    color: Colors.white,
+                    color: context.c.textPrimary,
                   ),
                 ),
                 const TextSpan(text: '  '),
@@ -149,11 +151,11 @@ class _AnswerBlock extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 2),
           child: Text(
             card.back,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               height: 1.45,
-              color: Colors.white,
+              color: context.c.textPrimary,
             ),
           ),
         ),

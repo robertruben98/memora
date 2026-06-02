@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/repositories/dgt_repository.dart';
@@ -219,16 +220,16 @@ class _ConceptGroupCardState extends State<_ConceptGroupCard> {
     final group = widget.group;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: context.c.surfaceMuted,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+        border: Border.all(color: context.c.border),
       ),
       child: Column(
         children: [
           ListTile(
-            leading: const Icon(
+            leading: Icon(
               Icons.psychology_alt_rounded,
-              color: Color(0xFFB9A6FF),
+              color: AppColors.brand,
             ),
             title: Text(
               group.topic,
@@ -240,7 +241,7 @@ class _ConceptGroupCardState extends State<_ConceptGroupCard> {
               '${group.totalFails} ${group.totalFails == 1 ? 'vez' : 'veces'}',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.white.withValues(alpha: 0.7),
+                color: context.c.textSecondary,
               ),
             ),
             trailing: Container(
@@ -308,7 +309,7 @@ class _ConceptGroupCardState extends State<_ConceptGroupCard> {
                     'Practicar ${group.items.length == 1 ? '' : ''}similares',
                   ),
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFFB9A6FF),
+                    backgroundColor: AppColors.brand,
                   ),
                 ),
               ),
@@ -332,7 +333,7 @@ class _LoadingSkeleton extends StatelessWidget {
       itemBuilder: (_, _) => Container(
         height: 72,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.05),
+          color: context.c.surfaceMuted,
           borderRadius: BorderRadius.circular(12),
         ),
       ),
@@ -471,14 +472,14 @@ class _QuizQuestion extends StatelessWidget {
             value: (index + 1) / total,
             minHeight: 6,
             valueColor:
-                const AlwaysStoppedAnimation(Color(0xFFB9A6FF)),
+                const AlwaysStoppedAnimation(AppColors.brand),
           ),
           const SizedBox(height: 8),
           Text(
             'Pregunta ${index + 1} de $total',
             style: TextStyle(
               fontSize: 12,
-              color: Colors.white.withValues(alpha: 0.6),
+              color: context.c.textSecondary,
             ),
           ),
           const SizedBox(height: 16),
@@ -519,7 +520,7 @@ class _QuizQuestion extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.05),
+                        color: context.c.surfaceMuted,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
@@ -527,7 +528,7 @@ class _QuizQuestion extends StatelessWidget {
                         '${q.explanation == null || q.explanation!.isEmpty ? '' : '\n${q.explanation}'}',
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white.withValues(alpha: 0.85),
+                          color: context.c.textPrimary,
                           height: 1.4,
                         ),
                       ),
@@ -570,8 +571,8 @@ class _Option extends StatelessWidget {
     final answered = picked != null;
     final isThisPicked = picked == letter;
     final isCorrectOption = letter == correct;
-    Color border = Colors.white.withValues(alpha: 0.15);
-    Color bg = const Color(0xFF1A1A22);
+    Color border = context.c.border;
+    Color bg = context.c.surfaceElevated;
     if (answered) {
       if (isCorrectOption) {
         border = const Color(0xFF4FFFB0);
@@ -656,7 +657,7 @@ class _QuizSummary extends StatelessWidget {
               'Acertaste $correct - Fallaste $wrong',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withValues(alpha: 0.75),
+                color: context.c.textSecondary,
               ),
             ),
             const SizedBox(height: 24),

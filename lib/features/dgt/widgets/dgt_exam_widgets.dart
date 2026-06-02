@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../../data/api/api_client.dart';
 import '../dgt_exam_controller.dart';
@@ -27,9 +28,7 @@ class DgtAnswerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected
-        ? const Color(0xFF7C5CFF)
-        : Colors.white.withValues(alpha: 0.08);
+    final color = selected ? AppColors.brand : context.c.surfaceMuted;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Material(
@@ -48,16 +47,14 @@ class DgtAnswerTile extends StatelessWidget {
                   height: 28,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: selected
-                        ? Colors.white
-                        : Colors.white.withValues(alpha: 0.12),
+                    color: selected ? Colors.white : context.c.surfaceMuted,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     letter.toUpperCase(),
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
-                      color: selected ? const Color(0xFF7C5CFF) : Colors.white,
+                      color: selected ? AppColors.brand : context.c.textPrimary,
                     ),
                   ),
                 ),
@@ -92,7 +89,7 @@ class DgtQuestionGridSheet {
     final questions = controller.questions;
     return showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color(0xFF1A1A22),
+      backgroundColor: context.c.surfaceElevated,
       builder: (ctx) {
         return SafeArea(
           child: Padding(
@@ -126,7 +123,7 @@ class DgtQuestionGridSheet {
                       bg =
                           const Color(0xFF4FFFB0).withValues(alpha: 0.35);
                     } else {
-                      bg = Colors.white.withValues(alpha: 0.08);
+                      bg = context.c.surfaceMuted;
                     }
                     return InkWell(
                       onTap: () {
@@ -157,8 +154,7 @@ class DgtQuestionGridSheet {
                     const Color(0xFF4FFFB0).withValues(alpha: 0.35),
                     'Respondida'),
                 _legendRow(const Color(0xFFFFB74F), 'Marcada'),
-                _legendRow(
-                    Colors.white.withValues(alpha: 0.08), 'Sin responder'),
+                _legendRow(context.c.surfaceMuted, 'Sin responder'),
               ],
             ),
           ),
@@ -207,7 +203,7 @@ class DgtExamImage extends ConsumerWidget {
       errorBuilder: (_, _, _) => Container(
         height: 120,
         alignment: Alignment.center,
-        color: Colors.white.withValues(alpha: 0.05),
+        color: context.c.surfaceMuted,
         child: const Icon(Icons.image_not_supported_outlined),
       ),
     );

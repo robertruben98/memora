@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../data/database/database.dart';
 import '../auth/auth_state.dart';
 import '../auth/login_screen.dart';
@@ -45,11 +46,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final auth = ref.read(authProvider);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => auth.isLoggedIn
+        builder: (routeContext) => auth.isLoggedIn
             ? const RootShell()
             : LoginScreen(
                 onAuthenticated: () {
-                  Navigator.of(context).pushReplacement(
+                  // Usar el context de ESTA ruta (LoginScreen sigue montado),
+                  // no el de onboarding, que ya quedó defunct tras el
+                  // pushReplacement -> evita "widget has been unmounted".
+                  Navigator.of(routeContext).pushReplacement(
                     MaterialPageRoute(builder: (_) => const RootShell()),
                   );
                 },
@@ -125,8 +129,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         height: 8,
                         decoration: BoxDecoration(
                           color: i == _index
-                              ? Colors.white
-                              : Colors.white.withValues(alpha: 0.25),
+                              ? context.c.textPrimary
+                              : context.c.textPrimary.withValues(alpha: 0.22),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -227,7 +231,7 @@ class _IntroPage extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               height: 1.5,
-              color: Colors.white.withValues(alpha: 0.7),
+              color: context.c.textSecondary,
             ),
           ),
         ],
@@ -265,7 +269,7 @@ class _LicensePage extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               height: 1.5,
-              color: Colors.white.withValues(alpha: 0.65),
+              color: context.c.textSecondary,
             ),
           ),
           const SizedBox(height: 28),
@@ -313,8 +317,8 @@ class _LicenseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: selected
-          ? const Color(0xFF7C5CFF).withValues(alpha: 0.18)
-          : const Color(0xFF1A1A22),
+          ? AppColors.brand.withValues(alpha: 0.18)
+          : context.c.surfaceElevated,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
@@ -324,9 +328,7 @@ class _LicenseCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: selected
-                  ? const Color(0xFF7C5CFF)
-                  : Colors.white.withValues(alpha: 0.08),
+              color: selected ? AppColors.brand : context.c.border,
               width: selected ? 1.6 : 1,
             ),
           ),
@@ -358,7 +360,7 @@ class _LicenseCard extends StatelessWidget {
                       type.description,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: context.c.textSecondary,
                       ),
                     ),
                   ],
@@ -418,7 +420,7 @@ class _ExamDatePage extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               height: 1.5,
-              color: Colors.white.withValues(alpha: 0.65),
+              color: context.c.textSecondary,
             ),
           ),
           const SizedBox(height: 28),
@@ -492,7 +494,7 @@ class _DailyGoalPage extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               height: 1.5,
-              color: Colors.white.withValues(alpha: 0.65),
+              color: context.c.textSecondary,
             ),
           ),
           const SizedBox(height: 28),

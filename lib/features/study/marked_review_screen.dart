@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
 import '../../core/models/memora_card.dart';
 import '../../data/repositories/review_repository.dart';
 import '../review/review_invalidation.dart';
@@ -97,7 +98,7 @@ class _ActiveMarkedReviewState extends ConsumerState<_ActiveMarkedReview> {
       context: context,
       barrierDismissible: false,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A22),
+        backgroundColor: context.c.surfaceElevated,
         title: const Text('¡Repaso completado!'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -198,7 +199,7 @@ class _MarkedEmptyScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.white.withValues(alpha: 0.6),
+                  color: context.c.textSecondary,
                 ),
               ),
             ],

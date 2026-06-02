@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
+
 import '../../../core/models/memora_card.dart';
 import '../../../data/repositories/card_repository.dart';
 import '../../cards/card_editor_screen.dart';
@@ -17,7 +19,7 @@ class FeedPostMoreMenu {
   }) {
     return showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1A1A22),
+      backgroundColor: context.c.surfaceElevated,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -30,7 +32,7 @@ class FeedPostMoreMenu {
               height: 4,
               margin: const EdgeInsets.only(top: 8, bottom: 4),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: context.c.border,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -63,7 +65,7 @@ class FeedPostMoreMenu {
                 final ok = await showDialog<bool>(
                   context: context,
                   builder: (_) => AlertDialog(
-                    backgroundColor: const Color(0xFF1A1A22),
+                    backgroundColor: context.c.surfaceElevated,
                     title: const Text('Eliminar tarjeta'),
                     content: const Text('Esta acción no se puede deshacer.'),
                     actions: [

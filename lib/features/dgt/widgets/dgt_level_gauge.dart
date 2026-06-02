@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../dgt_prediction.dart';
 import '../dgt_ready_check_screen.dart';
@@ -150,7 +151,7 @@ class _DgtLevelGaugeContent extends StatelessWidget {
           ),
           child: Ink(
             decoration: BoxDecoration(
-              color: const Color(0xFF1A1A22),
+              color: context.c.surfaceElevated,
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
                 color: zone.color.withValues(alpha: hasData ? 0.55 : 0.2),
@@ -181,7 +182,7 @@ class _DgtLevelGaugeContent extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white.withValues(alpha: 0.65),
+                    color: context.c.textSecondary,
                   ),
                 ),
               ],
@@ -305,10 +306,10 @@ class _DgtLevelGaugeSkeleton extends StatelessWidget {
       label: 'Mi nivel DGT: cargando',
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A22),
+          color: context.c.surfaceElevated,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: Colors.white.withValues(alpha: 0.08),
+            color: context.c.border,
           ),
         ),
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
@@ -329,7 +330,7 @@ class _DgtLevelGaugeSkeleton extends StatelessWidget {
               height: 12,
               width: 140,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.08),
+                color: context.c.surfaceMuted,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -338,7 +339,7 @@ class _DgtLevelGaugeSkeleton extends StatelessWidget {
               height: 10,
               width: 100,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
+                color: context.c.surfaceMuted,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -359,10 +360,10 @@ class _DgtLevelGaugeError extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A22),
+          color: context.c.surfaceElevated,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: Colors.white.withValues(alpha: 0.10),
+            color: context.c.border,
           ),
         ),
         child: Row(
@@ -370,7 +371,7 @@ class _DgtLevelGaugeError extends StatelessWidget {
             Icon(
               Icons.signal_wifi_off_rounded,
               size: 18,
-              color: Colors.white.withValues(alpha: 0.55),
+              color: context.c.textMuted,
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -378,7 +379,7 @@ class _DgtLevelGaugeError extends StatelessWidget {
                 'Mi nivel: no disponible',
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: context.c.textSecondary,
                 ),
               ),
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../data/api/api_client.dart';
@@ -140,7 +141,7 @@ class _DgtVideoQuestionPlayerScreenState
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white.withValues(alpha: 0.7),
+                              color: context.c.textSecondary,
                             ),
                           ),
                         ),
@@ -321,9 +322,9 @@ class _AnswerOption extends StatelessWidget {
     final selected = picked == letter;
     final isCorrectOption = letter == correct;
 
-    Color bg = Colors.white.withValues(alpha: 0.08);
-    Color iconBg = Colors.white.withValues(alpha: 0.12);
-    Color iconFg = Colors.white;
+    Color bg = context.c.surfaceMuted;
+    Color iconBg = context.c.surfaceMuted;
+    Color iconFg = context.c.textPrimary;
 
     if (answered) {
       if (isCorrectOption) {
@@ -455,7 +456,7 @@ class _ExplanationCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               height: 1.45,
-              color: Colors.white.withValues(alpha: 0.85),
+              color: context.c.textPrimary,
             ),
           ),
         ],

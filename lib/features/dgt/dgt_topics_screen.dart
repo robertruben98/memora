@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_hard_challenge_screen.dart';
@@ -108,7 +109,7 @@ class _DgtTopicsScreenState extends ConsumerState<DgtTopicsScreen> {
     final max = topic.questionCount;
     return showModalBottomSheet<int>(
       context: context,
-      backgroundColor: const Color(0xFF1A1A22),
+      backgroundColor: context.c.surfaceElevated,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
       ),
@@ -127,7 +128,7 @@ class _DgtTopicsScreenState extends ConsumerState<DgtTopicsScreen> {
                     height: 4,
                     margin: const EdgeInsets.only(bottom: 14),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
+                      color: ctx.c.border,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -144,7 +145,7 @@ class _DgtTopicsScreenState extends ConsumerState<DgtTopicsScreen> {
                   '¿Cuantas preguntas quieres practicar?',
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: ctx.c.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -253,7 +254,7 @@ class _TopicTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white.withValues(alpha: 0.06),
+      color: context.c.surfaceMuted,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
@@ -267,12 +268,12 @@ class _TopicTile extends StatelessWidget {
                 height: 38,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7C5CFF).withValues(alpha: 0.18),
+                  color: AppColors.brand.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
                   Icons.menu_book_rounded,
-                  color: Color(0xFF7C5CFF),
+                  color: AppColors.brand,
                   size: 20,
                 ),
               ),
@@ -295,7 +296,7 @@ class _TopicTile extends StatelessWidget {
                           : 'Sin contador',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.65),
+                        color: context.c.textSecondary,
                       ),
                     ),
                   ],
@@ -328,7 +329,7 @@ class _CountOption extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Material(
-        color: Colors.white.withValues(alpha: 0.06),
+        color: context.c.surfaceMuted,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           onTap: enabled ? onTap : null,
@@ -353,7 +354,7 @@ class _CountOption extends StatelessWidget {
                         subtitle,
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.white.withValues(alpha: 0.65),
+                          color: context.c.textSecondary,
                         ),
                       ),
                     ],

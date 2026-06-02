@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import 'dgt_tile_spec.dart';
 
@@ -156,7 +157,7 @@ class DgtTile extends ConsumerWidget {
         borderRadius: BorderRadius.circular(16),
         child: Ink(
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1A22),
+            color: context.c.surfaceElevated,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: spec.accentColor.withValues(alpha: 0.45),
@@ -197,7 +198,7 @@ class DgtTile extends ConsumerWidget {
                       subtitle,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: context.c.textSecondary,
                       ),
                     ),
                   ],
@@ -205,7 +206,7 @@ class DgtTile extends ConsumerWidget {
               ),
               Icon(
                 Icons.arrow_forward_rounded,
-                color: Colors.white.withValues(alpha: 0.55),
+                color: context.c.textMuted,
               ),
             ],
           ),
@@ -231,7 +232,7 @@ class DgtTile extends ConsumerWidget {
         borderRadius: BorderRadius.circular(14),
         child: Ink(
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1A22),
+            color: context.c.surfaceElevated,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: spec.accentColor.withValues(alpha: 0.4),
@@ -309,7 +310,7 @@ class DgtTile extends ConsumerWidget {
                       subtitle,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: context.c.textSecondary,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -318,7 +319,7 @@ class DgtTile extends ConsumerWidget {
               ),
               Icon(
                 Icons.arrow_forward_rounded,
-                color: Colors.white.withValues(alpha: 0.5),
+                color: context.c.textMuted,
               ),
             ],
           ),

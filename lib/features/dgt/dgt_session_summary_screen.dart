@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import 'dgt_failures_review_screen.dart';
 import 'dgt_weak_focus_screen.dart';
@@ -93,7 +94,7 @@ class DgtSessionSummaryScreen extends StatelessWidget {
               Text(
                 'Buen trabajo. Esto invertiste hoy.',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: context.c.textSecondary,
                 ),
               ),
               const SizedBox(height: 24),
@@ -225,7 +226,7 @@ class _SummaryStat extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.white.withValues(alpha: 0.65),
+            color: context.c.textSecondary,
           ),
         ),
       ],

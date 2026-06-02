@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../marked_cards_provider.dart';
 
@@ -33,7 +34,7 @@ class StarToggleButton extends ConsumerWidget {
             size: size,
             color: marked
                 ? const Color(0xFFFFC857)
-                : Colors.white.withValues(alpha: 0.65),
+                : context.c.textSecondary,
           ),
         ),
       ),

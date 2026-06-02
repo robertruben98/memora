@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
+
 import '../dgt_adaptive_goal_provider.dart';
 import '../dgt_settings.dart';
 
@@ -60,7 +62,7 @@ class _BannerState extends ConsumerState<_Banner> {
       child: Ink(
         padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A22),
+          color: context.c.surfaceElevated,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: accent.withValues(alpha: 0.55)),
         ),
@@ -100,7 +102,7 @@ class _BannerState extends ConsumerState<_Banner> {
                   onPressed: _busy ? null : _dismiss,
                   icon: Icon(
                     Icons.close_rounded,
-                    color: Colors.white.withValues(alpha: 0.55),
+                    color: context.c.textMuted,
                   ),
                 ),
               ],

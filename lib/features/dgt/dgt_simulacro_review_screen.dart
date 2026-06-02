@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_favorites_provider.dart';
@@ -178,10 +179,10 @@ class _ReviewPage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
+                color: context.c.surfaceMuted,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.08),
+                  color: context.c.border,
                 ),
               ),
               child: Column(
@@ -193,7 +194,7 @@ class _ReviewPage extends StatelessWidget {
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.5,
-                      color: Colors.white.withValues(alpha: 0.6),
+                      color: context.c.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -226,8 +227,8 @@ class _OptionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color border = Colors.white.withValues(alpha: 0.15);
-    Color bg = const Color(0xFF1A1A22);
+    Color border = context.c.border;
+    Color bg = context.c.surfaceElevated;
     if (isCorrect) {
       border = const Color(0xFF4FFFB0);
       bg = const Color(0xFF4FFFB0).withValues(alpha: 0.10);

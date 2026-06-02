@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:memora/core/theme/app_colors.dart';
 import '../../data/dgt/dgt_sections_local.dart';
 import 'dgt_section_detail_screen.dart';
 
@@ -63,10 +64,10 @@ class _SectionTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         child: Ink(
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1A22),
+            color: context.c.surfaceElevated,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: const Color(0xFF7C5CFF).withValues(alpha: 0.35),
+              color: AppColors.brand.withValues(alpha: 0.35),
             ),
           ),
           padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
@@ -76,14 +77,14 @@ class _SectionTile extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7C5CFF).withValues(alpha: 0.18),
+                  color: AppColors.brand.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(11),
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   '$index',
                   style: const TextStyle(
-                    color: Color(0xFFB9A6FF),
+                    color: AppColors.brand,
                     fontWeight: FontWeight.w800,
                     fontSize: 16,
                   ),
@@ -107,7 +108,7 @@ class _SectionTile extends StatelessWidget {
                       '${section.concepts.length} conceptos · ${section.description}',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: context.c.textSecondary,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -117,7 +118,7 @@ class _SectionTile extends StatelessWidget {
               ),
               Icon(
                 Icons.arrow_forward_rounded,
-                color: Colors.white.withValues(alpha: 0.55),
+                color: context.c.textMuted,
               ),
             ],
           ),

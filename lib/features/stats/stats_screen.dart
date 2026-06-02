@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import 'stats_repository.dart';
 
@@ -67,13 +68,13 @@ class _StreakHero extends StatelessWidget {
         gradient: LinearGradient(
           colors: hasStreak
               ? const [Color(0xFFFF8A4F), Color(0xFFFFD24F)]
-              : const [Color(0xFF1A1A22), Color(0xFF1A1A22)],
+              : [context.c.surfaceElevated, context.c.surfaceElevated],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         border: !hasStreak
-            ? Border.all(color: Colors.white.withValues(alpha: 0.08))
+            ? Border.all(color: context.c.border)
             : null,
       ),
       child: Row(
@@ -94,7 +95,7 @@ class _StreakHero extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     color: hasStreak
                         ? Colors.black.withValues(alpha: 0.7)
-                        : Colors.white.withValues(alpha: 0.6),
+                        : context.c.textSecondary,
                     letterSpacing: 0.4,
                   ),
                 ),
@@ -107,7 +108,7 @@ class _StreakHero extends StatelessWidget {
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.5,
-                    color: hasStreak ? Colors.black : Colors.white,
+                    color: hasStreak ? Colors.black : context.c.textPrimary,
                   ),
                 ),
               ],
@@ -132,7 +133,7 @@ class _StatsRow extends StatelessWidget {
             value: snapshot.reviewsToday.toString(),
             label: 'hoy',
             icon: Icons.today_rounded,
-            color: const Color(0xFF7C5CFF),
+            color: AppColors.brand,
           ),
         ),
         const SizedBox(width: 8),
@@ -178,9 +179,9 @@ class _MiniStatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: context.c.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,7 +205,7 @@ class _MiniStatCard extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 11,
-              color: Colors.white.withValues(alpha: 0.55),
+              color: context.c.textMuted,
             ),
           ),
         ],
@@ -250,9 +251,9 @@ class _StateDistribution extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: context.c.border),
       ),
       child: Column(
         children: [
@@ -297,7 +298,7 @@ class _StateDistribution extends StatelessWidget {
                     '${it.count}',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: context.c.textSecondary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -311,7 +312,7 @@ class _StateDistribution extends StatelessWidget {
                       textAlign: TextAlign.right,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: context.c.textMuted,
                       ),
                     ),
                   ),
@@ -324,17 +325,19 @@ class _StateDistribution extends StatelessWidget {
     );
   }
 
-  Widget _empty(String text) => Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1A1A22),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
-        ),
-        child: Center(
-          child: Text(
-            text,
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+  Widget _empty(String text) => Builder(
+        builder: (context) => Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: context.c.surfaceElevated,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: context.c.border),
+          ),
+          child: Center(
+            child: Text(
+              text,
+              style: TextStyle(color: context.c.textMuted),
+            ),
           ),
         ),
       );
@@ -358,9 +361,9 @@ class _Heatmap extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A22),
+        color: context.c.surfaceElevated,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: context.c.border),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -410,9 +413,9 @@ class _HeatCell extends StatelessWidget {
         day.day.month == today.month &&
         day.day.day == today.day;
 
-    final base = const Color(0xFF7C5CFF);
+    final base = AppColors.brand;
     final color = day.count == 0
-        ? Colors.white.withValues(alpha: 0.05)
+        ? context.c.surfaceMuted
         : base.withValues(alpha: 0.18 + 0.6 * intensity);
 
     return Tooltip(
@@ -425,7 +428,7 @@ class _HeatCell extends StatelessWidget {
           color: color,
           borderRadius: BorderRadius.circular(6),
           border: isToday
-              ? Border.all(color: Colors.white.withValues(alpha: 0.6), width: 1.5)
+              ? Border.all(color: context.c.border, width: 1.5)
               : null,
         ),
         alignment: Alignment.center,
@@ -458,7 +461,7 @@ class _ActivityFooter extends StatelessWidget {
             'Total revisiones: ${snapshot.totalReviews}',
             style: TextStyle(
               fontSize: 12,
-              color: Colors.white.withValues(alpha: 0.55),
+              color: context.c.textMuted,
             ),
           ),
           const Spacer(),
@@ -466,7 +469,7 @@ class _ActivityFooter extends StatelessWidget {
             'Tarjetas: ${snapshot.totalCards}',
             style: TextStyle(
               fontSize: 12,
-              color: Colors.white.withValues(alpha: 0.55),
+              color: context.c.textMuted,
             ),
           ),
         ],

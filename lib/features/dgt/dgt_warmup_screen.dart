@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/app_colors.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_exam_screen.dart';
@@ -127,9 +128,9 @@ class _DgtWarmupScreenState extends ConsumerState<DgtWarmupScreen> {
             LinearProgressIndicator(
               value: progress,
               minHeight: 6,
-              backgroundColor: Colors.white.withValues(alpha: 0.08),
+              backgroundColor: context.c.surfaceMuted,
               valueColor: const AlwaysStoppedAnimation<Color>(
-                Color(0xFF7C5CFF),
+                AppColors.brand,
               ),
             ),
             const SizedBox(height: 8),
@@ -137,7 +138,7 @@ class _DgtWarmupScreenState extends ConsumerState<DgtWarmupScreen> {
               'Pregunta ${_current + 1} de ${_questions.length}',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.white.withValues(alpha: 0.6),
+                color: context.c.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -186,12 +187,10 @@ class _DgtWarmupScreenState extends ConsumerState<DgtWarmupScreen> {
               onPressed: answered ? _next : null,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                backgroundColor: const Color(0xFF7C5CFF),
-                foregroundColor: Colors.white,
-                disabledBackgroundColor:
-                    Colors.white.withValues(alpha: 0.08),
-                disabledForegroundColor:
-                    Colors.white.withValues(alpha: 0.4),
+                backgroundColor: AppColors.brand,
+                foregroundColor: context.c.onAccent,
+                disabledBackgroundColor: context.c.surfaceMuted,
+                disabledForegroundColor: context.c.textMuted,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -233,9 +232,9 @@ class _WarmupAnswerTile extends StatelessWidget {
     final selected = picked == letter;
     final isCorrectOption = letter == correct;
 
-    Color bg = Colors.white.withValues(alpha: 0.08);
-    Color iconBg = Colors.white.withValues(alpha: 0.12);
-    Color iconFg = Colors.white;
+    Color bg = context.c.surfaceMuted;
+    Color iconBg = context.c.border;
+    Color iconFg = context.c.textPrimary;
 
     if (answered) {
       if (isCorrectOption) {
@@ -248,7 +247,8 @@ class _WarmupAnswerTile extends StatelessWidget {
         iconFg = Colors.white;
       }
     } else if (selected) {
-      bg = const Color(0xFF7C5CFF);
+      bg = AppColors.brand;
+      iconFg = Colors.white;
     }
 
     return Padding(
@@ -358,7 +358,7 @@ class _WarmupSummary extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15,
-                color: Colors.white.withValues(alpha: 0.7),
+                color: context.c.textSecondary,
               ),
             ),
             const SizedBox(height: 4),
@@ -367,7 +367,7 @@ class _WarmupSummary extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.white.withValues(alpha: 0.5),
+                color: context.c.textMuted,
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -396,7 +396,7 @@ class _WarmupSummary extends StatelessWidget {
               child: Text(
                 'Salir',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.6),
+                  color: context.c.textSecondary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -430,7 +430,7 @@ class _ErrorState extends StatelessWidget {
               error,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
+                color: context.c.textSecondary,
                 fontSize: 14,
               ),
             ),
