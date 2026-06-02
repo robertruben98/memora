@@ -29,6 +29,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.accent,
     required this.onAccent,
     required this.shadow,
+    required this.achievementUnlocked,
   });
 
   final Color surface;
@@ -41,6 +42,9 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color accent;
   final Color onAccent;
   final Color shadow;
+
+  /// Color oro para logros desbloqueados, idéntico en ambos modos.
+  final Color achievementUnlocked;
 
   /// Color de marca, idéntico en ambos modos.
   static const Color brand = Color(0xFF7C5CFF);
@@ -56,6 +60,7 @@ class AppColors extends ThemeExtension<AppColors> {
     accent: brand,
     onAccent: Colors.white,
     shadow: Color(0x66000000),
+    achievementUnlocked: Color(0xFFFFB74F),
   );
 
   static const AppColors light = AppColors(
@@ -69,6 +74,7 @@ class AppColors extends ThemeExtension<AppColors> {
     accent: brand,
     onAccent: Colors.white,
     shadow: Color(0x1F000000),
+    achievementUnlocked: Color(0xFFFFB74F),
   );
 
   @override
@@ -83,6 +89,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? accent,
     Color? onAccent,
     Color? shadow,
+    Color? achievementUnlocked,
   }) {
     return AppColors(
       surface: surface ?? this.surface,
@@ -95,6 +102,7 @@ class AppColors extends ThemeExtension<AppColors> {
       accent: accent ?? this.accent,
       onAccent: onAccent ?? this.onAccent,
       shadow: shadow ?? this.shadow,
+      achievementUnlocked: achievementUnlocked ?? this.achievementUnlocked,
     );
   }
 
@@ -112,6 +120,8 @@ class AppColors extends ThemeExtension<AppColors> {
       accent: Color.lerp(accent, other.accent, t)!,
       onAccent: Color.lerp(onAccent, other.onAccent, t)!,
       shadow: Color.lerp(shadow, other.shadow, t)!,
+      achievementUnlocked:
+          Color.lerp(achievementUnlocked, other.achievementUnlocked, t)!,
     );
   }
 }
