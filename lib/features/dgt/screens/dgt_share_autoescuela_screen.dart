@@ -4,6 +4,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../services/dgt_share_snapshot.dart';
 
@@ -28,7 +29,7 @@ class DgtShareAutoescuelaScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Compartir con autoescuela')),
       body: snapshotAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => AppStateView.loading(),
         error: (e, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),

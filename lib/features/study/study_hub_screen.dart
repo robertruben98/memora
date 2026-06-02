@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../core/models/memora_card.dart';
 import '../../core/theme/deck_visuals.dart';
@@ -142,11 +143,11 @@ class StudyHubScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           decksAsync.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.symmetric(vertical: 20),
-              child: Center(child: CircularProgressIndicator()),
+            loading: () => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: AppStateView.loading(),
             ),
-            error: (e, _) => Center(child: Text('Error: $e')),
+            error: (e, _) => AppStateView.error(e),
             data: (decks) {
               if (decks.isEmpty) {
                 return _empty(context);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_practice_screen.dart';
@@ -40,7 +41,7 @@ class DgtTopicStatsScreen extends ConsumerWidget {
         ],
       ),
       body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => AppStateView.loading(),
         error: (e, _) => _ErrorView(
           message: 'No se pudieron cargar las estadisticas: $e',
           onRetry: () => ref.invalidate(dgtTopicStatsProvider),

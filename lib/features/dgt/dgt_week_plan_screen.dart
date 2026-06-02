@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 
 import 'dgt_week_plan_provider.dart';
 
@@ -19,7 +20,7 @@ class DgtWeekPlanScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Mi plan semanal')),
       body: asyncPlan.when(
         data: (plan) => _Body(plan: plan),
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => AppStateView.loading(),
         error: (_, _) => const _ErrorMessage(),
       ),
     );

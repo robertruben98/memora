@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/repositories/dgt_repository.dart';
@@ -111,7 +112,7 @@ class _DgtConceptualErrorsScreenState
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
+      builder: (_) => AppStateView.loading(),
     );
     final related =
         await repo.fetchConceptRelated(questionId: firstId, limit: 10);

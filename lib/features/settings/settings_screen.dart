@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/srs/study_settings.dart';
@@ -85,11 +86,11 @@ class SettingsScreen extends ConsumerWidget {
           const _SectionTitle('DGT'),
           const SizedBox(height: 8),
           dgtAsync.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Center(child: CircularProgressIndicator()),
+            loading: () => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: AppStateView.loading(),
             ),
-            error: (e, _) => Text('Error: $e'),
+            error: (e, _) => AppStateView.error(e),
             data: (dgt) => _DgtSection(
               settings: dgt,
               onChanged: (next) async {

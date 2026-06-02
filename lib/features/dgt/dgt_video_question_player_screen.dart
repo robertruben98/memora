@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../data/api/api_client.dart';
@@ -235,7 +236,7 @@ class _VideoArea extends ConsumerWidget {
     if (error != null) {
       child = _FallbackThumb(thumbnailPath: thumbnailPath, errorText: '$error');
     } else if (!initialized || controller == null) {
-      child = const Center(child: CircularProgressIndicator());
+      child = AppStateView.loading();
     } else {
       child = AspectRatio(
         aspectRatio: controller!.value.aspectRatio == 0

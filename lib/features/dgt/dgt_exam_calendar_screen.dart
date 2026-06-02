@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 
 import 'dgt_exam_calendar_phase.dart';
 import 'dgt_favorites_screen.dart';
@@ -25,7 +26,7 @@ class DgtExamCalendarScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Mi calendario examen')),
       body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => AppStateView.loading(),
         error: (e, _) => _ErrorView(message: 'No se pudo cargar: $e'),
         data: (settings) => settings.examDate == null
             ? const _NoExamDateView()

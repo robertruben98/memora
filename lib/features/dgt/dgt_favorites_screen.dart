@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
 
@@ -420,7 +421,7 @@ class _DgtFavoritesQuizScreenState
     if (_questions.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: const Text('Quiz favoritas')),
-        body: const Center(child: Text('No hay preguntas favoritas')),
+        body: AppStateView.empty(icon: Icons.star_border_rounded, title: 'No hay preguntas favoritas'),
       );
     }
     if (_finished) return _buildSummary();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/app_state_view.dart';
 
 import 'dgt_exam_screen.dart';
 import 'dgt_ready_check_provider.dart';
@@ -23,7 +24,7 @@ class DgtReadyCheckScreen extends ConsumerWidget {
         title: const Text('Listo para el examen?'),
       ),
       body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => AppStateView.loading(),
         error: (e, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
