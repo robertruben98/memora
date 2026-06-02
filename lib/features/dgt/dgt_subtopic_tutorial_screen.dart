@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
+import 'package:memora/core/widgets/card_with_icon_header.dart';
 
 import 'dgt_tutorial_seen_provider.dart';
 import 'dgt_tutorials_catalog.dart';
@@ -84,14 +85,14 @@ class DgtSubtopicTutorialScreen extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 22),
-                      _Section(
+                      CardWithIconHeader(
                         title: 'Concepto clave',
                         body: tutorial.concept,
                         accent: AppColors.brand,
                         icon: Icons.lightbulb_outline_rounded,
                       ),
                       const SizedBox(height: 14),
-                      _Section(
+                      CardWithIconHeader(
                         title: 'Ejemplo',
                         body: tutorial.example,
                         accent: DgtStatusColors.success,
@@ -135,56 +136,5 @@ class DgtSubtopicTutorialScreen extends ConsumerWidget {
     await ref.read(dgtTutorialSeenStoreProvider).markSeen(topicId);
     if (!context.mounted) return;
     Navigator.of(context).pop(DgtTutorialResult.suppress);
-  }
-}
-
-class _Section extends StatelessWidget {
-  final String title;
-  final String body;
-  final Color accent;
-  final IconData icon;
-
-  const _Section({
-    required this.title,
-    required this.body,
-    required this.accent,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-      decoration: BoxDecoration(
-        color: context.c.surfaceMuted,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: accent.withValues(alpha: 0.35), width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: accent, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: accent,
-                  letterSpacing: 0.3,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            body,
-            style: const TextStyle(fontSize: 14.5, height: 1.4),
-          ),
-        ],
-      ),
-    );
   }
 }

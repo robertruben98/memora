@@ -9,39 +9,48 @@ enum DeckSortOption {
   mostRecent,
 }
 
-String deckSortOptionToString(DeckSortOption o) {
-  switch (o) {
-    case DeckSortOption.alphabetical:
-      return 'alphabetical';
-    case DeckSortOption.pendingFirst:
-      return 'pending_first';
-    case DeckSortOption.mostRecent:
-      return 'most_recent';
+extension DeckSortOptionX on DeckSortOption {
+  String get stringValue {
+    switch (this) {
+      case DeckSortOption.alphabetical:
+        return 'alphabetical';
+      case DeckSortOption.pendingFirst:
+        return 'pending_first';
+      case DeckSortOption.mostRecent:
+        return 'most_recent';
+    }
+  }
+
+  String get label {
+    switch (this) {
+      case DeckSortOption.alphabetical:
+        return 'Alfabetico (A-Z)';
+      case DeckSortOption.pendingFirst:
+        return 'Pendientes primero';
+      case DeckSortOption.mostRecent:
+        return 'Mas recientes';
+    }
+  }
+
+  static DeckSortOption fromString(String? v) {
+    switch (v) {
+      case 'pending_first':
+        return DeckSortOption.pendingFirst;
+      case 'most_recent':
+        return DeckSortOption.mostRecent;
+      case 'alphabetical':
+      default:
+        return DeckSortOption.alphabetical;
+    }
   }
 }
 
-DeckSortOption deckSortOptionFromString(String? v) {
-  switch (v) {
-    case 'pending_first':
-      return DeckSortOption.pendingFirst;
-    case 'most_recent':
-      return DeckSortOption.mostRecent;
-    case 'alphabetical':
-    default:
-      return DeckSortOption.alphabetical;
-  }
-}
+String deckSortOptionToString(DeckSortOption o) => o.stringValue;
 
-String deckSortOptionLabel(DeckSortOption o) {
-  switch (o) {
-    case DeckSortOption.alphabetical:
-      return 'Alfabetico (A-Z)';
-    case DeckSortOption.pendingFirst:
-      return 'Pendientes primero';
-    case DeckSortOption.mostRecent:
-      return 'Mas recientes';
-  }
-}
+DeckSortOption deckSortOptionFromString(String? v) =>
+    DeckSortOptionX.fromString(v);
+
+String deckSortOptionLabel(DeckSortOption o) => o.label;
 
 /// Ordena en memoria sin mutar la lista original.
 List<DeckSummary> sortDecks(List<DeckSummary> decks, DeckSortOption option) {
