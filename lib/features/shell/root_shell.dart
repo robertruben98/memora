@@ -19,11 +19,13 @@ class RootShell extends ConsumerStatefulWidget {
 class _RootShellState extends ConsumerState<RootShell> {
   int _index = 0;
 
+  // Enfoque DGT: la app arranca en el hub "Estudiar" (teórico DGT). Lo
+  // genérico (mazos propios, feed) queda en pestañas secundarias.
   static const _tabs = <Widget>[
-    BrowseFeedScreen(),
-    HomeScreen(),
     StudyHubScreen(),
     StatsScreen(),
+    HomeScreen(),
+    BrowseFeedScreen(),
     ProfileScreen(),
   ];
 
@@ -73,31 +75,31 @@ class _BottomNav extends StatelessWidget {
             children: [
               _NavItem(
                 selected: index == 0,
-                iconActive: Icons.home_rounded,
-                iconInactive: Icons.home_outlined,
-                label: 'Inicio',
+                iconActive: Icons.play_circle_filled_rounded,
+                iconInactive: Icons.play_circle_outline_rounded,
+                label: 'Estudiar',
                 onTap: () => onSelect(0),
+                accent: true,
               ),
               _NavItem(
                 selected: index == 1,
-                iconActive: Icons.style_rounded,
-                iconInactive: Icons.style_outlined,
-                label: 'Mazos',
+                iconActive: Icons.bar_chart_rounded,
+                iconInactive: Icons.bar_chart_outlined,
+                label: 'Progreso',
                 onTap: () => onSelect(1),
               ),
               _NavItem(
                 selected: index == 2,
-                iconActive: Icons.play_circle_filled_rounded,
-                iconInactive: Icons.play_circle_outline_rounded,
-                label: 'Estudiar',
+                iconActive: Icons.style_rounded,
+                iconInactive: Icons.style_outlined,
+                label: 'Mazos',
                 onTap: () => onSelect(2),
-                accent: true,
               ),
               _NavItem(
                 selected: index == 3,
-                iconActive: Icons.bar_chart_rounded,
-                iconInactive: Icons.bar_chart_outlined,
-                label: 'Stats',
+                iconActive: Icons.dynamic_feed_rounded,
+                iconInactive: Icons.dynamic_feed_outlined,
+                label: 'Feed',
                 onTap: () => onSelect(3),
               ),
               _NavItem(
