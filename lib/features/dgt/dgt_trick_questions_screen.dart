@@ -418,6 +418,29 @@ class _AnswerTile extends StatelessWidget {
     final selected = picked == letter;
     final isCorrectOption = letter == correct;
 
+    // Descripcion accesible de la opcion para lectores de pantalla.
+    final letterLabel = letter.toUpperCase();
+    final statusLabel = !answered
+        ? (selected ? 'seleccionada' : '')
+        : isCorrectOption
+            ? (selected
+                ? 'correcta, tu respuesta'
+                : 'respuesta correcta')
+            : selected
+                ? 'incorrecta, tu respuesta'
+                : '';
+    final semanticsLabel = statusLabel.isEmpty
+        ? 'Opcion $letterLabel: $text'
+        : 'Opcion $letterLabel: $text, $statusLabel';
+    // Etiqueta para el icono de estado (check/cancel).
+    final String? iconSemanticLabel = !answered
+        ? null
+        : isCorrectOption
+            ? 'Respuesta correcta'
+            : selected
+                ? 'Respuesta incorrecta'
+                : null;
+
     Color bg = context.c.surfaceMuted;
     Color iconBg = context.c.surfaceMuted;
     Color iconFg = context.c.textPrimary;
@@ -438,7 +461,11 @@ class _AnswerTile extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: Material(
+      child: Semantics(
+        label: semanticsLabel,
+        button: !answered,
+        selected: selected,
+        child: Material(
         color: bg,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
@@ -473,14 +500,19 @@ class _AnswerTile extends StatelessWidget {
                   ),
                 ),
                 if (answered && isCorrectOption)
-                  const Icon(Icons.check_circle_rounded,
-                      color: DgtStatusColors.success, size: 20)
+                  Icon(Icons.check_circle_rounded,
+                      color: DgtStatusColors.success,
+                      size: 20,
+                      semanticLabel: iconSemanticLabel)
                 else if (answered && selected && !isCorrectOption)
-                  const Icon(Icons.cancel_rounded,
-                      color: DgtStatusColors.error, size: 20),
+                  Icon(Icons.cancel_rounded,
+                      color: DgtStatusColors.error,
+                      size: 20,
+                      semanticLabel: iconSemanticLabel),
               ],
             ),
           ),
+        ),
         ),
       ),
     );

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
+import 'package:memora/core/widgets/section_title.dart';
 
 import '../settings/settings_screen.dart';
 import 'character_progress.dart';
@@ -10,7 +12,6 @@ import 'widgets/character_card.dart';
 import 'widgets/deck_skill_row.dart';
 import 'widgets/deck_titles_grid.dart';
 import 'widgets/primary_stats.dart';
-import 'widgets/section_title.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -59,11 +60,25 @@ class _ProfileBody extends StatelessWidget {
         const SizedBox(height: 24),
         PrimaryStats(progress: progress),
         const SizedBox(height: 24),
-        const SectionTitle('Títulos del personaje'),
+        const SectionTitle(
+          'Títulos del personaje',
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.5,
+          color: DgtStatusColors.warningStrong,
+          showAccentBar: true,
+        ),
         const SizedBox(height: 12),
         DeckTitlesGrid(decks: progress.decks),
         const SizedBox(height: 24),
-        const SectionTitle('Habilidades por mazo'),
+        const SectionTitle(
+          'Habilidades por mazo',
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.5,
+          color: DgtStatusColors.warningStrong,
+          showAccentBar: true,
+        ),
         const SizedBox(height: 12),
         if (progress.decks.isEmpty)
           AppStateView.empty(
@@ -77,7 +92,14 @@ class _ProfileBody extends StatelessWidget {
               child: DeckSkillRow(deck: d),
             ),
         const SizedBox(height: 24),
-        const SectionTitle('Logros desbloqueados'),
+        const SectionTitle(
+          'Logros desbloqueados',
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.5,
+          color: DgtStatusColors.warningStrong,
+          showAccentBar: true,
+        ),
         const SizedBox(height: 12),
         AchievementsSection(progress: progress),
       ],
