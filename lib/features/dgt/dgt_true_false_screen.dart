@@ -503,8 +503,7 @@ class _FeedbackCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent =
-        isCorrect ? DgtStatusColors.success : DgtStatusColors.error;
+    final accent = DgtStatusColors.forPassed(isCorrect);
     final label = isCorrect ? 'Correcto' : 'Incorrecto';
     final explanation = isCorrect
         ? (stmt.isTrue

@@ -119,7 +119,7 @@ class _DgtResultScreenState extends State<DgtResultScreen> {
   Widget build(BuildContext context) {
     final result = widget.result;
     final passed = result.passed;
-    final color = passed ? DgtStatusColors.success : DgtStatusColors.error;
+    final color = DgtStatusColors.forPassed(passed);
 
     return Scaffold(
       appBar: AppBar(

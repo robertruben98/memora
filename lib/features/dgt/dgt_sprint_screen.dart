@@ -518,9 +518,9 @@ class _SprintSummary extends StatelessWidget {
                       entry.correct >= prevAvg
                           ? Icons.trending_up_rounded
                           : Icons.trending_down_rounded,
-                      color: entry.correct >= prevAvg
-                          ? DgtStatusColors.success
-                          : DgtStatusColors.error,
+                      color: DgtStatusColors.forPassed(
+                        entry.correct >= prevAvg,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
