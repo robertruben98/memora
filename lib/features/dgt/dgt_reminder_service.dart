@@ -223,7 +223,7 @@ class DgtReminderService {
     // cual es aceptable para un recordatorio diario.
     await _plugin.zonedSchedule(
       kDgtReminderNotifId,
-      'Memora DGT',
+      'RutaB DGT',
       body,
       scheduled,
       details,

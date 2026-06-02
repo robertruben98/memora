@@ -107,7 +107,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     alignment: Alignment.center,
                     child: const Text(
-                      'M',
+                      'B',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 36,
@@ -117,7 +117,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'Memora',
+                    'RutaB',
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w800,

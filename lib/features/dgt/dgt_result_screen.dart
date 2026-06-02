@@ -83,7 +83,7 @@ class _DgtResultScreenState extends State<DgtResultScreen> {
         ? 0
         : ((result.correct / result.total) * 100).round();
     final buf = StringBuffer();
-    buf.writeln('Simulacro DGT - Memora');
+    buf.writeln('Simulacro DGT - RutaB');
     buf.writeln(
         'Resultado: ${result.correct}/${result.total} (${passed ? "APTO" : "NO APTO"})');
     buf.write('Aciertos: $pct%');
@@ -111,7 +111,7 @@ class _DgtResultScreenState extends State<DgtResultScreen> {
 
   Future<void> _shareResult() async {
     final text = _composeShareText();
-    await Share.share(text, subject: 'Mi simulacro DGT en Memora');
+    await Share.share(text, subject: 'Mi simulacro DGT en RutaB');
   }
 
   @override

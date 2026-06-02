@@ -88,7 +88,7 @@ class _FeedPostCardState extends ConsumerState<FeedPostCard>
     final text = '${c.deck}\n\n'
         'Pregunta: ${c.front}\n\n'
         'Respuesta: ${c.back}\n\n'
-        '— Memora';
+        '— RutaB';
     await Share.share(text, subject: c.deck);
   }
 

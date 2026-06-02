@@ -141,7 +141,7 @@ class DgtWeeklyReportScheduler {
     // unos minutos de holgura son aceptables.
     await _plugin.zonedSchedule(
       kDgtWeeklyReportNotifId,
-      'Memora DGT - resumen semanal',
+      'RutaB DGT - resumen semanal',
       'Toca para ver tu progreso de la semana.',
       scheduled,
       details,

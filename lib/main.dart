@@ -206,7 +206,7 @@ class _MemoraAppState extends ConsumerState<MemoraApp> {
       brightness: Brightness.light,
     );
     return MaterialApp(
-      title: 'Memora',
+      title: 'RutaB',
       navigatorKey: appNavigatorKey,
       debugShowCheckedModeBanner: false,
       themeMode: themeMode,

@@ -69,7 +69,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         gradient: [Color(0xFF7C5CFF), Color(0xFF4F8AFF)],
         icon: Icons.bolt_rounded,
         title: 'Aprende como haces scroll',
-        body: 'Memora muestra tus tarjetas en un feed vertical. '
+        body: 'RutaB muestra tus tarjetas en un feed vertical. '
             'Toca para revelar la respuesta y di si la sabias.',
       ),
       const _IntroPage(

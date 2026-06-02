@@ -602,7 +602,7 @@ class _ExportStatsButton extends ConsumerWidget {
       };
       final encoder = const JsonEncoder.withIndent('  ');
       final json = encoder.convert(payload);
-      await Share.share(json, subject: 'Mis stats DGT (Memora)');
+      await Share.share(json, subject: 'Mis stats DGT (RutaB)');
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

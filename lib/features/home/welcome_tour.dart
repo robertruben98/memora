@@ -43,7 +43,7 @@ class TourStep {
 /// Pasos por defecto del tour DGT (5 pasos, segun spec del issue).
 const List<TourStep> kDefaultDgtTourSteps = <TourStep>[
   TourStep(
-    title: '¡Bienvenido a Memora DGT!',
+    title: '¡Bienvenido a RutaB DGT!',
     description: 'Aqui veras tu progreso, dias restantes hasta tu '
         'examen y meta diaria. Toca el banner para ver estadisticas.',
     icon: Icons.directions_car_filled_rounded,

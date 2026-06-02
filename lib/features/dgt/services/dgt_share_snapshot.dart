@@ -65,7 +65,7 @@ class DgtShareSnapshot {
 
   /// Texto humano corto (para Share.share y para mostrar bajo el QR).
   String buildHumanText() {
-    final buf = StringBuffer('Mi progreso DGT (Memora)\n');
+    final buf = StringBuffer('Mi progreso DGT (RutaB)\n');
     if (expectedScorePct != null) {
       buf.writeln('- Prediccion aprobado: ${expectedScorePct!.toStringAsFixed(0)}%');
     } else {

@@ -1,4 +1,4 @@
-# Ficha de Google Play — Memora (es-ES)
+# Ficha de Google Play — RutaB (es-ES)
 
 > Idioma principal de la ficha: **Español (España) · es-ES**
 > App ID: `com.robertdev.memora` · Versión: 2.6.0 (versionCode 31)
@@ -8,7 +8,7 @@
 ## Título de la app (máx. 30 caracteres)
 
 ```
-Memora: Test DGT 2026
+RutaB: Test DGT 2026
 ```
 
 (21 caracteres — dentro del límite de 30.)
@@ -28,9 +28,9 @@ Aprueba el test teórico DGT 2026 con repaso inteligente y simulacros reales.
 ## Descripción completa (máx. 4000 caracteres)
 
 ```
-Memora es tu app para aprobar el examen teórico de la DGT 2026 a la primera. Combina simulacros oficiales con repetición espaciada para que estudies menos horas y retengas más, repasando justo lo que más te cuesta.
+RutaB es tu app para aprobar el examen teórico de la DGT 2026 a la primera. Combina simulacros oficiales con repetición espaciada para que estudies menos horas y retengas más, repasando justo lo que más te cuesta.
 
-Olvídate de leer el manual entero una y otra vez: Memora aprende de tus fallos y te programa el repaso en el momento exacto en el que estás a punto de olvidar cada concepto. Así fijas las señales, las normas y las preguntas trampa sin perder tiempo en lo que ya dominas.
+Olvídate de leer el manual entero una y otra vez: RutaB aprende de tus fallos y te programa el repaso en el momento exacto en el que estás a punto de olvidar cada concepto. Así fijas las señales, las normas y las preguntas trampa sin perder tiempo en lo que ya dominas.
 
 == POR QUÉ MEMORA ==
 
@@ -50,7 +50,7 @@ Olvídate de leer el manual entero una y otra vez: Memora aprende de tus fallos 
 == CÓMO FUNCIONA ==
 
 1. Practica por temas o lánzate a un simulacro completo.
-2. Memora detecta tus puntos débiles y crea tu plan de repaso.
+2. RutaB detecta tus puntos débiles y crea tu plan de repaso.
 3. Repasas cada día lo justo y necesario, también en modo audio.
 4. Sigues tu evolución y, cuando estás listo, te presentas con confianza.
 
@@ -60,7 +60,7 @@ Olvídate de leer el manual entero una y otra vez: Memora aprende de tus fallos 
 • Quien quiere recuperar puntos o repasar la normativa de circulación.
 • Estudiar en cualquier momento: en el bus, en pausas o desde casa.
 
-Prepárate para la DGT con un método que de verdad funciona. Descarga Memora y aprueba el teórico 2026 a la primera.
+Prepárate para la DGT con un método que de verdad funciona. Descarga RutaB y aprueba el teórico 2026 a la primera.
 ```
 
 (Aproximadamente 2.350 caracteres — muy por debajo del límite de 4000.)
@@ -191,7 +191,7 @@ Pantallas recomendadas (mínimo 2; ideal 4-5):
 
 | Campo | Valor |
 |---|---|
-| Nombre de la app | Memora: Test DGT 2026 |
+| Nombre de la app | RutaB: Test DGT 2026 |
 | Idioma por defecto | Español (España) — es-ES |
 | Descripción corta | Aprueba el test teórico DGT 2026 con repaso inteligente y simulacros reales. |
 | Categoría | Educación |

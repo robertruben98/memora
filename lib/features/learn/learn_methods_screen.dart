@@ -274,7 +274,7 @@ class _MethodCardState extends State<_MethodCard> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Cómo lo usa Memora',
+                                        'Cómo lo usa RutaB',
                                         style: TextStyle(
                                           fontSize: 11,
                                           fontWeight: FontWeight.w800,

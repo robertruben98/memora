@@ -96,8 +96,8 @@ class BackupService {
     final file = await _writeTempBackup(json);
     return Share.shareXFiles(
       [XFile(file.path, mimeType: 'application/json')],
-      subject: 'Backup de Memora',
-      text: 'Backup de tus mazos y progreso de Memora.',
+      subject: 'Backup de RutaB',
+      text: 'Backup de tus mazos y progreso de RutaB.',
     );
   }
 
@@ -133,7 +133,7 @@ class BackupService {
     }
     if (raw['format'] != 'memora-backup') {
       throw const FormatException(
-          'Este archivo no es un backup de Memora válido');
+          'Este archivo no es un backup de RutaB válido');
     }
     final decks = (raw['decks'] as List? ?? const []).cast<dynamic>();
     final cards = (raw['cards'] as List? ?? const []).cast<dynamic>();
