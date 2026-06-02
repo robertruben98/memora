@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
+import 'package:memora/core/widgets/confirmation_dialog.dart';
 
 import '../../core/models/memora_card.dart';
 import '../../data/repositories/card_repository.dart';
@@ -98,27 +99,15 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
   }
 
   Future<bool> _confirmExit() async {
-    final res = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: ctx.c.surfaceElevated,
-        title: const Text('¿Salir del simulacro?'),
-        content: const Text(
+    return showConfirmationDialog(
+      context,
+      title: '¿Salir del simulacro?',
+      message:
           'Si sales perderas el progreso. El examen oficial no permite pausa.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Seguir'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Salir', style: TextStyle(color: Colors.redAccent)),
-          ),
-        ],
-      ),
+      confirmLabel: 'Salir',
+      cancelLabel: 'Seguir',
+      destructive: true,
     );
-    return res ?? false;
   }
 
   @override

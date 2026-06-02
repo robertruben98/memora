@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
+import 'package:memora/core/widgets/confirmation_dialog.dart';
 
 import '../study/dgt_exam_history.dart';
 import 'dgt_failures_repository.dart';
@@ -285,28 +286,14 @@ class _SelectiveResetTile extends ConsumerWidget {
   }
 
   Future<void> _confirmAndRun(BuildContext context, WidgetRef ref) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(kind.title),
-        content: Text(kind.confirmBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            key: ValueKey('selective-reset-confirm-${kind.keySuffix}'),
-            style: TextButton.styleFrom(
-              foregroundColor: DgtStatusColors.error,
-            ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Borrar'),
-          ),
-        ],
-      ),
+    final ok = await showConfirmationDialog(
+      context,
+      title: kind.title,
+      message: kind.confirmBody,
+      confirmLabel: 'Borrar',
+      destructive: true,
     );
-    if (ok != true || !context.mounted) return;
+    if (!ok || !context.mounted) return;
     try {
       await _runSelectiveReset(ref, kind);
       if (!context.mounted) return;
@@ -637,55 +624,26 @@ class _ResetProgressButton extends ConsumerWidget {
   }
 
   Future<void> _confirmAndReset(BuildContext context, WidgetRef ref) async {
-    final first = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Resetear progreso DGT'),
-        content: const Text(
-          'Esto borrara:\n'
+    final first = await showConfirmationDialog(
+      context,
+      title: 'Resetear progreso DGT',
+      message: 'Esto borrara:\n'
           '- Historial de simulacros\n'
           '- Cola de fallos recientes\n'
           '- Racha y contadores diarios\n\n'
           'Tus ajustes (licencia, meta, recordatorios) se conservan.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            key: const ValueKey('reset-confirm-1'),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Continuar'),
-          ),
-        ],
-      ),
+      confirmLabel: 'Continuar',
+      destructive: true,
     );
-    if (first != true || !context.mounted) return;
-    final second = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Confirmar reset'),
-        content: const Text(
-          'Esta accion no se puede deshacer. ?Seguro?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            key: const ValueKey('reset-confirm-2'),
-            style: TextButton.styleFrom(
-              foregroundColor: DgtStatusColors.error,
-            ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Resetear'),
-          ),
-        ],
-      ),
+    if (!first || !context.mounted) return;
+    final second = await showConfirmationDialog(
+      context,
+      title: 'Confirmar reset',
+      message: 'Esta accion no se puede deshacer. ?Seguro?',
+      confirmLabel: 'Resetear',
+      destructive: true,
     );
-    if (second != true || !context.mounted) return;
+    if (!second || !context.mounted) return;
     try {
       await ref.read(dgtExamHistoryRepositoryProvider).clear();
       await ref.read(dgtFailuresRepositoryProvider).clearAll();

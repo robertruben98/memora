@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
+import 'package:memora/core/widgets/confirmation_dialog.dart';
 
 import '../../core/theme/deck_visuals.dart';
 import '../../core/widgets/styled_text_field.dart';
@@ -91,31 +92,15 @@ class _DeckEditorScreenState extends ConsumerState<DeckEditorScreen> {
   }
 
   Future<void> _delete() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: context.c.surfaceElevated,
-        title: const Text('Eliminar mazo'),
-        content: const Text(
-          'Se eliminará el mazo y todas sus tarjetas. '
+    final confirmed = await showConfirmationDialog(
+      context,
+      title: 'Eliminar mazo',
+      message: 'Se eliminará el mazo y todas sus tarjetas. '
           'Esta acción no se puede deshacer.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: DgtStatusColors.danger,
-            ),
-            child: const Text('Eliminar'),
-          ),
-        ],
-      ),
+      confirmLabel: 'Eliminar',
+      destructive: true,
     );
-    if (confirmed != true) return;
+    if (!confirmed || !mounted) return;
     setState(() => _saving = true);
     try {
       await ref.read(deckRepositoryProvider).deleteDeck(widget.deckToEdit!.id);

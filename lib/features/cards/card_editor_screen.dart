@@ -7,6 +7,7 @@ import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../../core/models/memora_card.dart';
+import '../../core/widgets/confirmation_dialog.dart';
 import '../../core/widgets/memora_image.dart';
 import '../../core/widgets/styled_text_field.dart';
 import '../../data/api/api_client.dart';
@@ -215,28 +216,14 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
   }
 
   Future<void> _delete() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: context.c.surfaceElevated,
-        title: const Text('Eliminar tarjeta'),
-        content: const Text('Esta acción no se puede deshacer.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: DgtStatusColors.danger,
-            ),
-            child: const Text('Eliminar'),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmationDialog(
+      context,
+      title: 'Eliminar tarjeta',
+      message: 'Esta acción no se puede deshacer.',
+      confirmLabel: 'Eliminar',
+      destructive: true,
     );
-    if (confirmed != true) return;
+    if (!confirmed || !mounted) return;
 
     setState(() => _saving = true);
     try {

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
+import 'package:memora/core/widgets/confirmation_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/srs/study_settings.dart';
@@ -201,58 +202,29 @@ class SettingsScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
   ) async {
-    final ok1 = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: context.c.surfaceElevated,
-        title: const Text('¿Eliminar tu cuenta?'),
-        content: const Text(
+    final ok1 = await showConfirmationDialog(
+      context,
+      title: '¿Eliminar tu cuenta?',
+      message:
           'Se borrarán permanentemente tu cuenta, mazos, tarjetas, '
           'progreso y estadísticas del servidor. Esta acción no se '
           'puede deshacer.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: DgtStatusColors.danger,
-            ),
-            child: const Text('Continuar'),
-          ),
-        ],
-      ),
+      confirmLabel: 'Continuar',
+      destructive: true,
     );
-    if (ok1 != true || !context.mounted) return;
+    if (!ok1 || !context.mounted) return;
 
-    final ok2 = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: context.c.surfaceElevated,
-        title: const Text('¿Estás seguro?'),
-        content: const Text(
+    final ok2 = await showConfirmationDialog(
+      context,
+      title: '¿Estás seguro?',
+      message:
           'Última confirmación. Toca "Sí, eliminar" para borrar tu '
           'cuenta de forma definitiva.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('No'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: DgtStatusColors.danger,
-            ),
-            child: const Text('Sí, eliminar'),
-          ),
-        ],
-      ),
+      confirmLabel: 'Sí, eliminar',
+      cancelLabel: 'No',
+      destructive: true,
     );
-    if (ok2 != true || !context.mounted) return;
+    if (!ok2 || !context.mounted) return;
 
     try {
       await ref.read(apiClientProvider).deleteAccount();
@@ -284,32 +256,17 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Future<void> _importBackup(BuildContext context, WidgetRef ref) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: context.c.surfaceElevated,
-        title: const Text('¿Reemplazar contenido?'),
-        content: const Text(
+    final ok = await showConfirmationDialog(
+      context,
+      title: '¿Reemplazar contenido?',
+      message:
           'Importar un backup borra TODOS tus mazos, tarjetas y '
           'progreso actuales antes de cargar los del archivo. '
           'Esta acción no se puede deshacer.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: DgtStatusColors.danger,
-            ),
-            child: const Text('Continuar'),
-          ),
-        ],
-      ),
+      confirmLabel: 'Continuar',
+      destructive: true,
     );
-    if (ok != true || !context.mounted) return;
+    if (!ok || !context.mounted) return;
 
     try {
       final result = await ref
@@ -341,58 +298,29 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {
-    final ok1 = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: context.c.surfaceElevated,
-        title: const Text('¿Resetear progreso?'),
-        content: const Text(
+    final ok1 = await showConfirmationDialog(
+      context,
+      title: '¿Resetear progreso?',
+      message:
           'Vas a borrar tu historial de estudio: todas las '
           'programaciones SRS y los logs de revisiones. '
           'Esta acción no se puede deshacer.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: DgtStatusColors.danger,
-            ),
-            child: const Text('Continuar'),
-          ),
-        ],
-      ),
+      confirmLabel: 'Continuar',
+      destructive: true,
     );
-    if (ok1 != true || !context.mounted) return;
+    if (!ok1 || !context.mounted) return;
 
-    final ok2 = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: context.c.surfaceElevated,
-        title: const Text('¿Estás seguro?'),
-        content: const Text(
+    final ok2 = await showConfirmationDialog(
+      context,
+      title: '¿Estás seguro?',
+      message:
           'Última confirmación. Toca "Sí, resetear" para borrar '
           'definitivamente.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('No'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: DgtStatusColors.danger,
-            ),
-            child: const Text('Sí, resetear'),
-          ),
-        ],
-      ),
+      confirmLabel: 'Sí, resetear',
+      cancelLabel: 'No',
+      destructive: true,
     );
-    if (ok2 != true || !context.mounted) return;
+    if (!ok2 || !context.mounted) return;
 
     await ref.read(settingsRepositoryProvider).resetSrsProgress();
 
@@ -1213,30 +1141,18 @@ class _DgtBackupTileState extends ConsumerState<_DgtBackupTile> {
       }
       final payload = result.payload!;
       // Confirmacion pre-merge.
-      final ok = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Restaurar progreso DGT'),
-          content: Text(
+      final ok = await showConfirmationDialog(
+        context,
+        title: 'Restaurar progreso DGT',
+        message:
             'Se va a mezclar con tu progreso actual:\n\n'
             '${payload.summaryLabel}\n\n'
             'Estrategia: favoritas y fallos se unifican, racha gana la mayor, '
             'fecha de examen y meta usan los del backup mas reciente. '
             'No se borra nada de lo que ya tienes.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('Cancelar'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text('Restaurar'),
-            ),
-          ],
-        ),
+        confirmLabel: 'Restaurar',
       );
-      if (ok != true) return;
+      if (!ok) return;
       final merged = await svc.applyMerge(payload);
       if (!mounted) return;
       // Refrescar providers afectados.

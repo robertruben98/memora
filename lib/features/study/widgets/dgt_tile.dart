@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/widgets/dgt_tinted_chip.dart';
 
 import 'dgt_tile_spec.dart';
 
@@ -284,23 +285,19 @@ class DgtTile extends ConsumerWidget {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Container(
+                              DgtTintedChip(
+                                color: badge.color,
+                                label: badge.text,
+                                bgAlpha: 0.20,
+                                radius: 4,
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 6,
                                   vertical: 2,
                                 ),
-                                decoration: BoxDecoration(
-                                  color: badge.color.withValues(alpha: 0.20),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  badge.text,
-                                  style: TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w900,
-                                    color: badge.color,
-                                    letterSpacing: 0.4,
-                                  ),
+                                textStyle: const TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.4,
                                 ),
                               ),
                             ],

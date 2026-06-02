@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
+import 'package:memora/core/widgets/dgt_tinted_chip.dart';
 
 import '../../core/models/memora_card.dart';
 import '../../core/theme/deck_visuals.dart';
@@ -346,19 +347,16 @@ class _StatChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return DgtTintedChip(
+      color: Colors.white,
+      bgAlpha: 0.15,
+      radius: 8,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-        ),
+      label: label,
+      textStyle: TextStyle(
+        color: color,
+        fontSize: 12,
+        fontWeight: FontWeight.w700,
       ),
     );
   }
