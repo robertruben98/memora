@@ -51,6 +51,12 @@ class CardRepository {
     String? frontImagePath,
     String? backImagePath,
   }) async {
+    if (frontText.trim().isEmpty) {
+      throw ArgumentError('El texto del anverso (frontText) no puede estar vacio.');
+    }
+    if (backText.trim().isEmpty) {
+      throw ArgumentError('El texto del reverso (backText) no puede estar vacio.');
+    }
     await _sync.upsertCard(
       id: id,
       deckId: deckId,
@@ -81,6 +87,12 @@ class CardRepository {
     String? frontImagePath,
     String? backImagePath,
   }) async {
+    if (frontText.trim().isEmpty) {
+      throw ArgumentError('El texto del anverso (frontText) no puede estar vacio.');
+    }
+    if (backText.trim().isEmpty) {
+      throw ArgumentError('El texto del reverso (backText) no puede estar vacio.');
+    }
     final existing = await _cardDao.getCardById(id);
     if (existing == null) return;
     await _sync.upsertCard(

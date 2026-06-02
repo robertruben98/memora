@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -19,8 +20,29 @@ class ApiClient {
   final String token;
   final http.Client _http;
 
-  ApiClient({required this.baseUrl, required this.token, http.Client? client})
-    : _http = client ?? http.Client();
+  /// Timeout aplicado a cada peticion HTTP. Evita que la app se cuelgue
+  /// indefinidamente con una conexion debil o un servidor que no responde.
+  final Duration timeout;
+
+  ApiClient({
+    required this.baseUrl,
+    required this.token,
+    http.Client? client,
+    this.timeout = const Duration(seconds: 30),
+  }) : _http = client ?? http.Client();
+
+  /// Ejecuta [request] aplicando [timeout]. Convierte un [TimeoutException]
+  /// en un [ApiException] coherente con el resto (status 408 Request Timeout).
+  Future<T> _withTimeout<T>(Future<T> Function() request) async {
+    try {
+      return await request().timeout(timeout);
+    } on TimeoutException {
+      throw ApiException(
+        408,
+        'Request timed out after ${timeout.inSeconds}s',
+      );
+    }
+  }
 
   Map<String, String> get _headers => {
     'Authorization': 'Bearer $token',
@@ -32,30 +54,38 @@ class ApiClient {
   }
 
   Future<dynamic> get(String path, {Map<String, String>? query}) async {
-    final res = await _http.get(_uri(path, query), headers: _headers);
+    final res = await _withTimeout(
+      () => _http.get(_uri(path, query), headers: _headers),
+    );
     return _decode(res);
   }
 
   Future<dynamic> put(String path, Object body) async {
-    final res = await _http.put(
-      _uri(path),
-      headers: _headers,
-      body: jsonEncode(body),
+    final res = await _withTimeout(
+      () => _http.put(
+        _uri(path),
+        headers: _headers,
+        body: jsonEncode(body),
+      ),
     );
     return _decode(res);
   }
 
   Future<dynamic> post(String path, Object body) async {
-    final res = await _http.post(
-      _uri(path),
-      headers: _headers,
-      body: jsonEncode(body),
+    final res = await _withTimeout(
+      () => _http.post(
+        _uri(path),
+        headers: _headers,
+        body: jsonEncode(body),
+      ),
     );
     return _decode(res);
   }
 
   Future<dynamic> delete(String path) async {
-    final res = await _http.delete(_uri(path), headers: _headers);
+    final res = await _withTimeout(
+      () => _http.delete(_uri(path), headers: _headers),
+    );
     return _decode(res);
   }
 
@@ -76,15 +106,19 @@ class ApiClient {
           filename: p.basename(file.path),
         ),
       );
-    final streamed = await req.send();
-    final res = await http.Response.fromStream(streamed);
+    final res = await _withTimeout(() async {
+      final streamed = await req.send();
+      return http.Response.fromStream(streamed);
+    });
     final body = _decode(res);
     return body as Map<String, dynamic>;
   }
 
   /// Descarga binario (APK/.apkg/etc).
   Future<Uint8List> downloadBytes(String path) async {
-    final res = await _http.get(_uri(path), headers: _headers);
+    final res = await _withTimeout(
+      () => _http.get(_uri(path), headers: _headers),
+    );
     if (res.statusCode >= 200 && res.statusCode < 300) {
       return res.bodyBytes;
     }

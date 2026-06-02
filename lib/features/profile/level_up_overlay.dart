@@ -51,7 +51,7 @@ class _LevelUpAnimatedState extends State<_LevelUpAnimated>
     super.initState();
     _ctrl.forward();
     _ctrl.addStatusListener((s) {
-      if (s == AnimationStatus.completed) widget.onDone();
+      if (s == AnimationStatus.completed && mounted) widget.onDone();
     });
   }
 

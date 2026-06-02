@@ -7,7 +7,14 @@ class StudySettings {
   const StudySettings({
     required this.newCardsPerDay,
     required this.maxReviewsPerDay,
-  });
+  })  : assert(
+          newCardsPerDay >= 0 && newCardsPerDay <= 100,
+          'newCardsPerDay must be between 0 and 100',
+        ),
+        assert(
+          maxReviewsPerDay >= 0 && maxReviewsPerDay <= 300,
+          'maxReviewsPerDay must be between 0 and 300',
+        );
 
   static const defaults = StudySettings(
     newCardsPerDay: 10,
