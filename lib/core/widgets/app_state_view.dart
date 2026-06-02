@@ -57,56 +57,68 @@ class AppStateView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (loading) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(),
-            if (message != null) ...[
-              const SizedBox(height: 16),
-              Text(
-                message!,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: context.c.textSecondary),
-              ),
+      final loadingLabel = message ?? 'Cargando';
+      return Semantics(
+        label: loadingLabel,
+        liveRegion: true,
+        container: true,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              if (message != null) ...[
+                const SizedBox(height: 16),
+                Text(
+                  message!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: context.c.textSecondary),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       );
     }
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null)
-              Icon(icon, size: 48, color: context.c.textMuted),
-            if (title != null) ...[
-              const SizedBox(height: 16),
-              Text(
-                title!,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                  color: context.c.textPrimary,
+    final stateLabel =
+        [title, message].whereType<String>().join('. ');
+    return Semantics(
+      label: stateLabel.isEmpty ? null : stateLabel,
+      container: true,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null)
+                Icon(icon, size: 48, color: context.c.textMuted),
+              if (title != null) ...[
+                const SizedBox(height: 16),
+                Text(
+                  title!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: context.c.textPrimary,
+                  ),
                 ),
-              ),
+              ],
+              if (message != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  message!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, color: context.c.textSecondary),
+                ),
+              ],
+              if (onRetry != null) ...[
+                const SizedBox(height: 20),
+                FilledButton.tonal(onPressed: onRetry, child: Text(retryLabel)),
+              ],
             ],
-            if (message != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                message!,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: context.c.textSecondary),
-              ),
-            ],
-            if (onRetry != null) ...[
-              const SizedBox(height: 20),
-              FilledButton.tonal(onPressed: onRetry, child: Text(retryLabel)),
-            ],
-          ],
+          ),
         ),
       ),
     );

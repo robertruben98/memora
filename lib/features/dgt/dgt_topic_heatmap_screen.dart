@@ -33,13 +33,18 @@ class DgtTopicHeatmapScreen extends ConsumerWidget {
       ),
       body: async.when(
         loading: () => AppStateView.loading(),
-        error: (e, _) => _ErrorView(
-          message: 'No se pudo cargar el desglose: $e',
+        error: (e, _) => AppStateView.error(
+          'No se pudo cargar el desglose: $e',
           onRetry: () => ref.invalidate(subtopicBreakdownProvider(topicId)),
         ),
         data: (stats) {
           if (stats.isEmpty) {
-            return const _EmptyView();
+            return AppStateView.empty(
+              icon: Icons.grid_view_rounded,
+              title: 'Sin datos de subtemas',
+              message: 'Aun no hay datos de subtemas. Practica unas cuantas '
+                  'preguntas y vuelve.',
+            );
           }
           // Orden estable: rojo primero (peor accuracy primero), luego ambar,
           // luego verde. Dentro de cada bucket ordena por fallPct desc.
@@ -183,52 +188,6 @@ class SubtopicCell extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyView extends StatelessWidget {
-  const _EmptyView();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(24),
-        child: Text(
-          'Aun no hay datos de subtemas. Practica unas cuantas '
-          'preguntas y vuelve.',
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _ErrorView({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(message, textAlign: TextAlign.center),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Reintentar'),
-            ),
-          ],
         ),
       ),
     );

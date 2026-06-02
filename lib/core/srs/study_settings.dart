@@ -30,6 +30,17 @@ class StudySettings {
       maxReviewsPerDay: maxReviewsPerDay ?? this.maxReviewsPerDay,
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is StudySettings &&
+        other.newCardsPerDay == newCardsPerDay &&
+        other.maxReviewsPerDay == maxReviewsPerDay;
+  }
+
+  @override
+  int get hashCode => Object.hash(newCardsPerDay, maxReviewsPerDay);
 }
 
 final studySettingsProvider =
