@@ -66,8 +66,11 @@ class DgtReminderConfig {
     required this.minute,
   });
 
+  // Recordatorio diario ON por defecto (retencion): el usuario puede
+  // desactivarlo en Ajustes (opt-out). El permiso del SO sigue siendo el
+  // gate real en Android 13+.
   static const DgtReminderConfig defaults = DgtReminderConfig(
-    enabled: false,
+    enabled: true,
     hour: kDgtReminderDefaultHour,
     minute: kDgtReminderDefaultMinute,
   );
@@ -177,7 +180,7 @@ class DgtReminderService {
   Future<DgtReminderConfig> loadConfig() async {
     final prefs = await SharedPreferences.getInstance();
     return DgtReminderConfig(
-      enabled: prefs.getBool(kDgtReminderEnabledKey) ?? false,
+      enabled: prefs.getBool(kDgtReminderEnabledKey) ?? true,
       hour: prefs.getInt(kDgtReminderHourKey) ?? kDgtReminderDefaultHour,
       minute: prefs.getInt(kDgtReminderMinuteKey) ?? kDgtReminderDefaultMinute,
     );

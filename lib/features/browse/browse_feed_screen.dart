@@ -98,28 +98,11 @@ class _BrowseFeedScreenState extends ConsumerState<BrowseFeedScreen> {
   }
 
   Widget _emptyState() {
-    return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.dynamic_feed_rounded,
-            size: 48,
-            color: context.c.textMuted,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _selectedDeckId == null
-                ? 'No hay tarjetas todavía'
-                : 'Este mazo está vacío',
-            style: TextStyle(
-              fontSize: 16,
-              color: context.c.textSecondary,
-            ),
-          ),
-        ],
-      ),
+    return AppStateView.empty(
+      icon: Icons.dynamic_feed_rounded,
+      title: _selectedDeckId == null
+          ? 'No hay tarjetas todavía'
+          : 'Este mazo está vacío',
     );
   }
 }

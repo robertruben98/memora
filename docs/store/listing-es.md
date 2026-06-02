@@ -18,7 +18,7 @@ RutaB: Test DGT 2026
 ## Descripción corta (máx. 80 caracteres)
 
 ```
-Aprueba el test teórico DGT 2026 con repaso inteligente y simulacros reales.
+Aprueba el permiso B: test DGT 2026 con repaso inteligente y simulacros reales.
 ```
 
 (76 caracteres — dentro del límite de 80.)
