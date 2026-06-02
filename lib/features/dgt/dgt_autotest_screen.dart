@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/api/api_client.dart';
@@ -241,10 +242,10 @@ class _DgtAutotestScreenState extends ConsumerState<DgtAutotestScreen> {
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF4FFFB0).withValues(alpha: 0.10),
+        color: DgtStatusColors.success.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: const Color(0xFF4FFFB0).withValues(alpha: 0.30),
+          color: DgtStatusColors.success.withValues(alpha: 0.30),
         ),
       ),
       child: Column(
@@ -257,7 +258,7 @@ class _DgtAutotestScreenState extends ConsumerState<DgtAutotestScreen> {
                 height: 28,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4FFFB0),
+                  color: DgtStatusColors.success,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -274,7 +275,7 @@ class _DgtAutotestScreenState extends ConsumerState<DgtAutotestScreen> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF4FFFB0),
+                  color: DgtStatusColors.success,
                 ),
               ),
             ],
@@ -323,8 +324,8 @@ class _DgtAutotestScreenState extends ConsumerState<DgtAutotestScreen> {
                     child: OutlinedButton.icon(
                       onPressed: () => _report(correct: false),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFFFF5C5C),
-                        side: const BorderSide(color: Color(0xFFFF5C5C)),
+                        foregroundColor: DgtStatusColors.error,
+                        side: const BorderSide(color: DgtStatusColors.error),
                       ),
                       icon: const Icon(Icons.close_rounded),
                       label: const Text('Falle'),
@@ -335,7 +336,7 @@ class _DgtAutotestScreenState extends ConsumerState<DgtAutotestScreen> {
                     child: FilledButton.icon(
                       onPressed: () => _report(correct: true),
                       style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF4FFFB0),
+                        backgroundColor: DgtStatusColors.success,
                         foregroundColor: Colors.black,
                       ),
                       icon: const Icon(Icons.check_rounded),
@@ -365,7 +366,7 @@ class _DgtAutotestScreenState extends ConsumerState<DgtAutotestScreen> {
                   : Icons.psychology_rounded,
               size: 64,
               color: hits == total
-                  ? const Color(0xFFFFB74F)
+                  ? DgtStatusColors.warning
                   : AppColors.brand,
             ),
             const SizedBox(height: 12),
@@ -397,17 +398,17 @@ class _DgtAutotestScreenState extends ConsumerState<DgtAutotestScreen> {
               Container(
                 padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFB74F).withValues(alpha: 0.10),
+                  color: DgtStatusColors.warning.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: const Color(0xFFFFB74F).withValues(alpha: 0.30),
+                    color: DgtStatusColors.warning.withValues(alpha: 0.30),
                   ),
                 ),
                 child: Row(
                   children: [
                     const Icon(
                       Icons.replay_rounded,
-                      color: Color(0xFFFFB74F),
+                      color: DgtStatusColors.warning,
                       size: 18,
                     ),
                     const SizedBox(width: 8),

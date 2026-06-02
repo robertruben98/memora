@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../../core/theme/deck_visuals.dart';
 import '../../data/database/database.dart';
@@ -98,7 +99,7 @@ class _DeckEditorScreenState extends ConsumerState<DeckEditorScreen> {
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFFFF4F6B),
+              foregroundColor: DgtStatusColors.danger,
             ),
             child: const Text('Eliminar'),
           ),
@@ -127,7 +128,7 @@ class _DeckEditorScreenState extends ConsumerState<DeckEditorScreen> {
             IconButton(
               tooltip: 'Eliminar mazo',
               icon: const Icon(Icons.delete_outline_rounded),
-              color: const Color(0xFFFF4F6B),
+              color: DgtStatusColors.danger,
               onPressed: _saving ? null : _delete,
             ),
         ],

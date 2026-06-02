@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../../core/models/memora_card.dart';
 import '../../core/theme/deck_visuals.dart';
@@ -44,7 +45,7 @@ Future<void> deleteCardWithUndo({
     messenger.showSnackBar(
       const SnackBar(
         content: Text('No se pudo eliminar'),
-        backgroundColor: Color(0xFFFF4F6B),
+        backgroundColor: DgtStatusColors.danger,
       ),
     );
     return;
@@ -76,7 +77,7 @@ Future<void> deleteCardWithUndo({
             messenger.showSnackBar(
               const SnackBar(
                 content: Text('No se pudo restaurar'),
-                backgroundColor: Color(0xFFFF4F6B),
+                backgroundColor: DgtStatusColors.danger,
               ),
             );
           }
@@ -337,7 +338,7 @@ class _DeckBodyState extends State<_DeckBody> {
                         alignment: Alignment.centerRight,
                         padding: const EdgeInsets.symmetric(horizontal: 24),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFF4F6B),
+                          color: DgtStatusColors.danger,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(
@@ -410,7 +411,7 @@ class _StudyButton extends ConsumerWidget {
         : allCaughtUp
             ? Icons.check_circle_outline_rounded
             : Icons.play_arrow_rounded;
-    final accent = allCaughtUp ? const Color(0xFF4FFFB0) : color;
+    final accent = allCaughtUp ? DgtStatusColors.success : color;
 
     final clickable = enabled && !allCaughtUp;
 
@@ -581,7 +582,7 @@ class _CardListTile extends ConsumerWidget {
                     messenger.showSnackBar(
                       const SnackBar(
                         content: Text('No se pudo duplicar'),
-                        backgroundColor: Color(0xFFFF4F6B),
+                        backgroundColor: DgtStatusColors.danger,
                       ),
                     );
                   }
@@ -590,11 +591,11 @@ class _CardListTile extends ConsumerWidget {
               ListTile(
                 leading: const Icon(
                   Icons.delete_outline_rounded,
-                  color: Color(0xFFFF4F6B),
+                  color: DgtStatusColors.danger,
                 ),
                 title: const Text(
                   'Eliminar',
-                  style: TextStyle(color: Color(0xFFFF4F6B)),
+                  style: TextStyle(color: DgtStatusColors.danger),
                 ),
                 onTap: () {
                   Navigator.of(sheetCtx).pop();

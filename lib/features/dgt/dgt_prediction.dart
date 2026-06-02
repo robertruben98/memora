@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../../data/api/api_client.dart';
 
@@ -373,20 +374,20 @@ class DgtPredictionCard extends ConsumerWidget {
       return const _PredictionTier(
         label: 'Listo',
         background: Color(0x224FFFB0),
-        accent: Color(0xFF4FFFB0),
+        accent: DgtStatusColors.success,
       );
     }
     if (score >= kDgtThresholdAlmost) {
       return const _PredictionTier(
         label: 'Casi',
         background: Color(0x22FFB74F),
-        accent: Color(0xFFFFB74F),
+        accent: DgtStatusColors.warning,
       );
     }
     return const _PredictionTier(
       label: 'Necesitas repaso',
       background: Color(0x22FF5C5C),
-      accent: Color(0xFFFF5C5C),
+      accent: DgtStatusColors.error,
     );
   }
 }

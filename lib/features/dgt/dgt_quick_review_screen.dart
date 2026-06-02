@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/api/api_client.dart';
@@ -94,7 +95,7 @@ class _DgtQuickReviewScreenState
 
   Color _timerColor(BuildContext context) {
     // Bajo umbral: ultimo tercio del tiempo total.
-    if (_secondsLeft <= _totalSeconds ~/ 3) return const Color(0xFFFF5C5C);
+    if (_secondsLeft <= _totalSeconds ~/ 3) return DgtStatusColors.error;
     return context.c.textPrimary;
   }
 
@@ -296,7 +297,7 @@ class _DgtQuickReviewScreenState
                         FilledButton.icon(
                           onPressed: _confirmFinish,
                           style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF4FFFB0),
+                            backgroundColor: DgtStatusColors.success,
                             foregroundColor: Colors.black,
                           ),
                           icon: const Icon(Icons.check_circle_rounded),
@@ -319,7 +320,7 @@ class _DgtQuickReviewScreenState
     final wrong = r.total - r.correct;
     final wentWell = wrong <= DgtQuickReviewScreen.passingThreshold;
     final color =
-        wentWell ? const Color(0xFF4FFFB0) : const Color(0xFFFFB74F);
+        wentWell ? DgtStatusColors.success : DgtStatusColors.warning;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Repaso rapido'),

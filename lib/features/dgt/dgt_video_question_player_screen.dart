@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:video_player/video_player.dart';
 
@@ -329,12 +330,12 @@ class _AnswerOption extends StatelessWidget {
 
     if (answered) {
       if (isCorrectOption) {
-        bg = const Color(0xFF4FFFB0).withValues(alpha: 0.18);
-        iconBg = const Color(0xFF4FFFB0);
+        bg = DgtStatusColors.success.withValues(alpha: 0.18);
+        iconBg = DgtStatusColors.success;
         iconFg = Colors.black;
       } else if (selected) {
-        bg = const Color(0xFFFF5C5C).withValues(alpha: 0.18);
-        iconBg = const Color(0xFFFF5C5C);
+        bg = DgtStatusColors.error.withValues(alpha: 0.18);
+        iconBg = DgtStatusColors.error;
         iconFg = Colors.white;
       }
     }
@@ -379,13 +380,13 @@ class _AnswerOption extends StatelessWidget {
                 if (answered && isCorrectOption)
                   const Icon(
                     Icons.check_circle_rounded,
-                    color: Color(0xFF4FFFB0),
+                    color: DgtStatusColors.success,
                     size: 20,
                   )
                 else if (answered && selected && !isCorrectOption)
                   const Icon(
                     Icons.cancel_rounded,
-                    color: Color(0xFFFF5C5C),
+                    color: DgtStatusColors.error,
                     size: 20,
                   ),
               ],
@@ -412,7 +413,7 @@ class _ExplanationCard extends StatelessWidget {
     final explanation = question.explanation.trim();
     final txt = explanation.isNotEmpty ? explanation : _fallbackText;
     final accent =
-        isCorrect ? const Color(0xFF4FFFB0) : const Color(0xFFFF8A4F);
+        isCorrect ? DgtStatusColors.success : DgtStatusColors.accentOrange;
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
       decoration: BoxDecoration(

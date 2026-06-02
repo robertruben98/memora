@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../dgt_prediction.dart';
 import '../dgt_ready_check_screen.dart';
@@ -55,13 +56,13 @@ extension DgtGaugeZoneCopy on DgtGaugeZone {
   Color get color {
     switch (this) {
       case DgtGaugeZone.sinOpciones:
-        return const Color(0xFFFF5C5C);
+        return DgtStatusColors.error;
       case DgtGaugeZone.necesitaEstudio:
-        return const Color(0xFFFFB74F);
+        return DgtStatusColors.warning;
       case DgtGaugeZone.cercaDeAprobar:
         return const Color(0xFF9CE37D);
       case DgtGaugeZone.listoParaExamen:
-        return const Color(0xFF4FFFB0);
+        return DgtStatusColors.success;
     }
   }
 }

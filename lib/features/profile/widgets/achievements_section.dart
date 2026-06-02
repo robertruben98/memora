@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../character_progress.dart';
 
@@ -103,7 +104,7 @@ class _AchievementBadge extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: unlocked
-                ? const Color(0xFFFFD24F).withValues(alpha: 0.5)
+                ? DgtStatusColors.warningStrong.withValues(alpha: 0.5)
                 : context.c.border,
           ),
         ),
@@ -127,7 +128,7 @@ class _AchievementBadge extends StatelessWidget {
                 fontSize: 9,
                 fontWeight: FontWeight.w700,
                 color: unlocked
-                    ? const Color(0xFFFFD24F)
+                    ? DgtStatusColors.warningStrong
                     : context.c.textMuted,
               ),
             ),

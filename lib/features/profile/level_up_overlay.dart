@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 /// Overlay tipo JRPG cuando el personaje sube de nivel.
 /// Se muestra sobre la app entera durante ~2.4s y se cierra solo.
@@ -127,9 +128,9 @@ class _LevelUpAnimatedState extends State<_LevelUpAnimated>
                         ShaderMask(
                           shaderCallback: (rect) => const LinearGradient(
                             colors: [
-                              Color(0xFFFFD24F),
-                              Color(0xFFFF8A4F),
-                              Color(0xFFFFD24F),
+                              DgtStatusColors.warningStrong,
+                              DgtStatusColors.accentOrange,
+                              DgtStatusColors.warningStrong,
                             ],
                           ).createShader(rect),
                           child: const Text(
@@ -159,8 +160,8 @@ class _LevelUpAnimatedState extends State<_LevelUpAnimated>
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
                               colors: [
-                                Color(0xFFFFD24F),
-                                Color(0xFFFF8A4F),
+                                DgtStatusColors.warningStrong,
+                                DgtStatusColors.accentOrange,
                               ],
                             ),
                             borderRadius: BorderRadius.circular(20),
@@ -170,7 +171,7 @@ class _LevelUpAnimatedState extends State<_LevelUpAnimated>
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFFFFD24F)
+                                color: DgtStatusColors.warningStrong
                                     .withValues(alpha: 0.6),
                                 blurRadius: 32,
                                 spreadRadius: 4,
@@ -198,14 +199,14 @@ class _LevelUpAnimatedState extends State<_LevelUpAnimated>
                               color: Colors.black.withValues(alpha: 0.6),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: const Color(0xFFFFD24F)
+                                color: DgtStatusColors.warningStrong
                                     .withValues(alpha: 0.7),
                               ),
                             ),
                             child: Text(
                               'Nuevo título: ${widget.title}',
                               style: const TextStyle(
-                                color: Color(0xFFFFD24F),
+                                color: DgtStatusColors.warningStrong,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.5,

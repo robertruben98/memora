@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../../stats/card_stats_provider.dart';
 
@@ -89,7 +90,7 @@ class FeedAnsweredPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color =
-        correct ? const Color(0xFF4FFFB0) : const Color(0xFFFF4F6B);
+        correct ? DgtStatusColors.success : DgtStatusColors.danger;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       decoration: BoxDecoration(

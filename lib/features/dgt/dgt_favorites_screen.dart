@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../../data/api/api_client.dart';
 import '../../data/repositories/dgt_repository.dart';
@@ -228,15 +229,15 @@ class _MinHintBanner extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(12, 12, 12, 4),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFB74F).withValues(alpha: 0.12),
+        color: DgtStatusColors.warning.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: const Color(0xFFFFB74F).withValues(alpha: 0.45),
+          color: DgtStatusColors.warning.withValues(alpha: 0.45),
         ),
       ),
       child: Row(
         children: [
-          const Icon(Icons.info_outline_rounded, color: Color(0xFFFFB74F)),
+          const Icon(Icons.info_outline_rounded, color: DgtStatusColors.warning),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -491,7 +492,7 @@ class _DgtFavoritesQuizScreenState
     final wrong = total - correct;
     final wentWell = correct / total >= 0.7;
     final color =
-        wentWell ? const Color(0xFF4FFFB0) : const Color(0xFFFFB74F);
+        wentWell ? DgtStatusColors.success : DgtStatusColors.warning;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Quiz favoritas'),
@@ -593,9 +594,9 @@ class _AnswerTile extends StatelessWidget {
           : context.c.surfaceMuted;
     } else {
       if (isCorrect) {
-        color = const Color(0xFF4FFFB0).withValues(alpha: 0.22);
+        color = DgtStatusColors.success.withValues(alpha: 0.22);
       } else if (selected) {
-        color = const Color(0xFFFF5C5C).withValues(alpha: 0.22);
+        color = DgtStatusColors.error.withValues(alpha: 0.22);
       } else {
         color = context.c.surfaceMuted;
       }

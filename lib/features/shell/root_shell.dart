@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
 
-import '../browse/browse_feed_screen.dart';
 import '../home/home_screen.dart';
 import '../profile/profile_screen.dart';
 import '../stats/stats_screen.dart';
@@ -19,13 +18,12 @@ class RootShell extends ConsumerStatefulWidget {
 class _RootShellState extends ConsumerState<RootShell> {
   int _index = 0;
 
-  // Enfoque DGT: la app arranca en el hub "Estudiar" (teórico DGT). Lo
-  // genérico (mazos propios, feed) queda en pestañas secundarias.
+  // Enfoque DGT: la app arranca en el hub "Estudiar" (teórico DGT). Mazos
+  // propios queda como pestaña secundaria. (Feed eliminado del producto.)
   static const _tabs = <Widget>[
     StudyHubScreen(),
     StatsScreen(),
     HomeScreen(),
-    BrowseFeedScreen(),
     ProfileScreen(),
   ];
 
@@ -97,17 +95,10 @@ class _BottomNav extends StatelessWidget {
               ),
               _NavItem(
                 selected: index == 3,
-                iconActive: Icons.dynamic_feed_rounded,
-                iconInactive: Icons.dynamic_feed_outlined,
-                label: 'Feed',
-                onTap: () => onSelect(3),
-              ),
-              _NavItem(
-                selected: index == 4,
                 iconActive: Icons.person_rounded,
                 iconInactive: Icons.person_outline_rounded,
                 label: 'Perfil',
-                onTap: () => onSelect(4),
+                onTap: () => onSelect(3),
               ),
             ],
           ),

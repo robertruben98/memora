@@ -1,5 +1,6 @@
 // Catálogo curado de métodos de aprendizaje.
 import 'package:flutter/material.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 class LearnCategory {
   final String title;
@@ -36,10 +37,10 @@ class LearnMethod {
 }
 
 enum EvidenceLevel {
-  high('Evidencia alta', Color(0xFF4FFFB0)),
-  medium('Evidencia moderada', Color(0xFFFFD24F)),
+  high('Evidencia alta', DgtStatusColors.success),
+  medium('Evidencia moderada', DgtStatusColors.warningStrong),
   low('Tradicional', Color(0xFF7C5CFF)),
-  myth('Mito desmentido', Color(0xFFFF4F6B));
+  myth('Mito desmentido', DgtStatusColors.danger);
 
   final String label;
   final Color color;
@@ -157,7 +158,7 @@ const learnCategories = <LearnCategory>[
   LearnCategory(
     title: 'En cada sesión',
     emoji: '⏱️',
-    accent: Color(0xFFFF8A4F),
+    accent: DgtStatusColors.accentOrange,
     methods: [
       LearnMethod(
         name: 'Pomodoro',
@@ -294,7 +295,7 @@ const learnCategories = <LearnCategory>[
   LearnCategory(
     title: 'Comprensión profunda',
     emoji: '💡',
-    accent: Color(0xFF4FFFB0),
+    accent: DgtStatusColors.success,
     methods: [
       LearnMethod(
         name: 'Técnica Feynman',
@@ -423,7 +424,7 @@ const learnCategories = <LearnCategory>[
   LearnCategory(
     title: 'Mitos a evitar',
     emoji: '⚠️',
-    accent: Color(0xFFFF4F6B),
+    accent: DgtStatusColors.danger,
     methods: [
       LearnMethod(
         name: 'Estilos de aprendizaje (VARK)',

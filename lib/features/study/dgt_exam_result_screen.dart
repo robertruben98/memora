@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/models/memora_card.dart';
@@ -229,7 +230,7 @@ class _ScoreCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = passed
-        ? const Color(0xFF4FFFB0)
+        ? DgtStatusColors.success
         : Colors.redAccent.shade200;
     return Container(
       padding: const EdgeInsets.all(24),
@@ -311,13 +312,13 @@ class _AllCorrectBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF4FFFB0).withValues(alpha: 0.1),
+        color: DgtStatusColors.success.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFF4FFFB0)),
+        border: Border.all(color: DgtStatusColors.success),
       ),
       child: const Row(
         children: [
-          Icon(Icons.emoji_events_rounded, color: Color(0xFF4FFFB0)),
+          Icon(Icons.emoji_events_rounded, color: DgtStatusColors.success),
           SizedBox(width: 12),
           Expanded(
             child: Text(

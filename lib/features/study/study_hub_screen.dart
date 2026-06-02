@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../core/models/memora_card.dart';
@@ -88,7 +89,7 @@ class StudyHubScreen extends ConsumerWidget {
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const DgtReadyCheckScreen()),
             ),
-            accentColor: const Color(0xFF4FFFB0),
+            accentColor: DgtStatusColors.success,
             leadingIcon: Icons.fact_check_rounded,
             title: 'Listo para el examen?',
             subtitle: 'Revisa 5 criterios antes de presentarte al DGT',
@@ -127,7 +128,7 @@ class StudyHubScreen extends ConsumerWidget {
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const LearnMethodsScreen()),
             ),
-            accentColor: const Color(0xFF4FFFB0),
+            accentColor: DgtStatusColors.success,
             leadingEmoji: '📖',
             title: 'Aprende a aprender',
             subtitle:
@@ -232,7 +233,7 @@ class _StudyAllHero extends StatelessWidget {
             borderRadius: BorderRadius.circular(24),
             border: allCaughtUp
                 ? Border.all(
-                    color: const Color(0xFF4FFFB0).withValues(alpha: 0.4),
+                    color: DgtStatusColors.success.withValues(alpha: 0.4),
                     width: 1.5,
                   )
                 : null,
@@ -257,7 +258,7 @@ class _StudyAllHero extends StatelessWidget {
                     height: 56,
                     decoration: BoxDecoration(
                       color: allCaughtUp
-                          ? const Color(0xFF4FFFB0).withValues(alpha: 0.18)
+                          ? DgtStatusColors.success.withValues(alpha: 0.18)
                           : Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -266,7 +267,7 @@ class _StudyAllHero extends StatelessWidget {
                           ? Icons.check_circle_outline_rounded
                           : Icons.play_arrow_rounded,
                       color: allCaughtUp
-                          ? const Color(0xFF4FFFB0)
+                          ? DgtStatusColors.success
                           : Colors.white,
                       size: 32,
                     ),
@@ -298,7 +299,7 @@ class _StudyAllHero extends StatelessWidget {
                                   : '$pendingCount tarjetas listas',
                           style: TextStyle(
                             color: allCaughtUp
-                                ? const Color(0xFF4FFFB0)
+                                ? DgtStatusColors.success
                                 : Colors.white.withValues(alpha: 0.85),
                             fontSize: 14,
                             fontWeight:
@@ -424,7 +425,7 @@ class _DeckQuickRow extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 12,
                         color: allCaughtUp
-                            ? const Color(0xFF4FFFB0)
+                            ? DgtStatusColors.success
                             : context.c.textMuted,
                         fontWeight:
                             allCaughtUp ? FontWeight.w700 : FontWeight.w500,
@@ -438,7 +439,7 @@ class _DeckQuickRow extends ConsumerWidget {
                     ? Icons.check_circle_outline_rounded
                     : Icons.play_arrow_rounded,
                 color: allCaughtUp
-                    ? const Color(0xFF4FFFB0)
+                    ? DgtStatusColors.success
                     : deck.color,
                 size: 22,
               ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import '../../data/dgt/dgt_sections_local.dart';
 import '../../data/repositories/dgt_repository.dart';
 import '../dgt/dgt_practice_screen.dart';
@@ -165,10 +166,10 @@ class _ConceptCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFF4FFFB0).withValues(alpha: 0.08),
+                color: DgtStatusColors.success.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: const Color(0xFF4FFFB0).withValues(alpha: 0.25),
+                  color: DgtStatusColors.success.withValues(alpha: 0.25),
                 ),
               ),
               child: Row(
@@ -177,7 +178,7 @@ class _ConceptCard extends StatelessWidget {
                   const Icon(
                     Icons.lightbulb_outline_rounded,
                     size: 16,
-                    color: Color(0xFF4FFFB0),
+                    color: DgtStatusColors.success,
                   ),
                   const SizedBox(width: 8),
                   Expanded(

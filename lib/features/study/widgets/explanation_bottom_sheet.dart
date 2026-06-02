@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../../../core/models/memora_card.dart';
 
@@ -88,7 +89,7 @@ class ExplanationBottomSheet extends StatelessWidget {
               children: [
                 Icon(
                   Icons.menu_book_rounded,
-                  color: const Color(0xFFFF8A4F),
+                  color: DgtStatusColors.accentOrange,
                   size: 20,
                 ),
                 const SizedBox(width: 8),
@@ -116,10 +117,10 @@ class ExplanationBottomSheet extends StatelessWidget {
             Container(
               padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
               decoration: BoxDecoration(
-                color: const Color(0xFF4FFFB0).withValues(alpha: 0.12),
+                color: DgtStatusColors.success.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: const Color(0xFF4FFFB0).withValues(alpha: 0.35),
+                  color: DgtStatusColors.success.withValues(alpha: 0.35),
                 ),
               ),
               child: Row(
@@ -127,7 +128,7 @@ class ExplanationBottomSheet extends StatelessWidget {
                 children: [
                   const Icon(
                     Icons.check_circle_rounded,
-                    color: Color(0xFF4FFFB0),
+                    color: DgtStatusColors.success,
                     size: 18,
                   ),
                   const SizedBox(width: 8),

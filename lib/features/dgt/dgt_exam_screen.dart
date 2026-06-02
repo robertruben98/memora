@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../../data/repositories/dgt_repository.dart';
 import 'dgt_exam_controller.dart';
@@ -178,7 +179,7 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFFFF5C5C),
+              backgroundColor: DgtStatusColors.error,
             ),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Empezar examen'),
@@ -208,7 +209,7 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
   }
 
   Color _timerColor(BuildContext context, int remainingSeconds) {
-    if (remainingSeconds <= 5 * 60) return const Color(0xFFFF5C5C);
+    if (remainingSeconds <= 5 * 60) return DgtStatusColors.error;
     return context.c.textPrimary;
   }
 

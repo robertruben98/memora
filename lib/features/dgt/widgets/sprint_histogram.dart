@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../dgt_sprint_history_provider.dart';
 
@@ -91,8 +92,8 @@ class _Bar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = passed
-        ? const Color(0xFF4FFFB0)
-        : const Color(0xFFFF5C5C);
+        ? DgtStatusColors.success
+        : DgtStatusColors.error;
     final clamped = ratio.clamp(0.05, 1.0);
     return LayoutBuilder(
       builder: (context, c) {

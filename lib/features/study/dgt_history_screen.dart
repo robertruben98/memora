@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import 'dgt_exam_history.dart';
@@ -156,7 +157,7 @@ class _HistoryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final passed = entry.passed;
     final chipColor =
-        passed ? const Color(0xFF4FFFB0) : Colors.redAccent.shade200;
+        passed ? DgtStatusColors.success : Colors.redAccent.shade200;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(

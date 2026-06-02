@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/api/api_client.dart';
@@ -369,7 +370,7 @@ Color _colorForCategory(String category) {
     case 'obligacion':
       return const Color(0xFF4F8AFF);
     case 'indicacion':
-      return const Color(0xFF4FFFB0);
+      return DgtStatusColors.success;
     default:
       return const Color(0xFFB9A6FF);
   }

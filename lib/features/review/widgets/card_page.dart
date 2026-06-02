@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../../../core/models/memora_card.dart';
 import '../../../core/widgets/memora_image.dart';
@@ -267,7 +268,7 @@ class _AnswerButtons extends StatelessWidget {
           child: _BigButton(
             label: 'No acerté',
             icon: Icons.close_rounded,
-            color: const Color(0xFFFF4F6B),
+            color: DgtStatusColors.danger,
             onPressed: onIncorrect,
           ),
         ),
@@ -276,7 +277,7 @@ class _AnswerButtons extends StatelessWidget {
           child: _BigButton(
             label: 'Acerté',
             icon: Icons.check_rounded,
-            color: const Color(0xFF4FFFB0),
+            color: DgtStatusColors.success,
             onPressed: onCorrect,
           ),
         ),

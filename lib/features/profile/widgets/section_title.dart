@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 /// Pequeño título de sección con barra vertical dorada y texto en mayúsculas.
 class SectionTitle extends StatelessWidget {
@@ -15,7 +16,7 @@ class SectionTitle extends StatelessWidget {
             width: 3,
             height: 14,
             decoration: BoxDecoration(
-              color: const Color(0xFFFFD24F),
+              color: DgtStatusColors.warningStrong,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -26,7 +27,7 @@ class SectionTitle extends StatelessWidget {
               fontSize: 12,
               fontWeight: FontWeight.w800,
               letterSpacing: 1.5,
-              color: Color(0xFFFFD24F),
+              color: DgtStatusColors.warningStrong,
             ),
           ),
         ],

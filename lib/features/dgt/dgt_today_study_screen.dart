@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -154,7 +155,7 @@ class _DgtTodayStudyScreenState extends ConsumerState<DgtTodayStudyScreen> {
           value: (_current + 1) / total,
           minHeight: 4,
           backgroundColor: context.c.surfaceMuted,
-          valueColor: const AlwaysStoppedAnimation(Color(0xFF4FA8FF)),
+          valueColor: const AlwaysStoppedAnimation(DgtStatusColors.info),
         ),
         Expanded(
           child: SingleChildScrollView(
@@ -260,10 +261,10 @@ class _DgtTodayStudyScreenState extends ConsumerState<DgtTodayStudyScreen> {
     final freshStats = _bucketStats(items, DgtTodayBucket.fresh);
 
     final accent = pct >= 80
-        ? const Color(0xFF4FFFB0)
+        ? DgtStatusColors.success
         : pct >= 50
             ? AppColors.brand
-            : const Color(0xFFFF8A4F);
+            : DgtStatusColors.accentOrange;
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -295,21 +296,21 @@ class _DgtTodayStudyScreenState extends ConsumerState<DgtTodayStudyScreen> {
               label: 'Debil',
               correct: weakStats.correct,
               total: weakStats.total,
-              color: const Color(0xFFFF5C5C),
+              color: DgtStatusColors.error,
             ),
             const SizedBox(height: 8),
             _BucketSummaryRow(
               label: 'Recurrentes',
               correct: recurrentStats.correct,
               total: recurrentStats.total,
-              color: const Color(0xFFFFB74F),
+              color: DgtStatusColors.warning,
             ),
             const SizedBox(height: 8),
             _BucketSummaryRow(
               label: 'Nuevas',
               correct: freshStats.correct,
               total: freshStats.total,
-              color: const Color(0xFF4FA8FF),
+              color: DgtStatusColors.info,
             ),
             const SizedBox(height: 28),
             FilledButton.icon(
@@ -369,38 +370,38 @@ class _IntroPanel extends StatelessWidget {
               label: 'Tema mas debil',
               count: weak,
               icon: Icons.gps_fixed_rounded,
-              color: const Color(0xFFFF5C5C),
+              color: DgtStatusColors.error,
             ),
             const SizedBox(height: 10),
             _IntroBreakdownRow(
               label: 'Errores recurrentes',
               count: recurrent,
               icon: Icons.history_toggle_off_rounded,
-              color: const Color(0xFFFFB74F),
+              color: DgtStatusColors.warning,
             ),
             const SizedBox(height: 10),
             _IntroBreakdownRow(
               label: 'Preguntas nuevas',
               count: fresh,
               icon: Icons.fiber_new_rounded,
-              color: const Color(0xFF4FA8FF),
+              color: DgtStatusColors.info,
             ),
             if (alreadyDoneWarning) ...[
               const SizedBox(height: 18),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFB74F).withValues(alpha: 0.12),
+                  color: DgtStatusColors.warning.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: const Color(0xFFFFB74F).withValues(alpha: 0.5),
+                    color: DgtStatusColors.warning.withValues(alpha: 0.5),
                   ),
                 ),
                 child: Row(
                   children: [
                     const Icon(
                       Icons.info_outline_rounded,
-                      color: Color(0xFFFFB74F),
+                      color: DgtStatusColors.warning,
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -484,17 +485,17 @@ class _BucketChip extends StatelessWidget {
     final (label, color, icon) = switch (bucket) {
       DgtTodayBucket.weak => (
           'Tema mas debil',
-          const Color(0xFFFF5C5C),
+          DgtStatusColors.error,
           Icons.gps_fixed_rounded,
         ),
       DgtTodayBucket.recurrent => (
           'Error recurrente',
-          const Color(0xFFFFB74F),
+          DgtStatusColors.warning,
           Icons.history_toggle_off_rounded,
         ),
       DgtTodayBucket.fresh => (
           'Nueva',
-          const Color(0xFF4FA8FF),
+          DgtStatusColors.info,
           Icons.fiber_new_rounded,
         ),
     };
@@ -551,12 +552,12 @@ class _AnswerTile extends StatelessWidget {
       final isCorrectOpt = letter == correct;
       final isPicked = letter == picked;
       if (isCorrectOpt) {
-        bg = const Color(0xFF4FFFB0).withValues(alpha: 0.12);
-        border = const Color(0xFF4FFFB0);
+        bg = DgtStatusColors.success.withValues(alpha: 0.12);
+        border = DgtStatusColors.success;
         trailing = Icons.check_circle_rounded;
       } else if (isPicked) {
-        bg = const Color(0xFFFF5C5C).withValues(alpha: 0.12);
-        border = const Color(0xFFFF5C5C);
+        bg = DgtStatusColors.error.withValues(alpha: 0.12);
+        border = DgtStatusColors.error;
         trailing = Icons.cancel_rounded;
       }
     }
@@ -674,7 +675,7 @@ class _Empty extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: const Color(0xFFFFB74F), size: 48),
+            Icon(icon, color: DgtStatusColors.warning, size: 48),
             const SizedBox(height: 12),
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 16),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import 'dgt_exam_screen.dart';
@@ -90,11 +91,11 @@ class DgtReadyVerdictCard extends StatelessWidget {
   static Color colorFor(DgtReadyVerdict v) {
     switch (v) {
       case DgtReadyVerdict.ready:
-        return const Color(0xFF4FFFB0);
+        return DgtStatusColors.success;
       case DgtReadyVerdict.almost:
-        return const Color(0xFFFFB74F);
+        return DgtStatusColors.warning;
       case DgtReadyVerdict.notReady:
-        return const Color(0xFFFF5C5C);
+        return DgtStatusColors.error;
     }
   }
 
@@ -172,11 +173,11 @@ class DgtReadyCriterionTile extends StatelessWidget {
   static Color colorFor(DgtReadyCriterionStatus s) {
     switch (s) {
       case DgtReadyCriterionStatus.pass:
-        return const Color(0xFF4FFFB0);
+        return DgtStatusColors.success;
       case DgtReadyCriterionStatus.warn:
-        return const Color(0xFFFFB74F);
+        return DgtStatusColors.warning;
       case DgtReadyCriterionStatus.fail:
-        return const Color(0xFFFF5C5C);
+        return DgtStatusColors.error;
     }
   }
 

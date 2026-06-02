@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../../../data/repositories/dgt_repository.dart';
 
@@ -153,7 +154,7 @@ class _DgtReportQuestionSheetBodyState
           children: [
             Row(
               children: const [
-                Icon(Icons.flag_rounded, color: Color(0xFFFFB74F)),
+                Icon(Icons.flag_rounded, color: DgtStatusColors.warning),
                 SizedBox(width: 8),
                 Text(
                   'Reportar errata',

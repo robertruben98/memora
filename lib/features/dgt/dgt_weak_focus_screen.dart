@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/repositories/dgt_repository.dart';
@@ -203,7 +204,7 @@ class _DgtWeakFocusScreenState extends ConsumerState<DgtWeakFocusScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: const Color(0xFFFFB74F), size: 48),
+            Icon(icon, color: DgtStatusColors.warning, size: 48),
             const SizedBox(height: 12),
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 16),
@@ -332,10 +333,10 @@ class DgtWeakFocusHeaderChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = accuracyPct < 50
-        ? const Color(0xFFFF5C5C)
+        ? DgtStatusColors.error
         : accuracyPct < 75
-            ? const Color(0xFFFFB74F)
-            : const Color(0xFF4FFFB0);
+            ? DgtStatusColors.warning
+            : DgtStatusColors.success;
     final accStr = accuracyPct.toStringAsFixed(0);
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
@@ -395,12 +396,12 @@ class _WeakFocusAnswerTile extends StatelessWidget {
 
     if (answered) {
       if (isCorrectOption) {
-        bg = const Color(0xFF4FFFB0).withValues(alpha: 0.18);
-        iconBg = const Color(0xFF4FFFB0);
+        bg = DgtStatusColors.success.withValues(alpha: 0.18);
+        iconBg = DgtStatusColors.success;
         iconFg = Colors.black;
       } else if (selected) {
-        bg = const Color(0xFFFF5C5C).withValues(alpha: 0.18);
-        iconBg = const Color(0xFFFF5C5C);
+        bg = DgtStatusColors.error.withValues(alpha: 0.18);
+        iconBg = DgtStatusColors.error;
         iconFg = Colors.white;
       }
     } else if (selected) {
@@ -447,10 +448,10 @@ class _WeakFocusAnswerTile extends StatelessWidget {
                 ),
                 if (answered && isCorrectOption)
                   const Icon(Icons.check_circle_rounded,
-                      color: Color(0xFF4FFFB0), size: 20)
+                      color: DgtStatusColors.success, size: 20)
                 else if (answered && selected && !isCorrectOption)
                   const Icon(Icons.cancel_rounded,
-                      color: Color(0xFFFF5C5C), size: 20),
+                      color: DgtStatusColors.error, size: 20),
               ],
             ),
           ),
@@ -469,7 +470,7 @@ class _ExplanationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isCorrect = picked == question.correct;
     final accent =
-        isCorrect ? const Color(0xFF4FFFB0) : const Color(0xFFFF8A4F);
+        isCorrect ? DgtStatusColors.success : DgtStatusColors.accentOrange;
     final base = (question.explanation ?? '').trim();
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),

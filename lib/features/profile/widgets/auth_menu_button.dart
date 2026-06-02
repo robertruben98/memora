@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../../auth/auth_state.dart';
 import '../../auth/login_screen.dart';
@@ -74,11 +75,11 @@ class AuthMenuButton extends ConsumerWidget {
               value: 'logout',
               child: Row(
                 children: [
-                  Icon(Icons.logout_rounded, color: Color(0xFFFF4F6B)),
+                  Icon(Icons.logout_rounded, color: DgtStatusColors.danger),
                   SizedBox(width: 8),
                   Text(
                     'Cerrar sesión',
-                    style: TextStyle(color: Color(0xFFFF4F6B)),
+                    style: TextStyle(color: DgtStatusColors.danger),
                   ),
                 ],
               ),

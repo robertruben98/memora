@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -224,16 +225,16 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFB74F).withValues(alpha: 0.15),
+                  color: DgtStatusColors.warning.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: const Color(0xFFFFB74F).withValues(alpha: 0.4),
+                    color: DgtStatusColors.warning.withValues(alpha: 0.4),
                   ),
                 ),
                 child: Row(
                   children: const [
                     Icon(Icons.emoji_events_rounded,
-                        color: Color(0xFFFFB74F)),
+                        color: DgtStatusColors.warning),
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -562,7 +563,7 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
                   : Icons.check_circle_outline_rounded,
               size: 64,
               color: correct == total
-                  ? const Color(0xFFFFB74F)
+                  ? DgtStatusColors.warning
                   : AppColors.brand,
             ),
             const SizedBox(height: 12),
@@ -642,12 +643,12 @@ class _AnswerTile extends StatelessWidget {
 
     if (answered) {
       if (isCorrectOption) {
-        bg = const Color(0xFF4FFFB0).withValues(alpha: 0.18);
-        iconBg = const Color(0xFF4FFFB0);
+        bg = DgtStatusColors.success.withValues(alpha: 0.18);
+        iconBg = DgtStatusColors.success;
         iconFg = Colors.black;
       } else if (selected) {
-        bg = const Color(0xFFFF5C5C).withValues(alpha: 0.18);
-        iconBg = const Color(0xFFFF5C5C);
+        bg = DgtStatusColors.error.withValues(alpha: 0.18);
+        iconBg = DgtStatusColors.error;
         iconFg = Colors.white;
       }
     } else if (selected) {
@@ -693,13 +694,13 @@ class _AnswerTile extends StatelessWidget {
                 if (answered && isCorrectOption)
                   const Icon(
                     Icons.check_circle_rounded,
-                    color: Color(0xFF4FFFB0),
+                    color: DgtStatusColors.success,
                     size: 20,
                   )
                 else if (answered && selected && !isCorrectOption)
                   const Icon(
                     Icons.cancel_rounded,
-                    color: Color(0xFFFF5C5C),
+                    color: DgtStatusColors.error,
                     size: 20,
                   ),
               ],
@@ -726,7 +727,7 @@ class _ExplanationCard extends StatelessWidget {
     final explanation = (question.explanation ?? '').trim();
     final txt = explanation.isNotEmpty ? explanation : _fallbackText;
     final accent =
-        isCorrect ? const Color(0xFF4FFFB0) : const Color(0xFFFF8A4F);
+        isCorrect ? DgtStatusColors.success : DgtStatusColors.accentOrange;
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
       decoration: BoxDecoration(
@@ -857,7 +858,7 @@ class _PracticeAppBarActions {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: (pomoOnBreak
-                      ? const Color(0xFF4FFFB0)
+                      ? DgtStatusColors.success
                       : AppColors.brand)
                   .withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(20),
@@ -870,7 +871,7 @@ class _PracticeAppBarActions {
                       : Icons.timer_rounded,
                   size: 16,
                   color: pomoOnBreak
-                      ? const Color(0xFF4FFFB0)
+                      ? DgtStatusColors.success
                       : AppColors.brand,
                 ),
                 const SizedBox(width: 6),

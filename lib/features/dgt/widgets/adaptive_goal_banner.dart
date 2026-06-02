@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../dgt_adaptive_goal_provider.dart';
 import '../dgt_settings.dart';
@@ -46,8 +47,8 @@ class _BannerState extends ConsumerState<_Banner> {
     final g = widget.goal;
     final accelerate = g.mustAccelerate == true;
     final accent = accelerate
-        ? const Color(0xFFFFB74F)
-        : const Color(0xFF4FFFB0);
+        ? DgtStatusColors.warning
+        : DgtStatusColors.success;
     final suggested = g.suggested!;
     final days = g.daysToExam;
     final message = _buildMessage(

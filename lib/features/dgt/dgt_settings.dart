@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../../data/database/database.dart';
 
@@ -317,9 +318,9 @@ final dgtSettingsProvider = FutureProvider<DgtSettings>((ref) async {
 Color dgtBannerAccentColor(int? daysUntilExam) {
   if (daysUntilExam == null) return const Color(0xFF4F8AFF);
   if (daysUntilExam < 0) return const Color(0xFF4F8AFF);
-  if (daysUntilExam < 7) return const Color(0xFFFF5C5C);
-  if (daysUntilExam <= 30) return const Color(0xFFFFB74F);
-  return const Color(0xFF4FFFB0);
+  if (daysUntilExam < 7) return DgtStatusColors.error;
+  if (daysUntilExam <= 30) return DgtStatusColors.warning;
+  return DgtStatusColors.success;
 }
 
 /// Issue #79 (dgt-ux): mensaje motivacional contextual segun urgencia

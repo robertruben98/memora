@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import '../character_progress.dart';
 
 /// Fila con 3 tarjetas de estadísticas principales: reviews, aciertos y racha.
@@ -28,7 +29,7 @@ class PrimaryStats extends StatelessWidget {
             value: progress.totalReviews == 0
                 ? '—'
                 : '${(progress.hitRate * 100).toStringAsFixed(0)}%',
-            tint: const Color(0xFF4FFFB0),
+            tint: DgtStatusColors.success,
           ),
         ),
         const SizedBox(width: 8),
@@ -37,7 +38,7 @@ class PrimaryStats extends StatelessWidget {
             icon: '🔥',
             label: 'Racha',
             value: '${progress.streakDays}d',
-            tint: const Color(0xFFFF8A4F),
+            tint: DgtStatusColors.accentOrange,
           ),
         ),
       ],

@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/api/api_client.dart';
@@ -319,7 +320,7 @@ class _LegendRow extends StatelessWidget {
       spacing: 12,
       runSpacing: 4,
       children: [
-        _LegendDot(color: Color(0xFF4FA8FF), label: '% acierto'),
+        _LegendDot(color: DgtStatusColors.info, label: '% acierto'),
         _LegendDot(color: Color(0xFFFF6B35), label: 'Simulacros'),
         _LegendDot(color: AppColors.brand, label: 'Streak (dias)'),
       ],
@@ -427,7 +428,7 @@ class _WeeklyTrendChart extends StatelessWidget {
           ),
         ),
         lineBarsData: [
-          _line(accuracySpots, const Color(0xFF4FA8FF)),
+          _line(accuracySpots, DgtStatusColors.info),
           _line(simulacrosSpots, const Color(0xFFFF6B35)),
           _line(streakSpots, AppColors.brand),
         ],

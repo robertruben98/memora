@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../../core/logging/app_logger.dart';
 import '../../data/api/api_client.dart';
@@ -152,13 +153,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFF4F6B).withValues(alpha: 0.12),
+                        color: DgtStatusColors.danger.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
                         _error!,
                         style: const TextStyle(
-                          color: Color(0xFFFF4F6B),
+                          color: DgtStatusColors.danger,
                           fontSize: 13,
                         ),
                       ),

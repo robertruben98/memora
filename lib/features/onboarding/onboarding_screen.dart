@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../data/database/database.dart';
@@ -73,7 +74,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             'Toca para revelar la respuesta y di si la sabias.',
       ),
       const _IntroPage(
-        gradient: [Color(0xFFFF8A4F), Color(0xFFFFD24F)],
+        gradient: [DgtStatusColors.accentOrange, DgtStatusColors.warningStrong],
         icon: Icons.auto_awesome_rounded,
         title: 'Repeticion espaciada',
         body: 'El algoritmo SM-2 calcula cuando deberias volver a '
@@ -81,7 +82,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             'vuelve antes.',
       ),
       const _IntroPage(
-        gradient: [Color(0xFF4FFFB0), Color(0xFF4FFFE9)],
+        gradient: [DgtStatusColors.success, Color(0xFF4FFFE9)],
         icon: Icons.create_rounded,
         title: 'Crea tus mazos',
         body: 'Ingles, geografia, programacion, lo que quieras. '
@@ -474,7 +475,7 @@ class _DailyGoalPage extends StatelessWidget {
           const Icon(
             Icons.flag_rounded,
             size: 72,
-            color: Color(0xFFFFD24F),
+            color: DgtStatusColors.warningStrong,
           ),
           const SizedBox(height: 24),
           const Text(

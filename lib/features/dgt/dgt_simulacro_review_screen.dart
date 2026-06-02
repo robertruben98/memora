@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/repositories/dgt_repository.dart';
@@ -231,11 +232,11 @@ class _OptionRow extends StatelessWidget {
     Color border = context.c.border;
     Color bg = context.c.surfaceElevated;
     if (isCorrect) {
-      border = const Color(0xFF4FFFB0);
-      bg = const Color(0xFF4FFFB0).withValues(alpha: 0.10);
+      border = DgtStatusColors.success;
+      bg = DgtStatusColors.success.withValues(alpha: 0.10);
     } else if (isPicked) {
-      border = const Color(0xFFFF5C5C);
-      bg = const Color(0xFFFF5C5C).withValues(alpha: 0.10);
+      border = DgtStatusColors.error;
+      bg = DgtStatusColors.error.withValues(alpha: 0.10);
     }
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -267,10 +268,10 @@ class _OptionRow extends StatelessWidget {
             ),
             if (isCorrect)
               const Icon(Icons.check_circle_rounded,
-                  size: 18, color: Color(0xFF4FFFB0))
+                  size: 18, color: DgtStatusColors.success)
             else if (isPicked)
               const Icon(Icons.cancel_rounded,
-                  size: 18, color: Color(0xFFFF5C5C)),
+                  size: 18, color: DgtStatusColors.error),
           ],
         ),
       ),
@@ -302,7 +303,7 @@ class _BottomBar extends StatelessWidget {
               onPressed: onToggleFavorite,
               icon: Icon(
                 isFavorite ? Icons.star_rounded : Icons.star_border_rounded,
-                color: isFavorite ? const Color(0xFFFFD24F) : null,
+                color: isFavorite ? DgtStatusColors.warningStrong : null,
               ),
               label: Text(isFavorite ? 'Favorita' : 'Favorita'),
               style: OutlinedButton.styleFrom(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/repositories/dgt_repository.dart';
@@ -212,17 +213,17 @@ class TopicStatTile extends StatelessWidget {
   /// Umbrales de color para la barra de accuracy.
   /// Rojo <60, ambar 60-80, verde >=80.
   static Color colorFor(double accuracyPct) {
-    if (accuracyPct >= 80) return const Color(0xFF4FFFB0);
-    if (accuracyPct >= 60) return const Color(0xFFFFB74F);
-    return const Color(0xFFFF5C5C);
+    if (accuracyPct >= 80) return DgtStatusColors.success;
+    if (accuracyPct >= 60) return DgtStatusColors.warning;
+    return DgtStatusColors.error;
   }
 
   /// Umbrales de color para la barra de COBERTURA (issue #117).
   /// Gris <30, ambar 30-70, verde >=70. Semantica: cuanto del temario
   /// has tocado, no que tan bien.
   static Color coverageColorFor(double coveragePct) {
-    if (coveragePct >= 70) return const Color(0xFF4FFFB0);
-    if (coveragePct >= 30) return const Color(0xFFFFB74F);
+    if (coveragePct >= 70) return DgtStatusColors.success;
+    if (coveragePct >= 30) return DgtStatusColors.warning;
     return const Color(0xFF7A7A7A);
   }
 

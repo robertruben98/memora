@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/repositories/dgt_repository.dart';
@@ -192,7 +193,7 @@ class _DgtSprintExtremeScreenState
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF5C5C),
+                backgroundColor: DgtStatusColors.error,
                 foregroundColor: Colors.white,
               ),
               onPressed: () => Navigator.of(ctx).pop(true),
@@ -238,7 +239,7 @@ class _DgtSprintExtremeScreenState
             const Icon(
               Icons.bolt_rounded,
               size: 64,
-              color: Color(0xFFFF5C5C),
+              color: DgtStatusColors.error,
             ),
             const SizedBox(height: 14),
             const Text(
@@ -264,7 +265,7 @@ class _DgtSprintExtremeScreenState
               onPressed: _confirmAndStart,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: const Color(0xFFFF5C5C),
+                backgroundColor: DgtStatusColors.error,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -342,7 +343,7 @@ class _DgtSprintExtremeScreenState
               minHeight: 6,
               backgroundColor: context.c.surfaceMuted,
               valueColor: const AlwaysStoppedAnimation<Color>(
-                Color(0xFFFF5C5C),
+                DgtStatusColors.error,
               ),
             ),
             const SizedBox(height: 8),
@@ -428,7 +429,7 @@ class _DgtSprintExtremeScreenState
               style: const TextStyle(
                 fontSize: 42,
                 fontWeight: FontWeight.w900,
-                color: Color(0xFFFF5C5C),
+                color: DgtStatusColors.error,
               ),
             ),
             Text(
@@ -444,14 +445,14 @@ class _DgtSprintExtremeScreenState
               icon: Icons.speed_rounded,
               label: 'Tiempo medio / pregunta',
               value: '${avgPerQ.toStringAsFixed(1)}s',
-              color: const Color(0xFFFFB74F),
+              color: DgtStatusColors.warning,
             ),
             const SizedBox(height: 10),
             _SummaryCard(
               icon: Icons.fact_check_rounded,
               label: 'Respondidas',
               value: '$answered / $total',
-              color: const Color(0xFF4FA8FF),
+              color: DgtStatusColors.info,
             ),
             if (velocista) ...[
               const SizedBox(height: 14),
@@ -461,17 +462,17 @@ class _DgtSprintExtremeScreenState
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4FFFB0).withValues(alpha: 0.18),
+                  color: DgtStatusColors.success.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: const Color(0xFF4FFFB0).withValues(alpha: 0.6),
+                    color: DgtStatusColors.success.withValues(alpha: 0.6),
                   ),
                 ),
                 child: Row(
                   children: const [
                     Icon(
                       Icons.emoji_events_rounded,
-                      color: Color(0xFF4FFFB0),
+                      color: DgtStatusColors.success,
                     ),
                     SizedBox(width: 10),
                     Expanded(
@@ -479,7 +480,7 @@ class _DgtSprintExtremeScreenState
                         'Insignia "Velocista" desbloqueada (>= 24/30)',
                         style: TextStyle(
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF4FFFB0),
+                          color: DgtStatusColors.success,
                         ),
                       ),
                     ),
@@ -492,7 +493,7 @@ class _DgtSprintExtremeScreenState
               onPressed: () => Navigator.of(context).pop(),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                backgroundColor: const Color(0xFFFF5C5C),
+                backgroundColor: DgtStatusColors.error,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -517,11 +518,11 @@ enum _TimerColorPhase { green, amber, red }
 Color _colorForPhase(_TimerColorPhase phase) {
   switch (phase) {
     case _TimerColorPhase.green:
-      return const Color(0xFF4FFFB0);
+      return DgtStatusColors.success;
     case _TimerColorPhase.amber:
-      return const Color(0xFFFFB74F);
+      return DgtStatusColors.warning;
     case _TimerColorPhase.red:
-      return const Color(0xFFFF5C5C);
+      return DgtStatusColors.error;
   }
 }
 
@@ -588,7 +589,7 @@ class _PerQuestionBar extends StatelessWidget {
     final fraction = total == 0 ? 0.0 : (secondsLeft / total).clamp(0.0, 1.0);
     final urgent = secondsLeft <= 3;
     final color = urgent
-        ? const Color(0xFFFF5C5C)
+        ? DgtStatusColors.error
         : context.c.textMuted;
     return Row(
       children: [
@@ -641,8 +642,8 @@ class _ExtremeAnswerTile extends StatelessWidget {
     Color bg = context.c.surfaceMuted;
     Color iconBg = context.c.border;
     if (selected) {
-      bg = const Color(0xFFFF5C5C).withValues(alpha: 0.28);
-      iconBg = const Color(0xFFFF5C5C);
+      bg = DgtStatusColors.error.withValues(alpha: 0.28);
+      iconBg = DgtStatusColors.error;
     }
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -757,7 +758,7 @@ class _ErrorState extends StatelessWidget {
               const Icon(
                 Icons.error_outline,
                 size: 48,
-                color: Color(0xFFFF5C5C),
+                color: DgtStatusColors.error,
               ),
               const SizedBox(height: 10),
               Text(

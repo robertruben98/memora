@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/theme/dgt_status_colors.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 
 import '../../data/repositories/dgt_repository.dart';
@@ -300,7 +301,7 @@ class _TimerBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color =
-        urgent ? const Color(0xFFFF5C5C) : AppColors.brand;
+        urgent ? DgtStatusColors.error : AppColors.brand;
     return Row(
       children: [
         Icon(Icons.timer_outlined, color: color, size: 20),
@@ -449,23 +450,23 @@ class _SprintSummary extends StatelessWidget {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFB74F).withValues(alpha: 0.15),
+                  color: DgtStatusColors.warning.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
-                  children: const [
-                    Icon(
+                  children: [
+                    const Icon(
                       Icons.info_outline,
-                      color: Color(0xFFFFB74F),
+                      color: DgtStatusColors.warning,
                       size: 18,
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Ya completaste el sprint de hoy. Vuelve manana.',
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFFFFB74F),
+                          color: DgtStatusColors.warning,
                           fontSize: 13,
                         ),
                       ),
@@ -518,8 +519,8 @@ class _SprintSummary extends StatelessWidget {
                           ? Icons.trending_up_rounded
                           : Icons.trending_down_rounded,
                       color: entry.correct >= prevAvg
-                          ? const Color(0xFF4FFFB0)
-                          : const Color(0xFFFF5C5C),
+                          ? DgtStatusColors.success
+                          : DgtStatusColors.error,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -590,7 +591,7 @@ class _ErrorState extends StatelessWidget {
               const Icon(
                 Icons.error_outline,
                 size: 48,
-                color: Color(0xFFFF5C5C),
+                color: DgtStatusColors.error,
               ),
               const SizedBox(height: 10),
               Text(
