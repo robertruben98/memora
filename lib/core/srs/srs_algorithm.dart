@@ -49,6 +49,21 @@ enum SrsCardState {
   }
 }
 
+/// Etiquetas legibles para el estado de una tarjeta SRS.
+/// Single source of truth para los magic strings de UI dispersos.
+extension SrsCardStateLabel on SrsCardState {
+  String get displayLabel {
+    switch (this) {
+      case SrsCardState.newCard:
+        return 'Nueva';
+      case SrsCardState.learning:
+        return 'Aprendiendo';
+      case SrsCardState.reviewing:
+        return 'Pendiente';
+    }
+  }
+}
+
 class SrsAlgorithm {
   /// Mapeo binario: usuario marca "Acerté" -> 4, "No acerté" -> 1.
   /// Equivale a "good" y "again" en terminología Anki.
