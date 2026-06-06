@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
+import 'package:memora/core/utils/format_duration.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:memora/core/widgets/dgt_answer_tile.dart';
 import 'package:memora/core/widgets/dgt_question_image.dart';
@@ -259,11 +260,7 @@ class _DgtPracticeScreenState extends ConsumerState<DgtPracticeScreen> {
     );
   }
 
-  String _formatPomoRemaining() {
-    final m = _pomoRemaining.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final s = _pomoRemaining.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$m:$s';
-  }
+  String _formatPomoRemaining() => formatMmSs(_pomoRemaining.inSeconds);
 
   Future<void> _initTtsIfNeeded() async {
     if (_tts != null) return;
