@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/utils/format_duration.dart';
+
 /// Clave SharedPreferences donde se persiste el historial de simulacros DGT.
 /// Aditivo: no toca el SRS ni el backend. Solo guarda lista local capada a 50
 /// entradas. Permite al estudiante ver evolucion (score, fecha, veredicto)
@@ -41,11 +43,7 @@ class DgtExamHistoryEntry {
   String get scoreLabel => '$correct/$total';
 
   /// Tiempo formateado mm:ss.
-  String get timeLabel {
-    final m = timeUsed.inMinutes.toString().padLeft(2, '0');
-    final s = (timeUsed.inSeconds % 60).toString().padLeft(2, '0');
-    return '$m:$s';
-  }
+  String get timeLabel => formatMmSs(timeUsed.inSeconds);
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'date': date.toIso8601String(),

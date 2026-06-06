@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
+import 'package:memora/core/utils/format_duration.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:memora/core/widgets/confirmation_dialog.dart';
 
@@ -517,12 +518,6 @@ class _GlobalTimerBar extends StatelessWidget {
     required this.phase,
   });
 
-  String _format(int s) {
-    final m = (s ~/ 60).toString().padLeft(2, '0');
-    final r = (s % 60).toString().padLeft(2, '0');
-    return '$m:$r';
-  }
-
   @override
   Widget build(BuildContext context) {
     final color = _colorForPhase(phase);
@@ -532,7 +527,7 @@ class _GlobalTimerBar extends StatelessWidget {
         Icon(Icons.timer_rounded, color: color, size: 22),
         const SizedBox(width: 8),
         Text(
-          _format(secondsLeft),
+          formatMmSs(secondsLeft),
           key: const ValueKey('dgt-sprint-extreme-global-timer'),
           style: TextStyle(
             fontWeight: FontWeight.w900,

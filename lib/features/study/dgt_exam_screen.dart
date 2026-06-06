@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
+import 'package:memora/core/utils/format_duration.dart';
 import 'package:memora/core/widgets/app_state_view.dart';
 import 'package:memora/core/widgets/confirmation_dialog.dart';
 
@@ -139,8 +140,7 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
 
   Widget _examShell() {
     final danger = _remaining.inSeconds <= 5 * 60;
-    final mins = _remaining.inMinutes.toString().padLeft(2, '0');
-    final secs = (_remaining.inSeconds % 60).toString().padLeft(2, '0');
+    final time = formatMmSs(_remaining.inSeconds);
     final current = _questions[_index];
     return PopScope(
       canPop: false,
@@ -181,7 +181,7 @@ class _DgtExamScreenState extends ConsumerState<DgtExamScreen> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        '$mins:$secs',
+                        time,
                         style: TextStyle(
                           color: danger ? Colors.redAccent : context.c.textPrimary,
                           fontWeight: FontWeight.w800,

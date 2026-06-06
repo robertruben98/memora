@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memora/core/theme/app_colors.dart';
 import 'package:memora/core/theme/dgt_status_colors.dart';
+import 'package:memora/core/utils/format_duration.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/models/memora_card.dart';
@@ -80,11 +81,7 @@ class _DgtExamResultScreenState extends ConsumerState<DgtExamResultScreen> {
   int get _failed => widget.answers.length - _correct;
   bool get _passed => _failed <= DgtExamScreen.passingThreshold;
 
-  String _fmtDuration(Duration d) {
-    final m = d.inMinutes.toString().padLeft(2, '0');
-    final s = (d.inSeconds % 60).toString().padLeft(2, '0');
-    return '$m:$s';
-  }
+  String _fmtDuration(Duration d) => formatMmSs(d.inSeconds);
 
   @override
   Widget build(BuildContext context) {
