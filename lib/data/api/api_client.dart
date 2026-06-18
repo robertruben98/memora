@@ -151,7 +151,7 @@ const memoraApiBase = String.fromEnvironment(
 );
 const fallbackApiToken = String.fromEnvironment(
   'MEMORA_API_TOKEN',
-  defaultValue: 'memora-jiku-9834-api',
+  defaultValue: '',
 );
 
 /// Token efectivo. Override en main.dart después de bootstrap del auth.

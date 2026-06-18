@@ -59,6 +59,7 @@ dependencies:
 
   # Token persistence
   shared_preferences: ^2.3.4
+  flutter_secure_storage: ^9.2.2
 
   # Confetti animation (issue #76 - celebracion al aprobar simulacro DGT)
   confetti: ^0.7.0

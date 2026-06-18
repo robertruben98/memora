@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/api/api_client.dart';
@@ -37,14 +38,30 @@ class AuthNotifier extends Notifier<AuthState> {
   static const _kToken = 'auth_token';
   static const _kEmail = 'auth_email';
   static const _kUserId = 'auth_user_id';
+  static const _secureStorage = FlutterSecureStorage();
 
   @override
   AuthState build() => const AuthState();
 
   Future<void> bootstrap() async {
     final prefs = await SharedPreferences.getInstance();
+    var token = await _secureStorage.read(key: _kToken);
+
+    // Migración transparente si existe token antiguo en SharedPreferences
+    if (token == null || token.isEmpty) {
+      final legacyToken = prefs.getString(_kToken);
+      if (legacyToken != null && legacyToken.isNotEmpty) {
+        token = legacyToken;
+        await _secureStorage.write(key: _kToken, value: token);
+        await prefs.remove(_kToken);
+      }
+    } else {
+      // Limpiar del SharedPreferences heredado si ya está en secure storage
+      await prefs.remove(_kToken);
+    }
+
     state = AuthState(
-      token: prefs.getString(_kToken),
+      token: token,
       email: prefs.getString(_kEmail),
       userId: prefs.getString(_kUserId),
       initialized: true,
@@ -57,10 +74,11 @@ class AuthNotifier extends Notifier<AuthState> {
     required String userId,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_kToken, token);
+    await _secureStorage.write(key: _kToken, value: token);
     await prefs.setString(_kEmail, email);
     await prefs.setString(_kUserId, userId);
   }
+
 
   Future<void> _handleAuthSuccess(
     Map<String, dynamic> res, {
@@ -106,7 +124,7 @@ class AuthNotifier extends Notifier<AuthState> {
 
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_kToken);
+    await _secureStorage.delete(key: _kToken);
     await prefs.remove(_kEmail);
     await prefs.remove(_kUserId);
     state = const AuthState(initialized: true);
