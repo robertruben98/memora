@@ -83,3 +83,7 @@ Si una PR introduce un crecimiento **legitimo** (nuevo feature, asset necesario,
 4. Explica brevemente en la descripcion del PR el motivo del crecimiento.
 
 Asi mantenemos un numero de referencia para futuras optimizaciones y evitamos regresiones silenciosas de tamano.
+
+## Licencia
+
+Este proyecto está bajo una **Licencia de Código Compartido (Uso No Comercial)**. Queda permitido el uso personal, de aprendizaje y modificación con fines educativos no comerciales. Está estrictamente prohibida la redistribución comercial, reventa o explotación lucrativa del código o sus aplicaciones compiladas. Ver el archivo [LICENSE](LICENSE) para más detalles.
